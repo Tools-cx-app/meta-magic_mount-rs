@@ -9,6 +9,14 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
 
       - name: grab zig
         run: |
@@ -22,6 +30,12 @@ jobs:
           tar xf sstrip.tar.gz
           make -C ELFkickers-3.2 sstrip
           cp ELFkickers-3.2/sstrip/sstrip .
+
+      - name: webui
+        run: |
+          cd webui
+          pnpm i
+          pnpm build
 
       - name: compile binary via zigcc
         run: |
@@ -44,8 +58,6 @@ jobs:
           mkdir bin
           pwd
           mv -f ../src/bin/* bin/
-          # how to handle this?
-          # mv -f ../webui webroot
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
