@@ -13,20 +13,11 @@ BASE_URL="https://github.com/7a72/meta-magic_mount/releases/download"
 UPDATE_JSON_URL="https://raw.githubusercontent.com/7a72/meta-magic_mount/public/update.json"
 CHANGELOG_URL="https://raw.githubusercontent.com/7a72/meta-magic_mount/public/changelog.md"
 
-# Rust targets
-RUST_TARGETS=(
-    "x86_64-unknown-linux-musl"
-    "armv7-unknown-linux-musleabihf"
-    "aarch64-unknown-linux-musl"
-)
-
 # Show usage
 usage() {
-    echo "Usage: $0 [--release] [--debug] [--url <base_url>] [--update-json-url <url>]"
+    echo "Usage: $0 [--release] [--debug]"
     echo "  --release            Build release version"
     echo "  --debug              Build debug version"
-    echo "  --url <url>          Set base URL for downloads (default: $BASE_URL)"
-    echo "  --update-json-url    Set update JSON URL (default: $UPDATE_JSON_URL)"
     echo "  (no option)          Build both release and debug versions"
     echo ""
     echo "Version number will be automatically obtained from git tag"
@@ -43,14 +34,6 @@ while [[ $# -gt 0 ]]; do
         --debug)
             BUILD_TYPES+=("debug")
             shift
-            ;;
-        --url)
-            BASE_URL="$2"
-            shift 2
-            ;;
-        --update-json-url)
-            UPDATE_JSON_URL="$2"
-            shift 2
             ;;
         -h|--help)
             usage
@@ -74,16 +57,9 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
     exit 1
 fi
 
-# Check if cargo is installed
-if ! command -v cargo &> /dev/null; then
-    echo -e "${RED}Error: cargo is not installed${NC}"
-    exit 1
-fi
-
-# Check if cargo-zigbuild is installed
-if ! cargo zigbuild --help &> /dev/null 2>&1; then
-    echo -e "${RED}Error: cargo-zigbuild is not installed${NC}"
-    echo -e "${YELLOW}Install it with: cargo install cargo-zigbuild${NC}"
+# Check if zig is installed
+if ! command -v zig &> /dev/null; then
+    echo -e "${RED}Error: zig is not installed${NC}"
     exit 1
 fi
 
@@ -175,101 +151,21 @@ EOF
 }
 
 # Function to build Rust project for all targets
-build_rust_binaries() {
+build_binaries() {
     local BUILD_TYPE=$1
-    local BIN_DIR="src/bin"
     
-    echo -e "\n${YELLOW}Building Rust binaries for all targets...${NC}"
-    
-    # Create bin directory if it doesn't exist
-    if [ -d "$BIN_DIR" ]; then
-        rm -rf "$BIN_DIR"
-    fi
-    mkdir -p "$BIN_DIR"
-    
-    # Change to src directory
-    if [ ! -d "src" ]; then
-        echo -e "${RED}Error: src directory does not exist${NC}"
-        return 1
-    fi
+    echo -e "\n${YELLOW}Building binaries for all targets...${NC}"
     
     cd src || return 1
     
     # Clean previous builds
-    cargo clean
+    make clean
     
-    # Build for each target
-    for target in "${RUST_TARGETS[@]}"; do
-        echo -e "${YELLOW}Building for target: $target${NC}"
-        
-        # Determine build command based on build type
-        if [ "$BUILD_TYPE" = "release" ]; then
-            cargo zigbuild --release --target "$target"
-        else
-            cargo zigbuild --target "$target"
-        fi
-        
-        if [ $? -ne 0 ]; then
-            echo -e "${RED}Error: Failed to build for target $target${NC}"
-            cd ..
-            return 1
-        fi
-        
-        # Determine build output directory
-        if [ "$BUILD_TYPE" = "release" ]; then
-            BUILD_OUTPUT_DIR="target/$target/release"
-        else
-            BUILD_OUTPUT_DIR="target/$target/debug"
-        fi
-        
-        # Get the binary name from Cargo.toml (assuming single binary project)
-        BINARY_NAME=$(cargo metadata --format-version 1 --no-deps 2>/dev/null | grep -o '"name":"[^"]*"' | head -1 | cut -d'"' -f4)
-        
-        if [ -z "$BINARY_NAME" ]; then
-            echo -e "${RED}Error: Could not determine binary name${NC}"
-            cd ..
-            return 1
-        fi
-        
-        # Copy binary to bin directory with target-specific name
-        # Map target to Android ABI
-        case "$target" in
-            "x86_64-unknown-linux-musl")
-                ABI_DIR="x86_64"
-                ;;
-            "armv7-unknown-linux-musleabihf")
-                ABI_DIR="armeabi-v7a"
-                ;;
-            "aarch64-unknown-linux-musl")
-                ABI_DIR="arm64-v8a"
-                ;;
-            *)
-                echo -e "${RED}Error: Unknown target $target${NC}"
-                cd ..
-                return 1
-                ;;
-        esac
-        
-        # Create ABI directory
-        mkdir -p "bin/$ABI_DIR"
-        
-        # Copy binary
-        if [ -f "$BUILD_OUTPUT_DIR/$BINARY_NAME" ]; then
-            cp "$BUILD_OUTPUT_DIR/$BINARY_NAME" "bin/$ABI_DIR/$BINARY_NAME"
-            # Strip binary to reduce size (for release builds)
-            if [ "$BUILD_TYPE" = "release" ]; then
-                strip "bin/$ABI_DIR/$BINARY_NAME" 2>/dev/null || true
-            fi
-            echo -e "${GREEN}Binary copied to bin/$ABI_DIR/$BINARY_NAME${NC}"
-        else
-            echo -e "${RED}Error: Binary not found at $BUILD_OUTPUT_DIR/$BINARY_NAME${NC}"
-            cd ..
-            return 1
-        fi
-    done
+    make $BUILD_TYPE VERSION="$VERSION"
     
     cd ..
-    echo -e "${GREEN}All Rust binaries built successfully${NC}"
+    
+    echo -e "${GREEN}All binaries built successfully${NC}"
     return 0
 }
 
@@ -310,13 +206,13 @@ build_for_type() {
     echo -e "${GREEN}Template copied${NC}"
 
     # Step 2: Build Rust binaries
-    echo -e "\n${YELLOW}[2/7] Building Rust binaries...${NC}"
-    build_rust_binaries "$BUILD_TYPE"
+    echo -e "\n${YELLOW}[2/7] Building binaries...${NC}"
+    build_binaries "$BUILD_TYPE"
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Error: Rust build failed${NC}"
+        echo -e "${RED}Error: Build failed${NC}"
         return 1
     fi
-    echo -e "${GREEN}Rust build completed${NC}"
+    echo -e "${GREEN}Build completed${NC}"
 
     # Step 3: Modify log level in metamount.sh (in build directory)
     echo -e "\n${YELLOW}[3/7] Modifying metamount.sh configuration...${NC}"
@@ -395,10 +291,6 @@ build_for_type() {
     echo -e "\n${GREEN}========================================${NC}"
     echo -e "${GREEN}Build completed!${NC}"
     echo -e "${GREEN}Output file: build/$OUTPUT_NAME${NC}"
-    echo -e "${GREEN}Update JSON: build/update_${BUILD_TYPE}.json${NC}"
-    if [ "$BUILD_TYPE" = "release" ]; then
-        echo -e "${GREEN}Main update JSON: build/update.json${NC}"
-    fi
     echo -e "${GREEN}========================================${NC}"
     
     # Export for summary
@@ -445,9 +337,6 @@ fi
 echo -e "${GREEN}----------------------------------------${NC}"
 echo -e "${GREEN}Generated files:${NC}"
 echo -e "${GREEN}  - Changelog: build/changelog.md${NC}"
-for BUILD_TYPE in "${BUILD_TYPES[@]}"; do
-    echo -e "${GREEN}  - Update JSON (${BUILD_TYPE}): build/update_${BUILD_TYPE}.json${NC}"
-done
 # Check if release was built
 for BUILD_TYPE in "${BUILD_TYPES[@]}"; do
     if [ "$BUILD_TYPE" = "release" ]; then

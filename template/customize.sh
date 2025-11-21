@@ -7,18 +7,20 @@ ABI=$(grep_get_prop ro.product.cpu.abi)
 ui_print "- Detected ABI: $ABI"
 
 # Select the correct binary based on architecture
+
+# Select the correct binary based on architecture
 case "$ABI" in
     arm64-v8a)
         ui_print "- Selected architecture: ARM64"
-        ARCH_BINARY="arm64-v8a/magic_mount_rs"
+        ARCH_BINARY="mm_arm64"
         ;;
     armeabi-v7a)
         ui_print "- Selected architecture: ARM"
-        ARCH_BINARY="armeabi-v7a/magic_mount_rs"
+        ARCH_BINARY="mm_armv7"
         ;;
     x86_64)
         ui_print "- Selected architecture: AMD64"
-        ARCH_BINARY="x86_64/magic_mount_rs"
+        ARCH_BINARY="mm_amd64"
         ;;
     *)
         abort "! Unsupported architecture: $ABI"
@@ -45,9 +47,9 @@ ui_print "- Architecture-specific binary installed successfully"
 
 mkdir -p /data/adb/magic_mount
 
-if [ ! -f /data/adb/magic_mount/config.toml ] ; then
+if [ ! -f /data/adb/magic_mount/mm.conf ] ; then
   ui_print "- Add default config"
-  cat "$MODPATH/config.toml" > /data/adb/magic_mount/config.toml
+  cat "$MODPATH/mm.conf" > /data/adb/magic_mount/mm.conf
 fi
 
 ui_print "- Installation complete"

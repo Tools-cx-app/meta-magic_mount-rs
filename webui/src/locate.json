@@ -1,48 +1,77 @@
 {
   "en": {
-    "config": "Configuration",
-    "reload": "Reload",
-    "saveConfig": "Save",
-    "loglevel": "Log Level",
-    "debug": "debug",
-    "info": "info",
-    "logView": "Log Viewer",
-    "selectLog": "Log File",
-    "refreshLog": "Refresh Log",
-    "emptyLog": "(empty)",
-    "configTab": "Config",
-    "logTab": "Logs",
-    "configLoaded": "Config loaded from file.",
-    "configDefaultUsed": "No config file found, using defaults.",
-    "configReadError": "Failed to read config, using defaults.",
-    "configSaved": "Config saved.",
-    "configSaveFailed": "Failed to save config. Check logs or permissions.",
-    "configSaveError": "Error occurred while saving config.",
-    "logReadFailed": "Failed to read log",
-    "logReadException": "Exception occurred while reading log.",
-    "configPathLabel": "Config file path"
+    "tabs": {
+      "config": "Config",
+      "logs": "Logs"
+    },
+    "config": {
+      "title": "Configuration",
+      "reload": "Reload",
+      "save": "Save",
+      "loadSuccess": "Configuration loaded.",
+      "loadDefault": "No config file found, using defaults.",
+      "loadError": "Failed to read config, using default values.",
+      "saveSuccess": "Configuration saved.",
+      "saveFailed": "Failed to save configuration.",
+      "saveError": "An error occurred while saving.",
+      "pathLabel": "Config file path",
+
+      "moduleDir": "Module Directory",
+      "tempDir": "Temporary Directory",
+      "mountSource": "Mount Source",
+      "logFile": "Log File",
+      "partitions": "Partitions",
+      "verboseLabel": "Log Level",
+      "verboseOff": "Info",
+      "verboseOn": "Debug"
+    },
+    "logs": {
+      "title": "Log Viewer",
+      "select": "Log File",
+      "refresh": "Refresh",
+      "empty": "(empty)",
+      "readFailed": "Failed to read log file.",
+      "readException": "An exception occurred while reading log.",
+      "current": "Current Log",
+      "old": "Old Log"
+    }
   },
+
   "zh": {
-    "config": "配置",
-    "reload": "重载",
-    "saveConfig": "保存",
-    "loglevel": "日志级别",
-    "debug": "调试",
-    "info": "信息",
-    "logView": "日志查看",
-    "selectLog": "日志文件",
-    "refreshLog": "刷新日志",
-    "emptyLog": "（空日志）",
-    "configTab": "配置",
-    "logTab": "日志",
-    "configLoaded": "已从配置文件加载。",
-    "configDefaultUsed": "未找到配置文件，已使用默认配置。",
-    "configReadError": "读取配置失败，已使用默认配置。",
-    "configSaved": "配置已保存",
-    "configSaveFailed": "保存失败，请查看日志或检查权限。",
-    "configSaveError": "保存配置时发生错误。",
-    "logReadFailed": "读取日志失败",
-    "logReadException": "读取日志时发生异常。",
-    "configPathLabel": "配置文件路径"
+    "tabs": {
+      "config": "配置",
+      "logs": "日志"
+    },
+    "config": {
+      "title": "配置",
+      "reload": "重载",
+      "save": "保存",
+      "loadSuccess": "已从配置文件加载。",
+      "loadDefault": "未找到配置文件，已使用默认配置。",
+      "loadError": "读取配置失败，已使用默认配置。",
+      "saveSuccess": "配置已保存。",
+      "saveFailed": "保存失败，请检查权限或日志。",
+      "saveError": "保存配置时发生错误。",
+      "pathLabel": "配置文件路径",
+
+      "moduleDir": "模块目录",
+      "tempDir": "临时目录",
+      "mountSource": "挂载源",
+      "logFile": "日志文件",
+      "partitions": "分区列表",
+      "verboseLabel": "日志级别",
+      "verboseOff": "信息",
+      "verboseOn": "调试"
+    },
+    "logs": {
+      "title": "日志查看",
+      "select": "日志文件",
+      "refresh": "刷新",
+      "empty": "（空日志）",
+      "readFailed": "读取日志失败。",
+      "readException": "读取日志时发生异常。",
+      "current": "当前日志",
+      "old": "旧日志"
+    }
   }
 }

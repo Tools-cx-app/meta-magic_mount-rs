@@ -1,5 +1,0 @@
-moduledir = "/data/adb/modules/"
-mountsource = "KSU"
-logfile = "/data/adb/magic_mount/mm.log"
-verbose = false
-partitions = []

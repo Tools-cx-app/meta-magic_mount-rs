@@ -1,5 +1,5 @@
 /* For KernelSU WebUI */
-@import url('https://mui.kernelsu.org/internal/insets.css');
+@import url("https://mui.kernelsu.org/internal/insets.css");
 
 /* ------- Nord Base Colors ------- */
 :root {
@@ -35,8 +35,8 @@ body {
   margin: 0;
   background: var(--nord0);
   color: var(--nord6);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter,
-    "Segoe UI", Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", Arial, sans-serif;
 }
 
 .app-root {
@@ -279,5 +279,5 @@ button:disabled {
   font-size: 16px;
   font-weight: 600;
   color: var(--nord6);
-  margin-right: auto; 
+  margin-right: auto;
 }

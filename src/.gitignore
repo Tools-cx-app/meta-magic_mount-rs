@@ -1,4 +1,2 @@
-/target
-/out
-Cargo.lock
+/bin
 *.log

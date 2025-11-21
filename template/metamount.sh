@@ -12,6 +12,24 @@ if [ ! -f "$BINARY" ]; then
     exit 1
 fi
 
+MM_LOG_FILE=$(busybox awk -F= '
+/^[[:space:]]*log_file[[:space:]]*=/ {
+    val=$2
+    sub(/#.*/, "", val)
+    gsub(/^[ \t"]+|[ \t"]+$/, "", val)
+    print val
+}' /data/adb/magic_mount/mm.conf)
+
+if [ -f "$MM_LOG_FILE" ]; then
+    mv "$MM_LOG_FILE" "$MM_LOG_FILE".old
+fi
+
+# Set environment variables
+export MODULE_METADATA_DIR="/data/adb/modules"
+
+log "Metadata directory: $MODULE_METADATA_DIR"
+log "Executing $BINARY"
+
 $BINARY
 
 EXIT_CODE=$?
