@@ -538,7 +538,7 @@
           </div>
 
           <div class="field">
-            <label for="partitions-input">{L.config.partitions}</label>
+            <label for="partitions-input">{L.config.extPartitions}</label>
             <input
               id="partitions-input"
               type="text"
