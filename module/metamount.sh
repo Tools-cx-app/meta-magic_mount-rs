@@ -12,7 +12,7 @@ if [ ! -f "$BINARY" ]; then
   exit 1
 fi
 
-nohup $BINARY >"/data/adb/magic_mount/mm.log" 2>&1 &
+nohup $BINARY >"/data/adb/magic_mount/mm.log" 2>&1
 
 EXIT_CODE=$?
 
