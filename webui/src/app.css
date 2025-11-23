@@ -229,7 +229,7 @@ button:disabled {
 .error {
   font-size: 12px;
   color: var(--nord11);
-  margin-bottom: 4px;
+  margin-top: 4px;
 }
 
 .path {
@@ -348,15 +348,20 @@ button:disabled {
 }
 
 .module-row {
+  padding: 12px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.module-info {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
 
+}
 .module-name {
   font-size: 15px;
+  overflow: scroll;
+  flex:1;
+  margin-right: 20px;
 }
 
 /* switch slider */

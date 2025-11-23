@@ -332,8 +332,11 @@
     }
   }
 
-  async function toggleSkipMount(mod) {
-    if (mod.disabledByFlag) return;
+  async function toggleSkipMount(event, mod) {
+    if (mod.disabledByFlag) {
+      event.target.checked = !event.target.checked;
+      return
+    };
 
     const moduleDir = config.moduledir || DEFAULT_CONFIG.moduledir;
     const modulePath = `${moduleDir}/${mod.name}`;
@@ -351,6 +354,7 @@
 
       if (errno !== 0) {
         console.error(stderr);
+        event.target.checked = !event.target.checked;
         modules = modules.map(m =>
           m.name === mod.name ? { ...m, toggling: false, error: L.modules.toggleError } : m
         );
@@ -363,6 +367,7 @@
       }
     } catch (e) {
       console.error(e);
+      event.target.checked = !event.target.checked;
       modules = modules.map(m =>
         m.name === mod.name ? { ...m, toggling: false, error: L.modules.toggleError } : m
       );
@@ -579,22 +584,24 @@
             <div class="module-list">
               {#each modules as m (m.name)}
                 <div class="module-row">
-                  <div class="module-name">{m.name}</div>
+                  <div class="module-info">
+                    <span class="module-name">{m.name}</span>
+                    <label class="switch {m.disabledByFlag ? 'disabled' : ''}">
+                      <input
+                        type="checkbox"
+                        checked={m.disabledByFlag ? false : !m.skipMount}
+                        disabled={m.disabledByFlag || m.toggling}
+                        on:change={(e) => {
+                          if (!m.disabledByFlag) toggleSkipMount(e,m);
+                        }}
+                      />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
 
-                  <label class="switch {m.disabledByFlag ? 'disabled' : ''}">
-                    <input
-                      type="checkbox"
-                      checked={m.disabledByFlag ? false : !m.skipMount}
-                      disabled={m.disabledByFlag || m.toggling}
-                      on:change={() => {
-                        if (!m.disabledByFlag) toggleSkipMount(m);
-                      }}
-                    />
-                    <span class="slider"></span>
-                  </label>
 
                   {#if m.error}
-                    <p class="error small">{m.error}</p>
+                    <div class="error small">{m.error}</div>
                   {/if}
                 </div>
               {/each}
