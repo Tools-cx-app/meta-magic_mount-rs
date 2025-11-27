@@ -37,10 +37,11 @@ where
     P: AsRef<Path>,
 {
     use std::ffi::CString;
-
     use rustix::path::Arg;
 
-    let path_str = target.as_ref().as_str()?;
+    let path_ref = target.as_ref();
+    let path_str = path_ref.as_str()?;
+    
     let path = CString::new(path_str)?;
     let cmd = KsuAddTryUmount {
         arg: path.as_ptr() as u64,
@@ -58,7 +59,6 @@ where
 
         if ret < 0 {
             use std::io;
-
             log::error!("{}", io::Error::last_os_error());
         }
     };
@@ -67,6 +67,6 @@ where
 }
 
 #[cfg(not(any(target_os = "linux", target_os = "android")))]
-pub(super) fn send_unmountable() {
+pub(super) fn send_unmountable<P>(_target: P) -> Result<()> {
     unimplemented!()
 }
