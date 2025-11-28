@@ -2,70 +2,14 @@ mod config;
 mod magic_mount;
 mod utils;
 
-use std::path::PathBuf;
-
 use anyhow::{Context, Result};
-use clap::{Parser, Subcommand};
 use config::{CONFIG_FILE_DEFAULT, Config};
 
 use crate::magic_mount::UMOUNT;
 
-#[derive(Parser, Debug)]
-#[command(name = "magic_mount", version, about = "Magic Mount Metamodule")]
-struct Cli {
-    /// Config file path
-    #[arg(short = 'c', long = "config")]
-    config: Option<PathBuf>,
-
-    /// Module directory path
-    #[arg(short = 'm', long = "moduledir")]
-    moduledir: Option<PathBuf>,
-
-    /// Temporary directory path (auto-selected if not specified)
-    #[arg(short = 't', long = "tempdir")]
-    tempdir: Option<PathBuf>,
-
-    /// Mount source name
-    #[arg(short = 's', long = "mountsource")]
-    mountsource: Option<String>,
-
-    /// Enable verbose (debug) logging
-    #[arg(short = 'v', long = "verbose")]
-    verbose: bool,
-
-    /// Extra partitions, comma-separated, eg: -p mi_ext,my_stock
-    #[arg(short = 'p', long = "partitions", value_delimiter = ',')]
-    partitions: Vec<String>,
-
-    /// Disbale umount
-    #[arg(long = "-no-umount")]
-    umount: bool,
-
-    #[command(subcommand)]
-    command: Option<Commands>,
-}
-
-#[derive(Subcommand, Debug)]
-enum Commands {
-    /// Generate example config file
-    GenConfig {
-        /// Output path for config file
-        #[arg(short = 'o', long = "output", default_value = CONFIG_FILE_DEFAULT)]
-        output: PathBuf,
-    },
-    /// Show current effective configuration
-    ShowConfig,
-}
-
-fn load_config(cli: &Cli) -> Result<Config> {
-    // 1. 尝试从指定的配置文件加载
-    if let Some(config_path) = &cli.config {
-        log::info!("Loading config from: {}", config_path.display());
-        return Config::from_file(config_path).context("failed to load specified config file");
-    }
-
+fn load_config() -> Result<Config> {
     // 2. 尝试从默认位置加载
-    if let Some(config) = Config::load_default() {
+    if let Ok(config) = Config::load_default() {
         log::info!(
             "Loaded config from default location: {}",
             CONFIG_FILE_DEFAULT
@@ -79,33 +23,8 @@ fn load_config(cli: &Cli) -> Result<Config> {
 }
 
 fn main() -> Result<()> {
-    let cli = Cli::parse();
-
-    // 处理子命令
-    if let Some(command) = &cli.command {
-        match command {
-            Commands::GenConfig { output } => {
-                return generate_config(output);
-            }
-            Commands::ShowConfig => {
-                let config = load_config(&cli)?;
-                return show_config(&config);
-            }
-        }
-    }
-
     // 加载配置
-    let mut config = load_config(&cli)?;
-
-    // 命令行参数覆盖配置文件
-    config.merge_with_cli(
-        cli.moduledir,
-        cli.tempdir,
-        cli.mountsource,
-        cli.verbose,
-        cli.umount,
-        cli.partitions,
-    );
+    let config = load_config()?;
 
     // 初始化日志
     utils::init_logger(config.verbose)?;
@@ -153,34 +72,4 @@ fn main() -> Result<()> {
             Err(e)
         }
     }
-}
-
-fn generate_config(output: &PathBuf) -> Result<()> {
-    let config = Config::default();
-    config
-        .save_to_file(output)
-        .context("failed to generate config file")?;
-
-    println!("✓ Config file generated at: {}", output.display());
-    println!("\nExample content:");
-    println!("{}", Config::example());
-    Ok(())
-}
-
-fn show_config(config: &Config) -> Result<()> {
-    println!("Current Configuration:");
-    println!("=====================");
-    println!("Module Dir    : {}", config.moduledir.display());
-    println!(
-        "Temp Dir      : {}",
-        config
-            .tempdir
-            .as_ref()
-            .map(|p| p.display().to_string())
-            .unwrap_or_else(|| "(auto)".to_string())
-    );
-    println!("Mount Source  : {}", config.mountsource);
-    println!("Verbose       : {}", config.verbose);
-    println!("Partitions    : {:?}", config.partitions);
-    Ok(())
 }

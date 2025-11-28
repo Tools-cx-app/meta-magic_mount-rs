@@ -1,7 +1,4 @@
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{fs, path::PathBuf};
 
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
@@ -42,61 +39,12 @@ impl Default for Config {
 }
 
 impl Config {
-    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let content = fs::read_to_string(path.as_ref()).context("failed to read config file")?;
+    pub fn load_default() -> Result<Self> {
+        let content =
+            fs::read_to_string(CONFIG_FILE_DEFAULT).context("failed to read config file")?;
 
-        let config: Config = toml::from_str(&content).context("failed to parse config file")?;
+        let config: Self = toml::from_str(&content).context("failed to parse config file")?;
 
         Ok(config)
-    }
-
-    pub fn load_default() -> Option<Self> {
-        Self::from_file(CONFIG_FILE_DEFAULT).ok()
-    }
-
-    pub fn save_to_file<P: AsRef<Path>>(&self, path: P) -> Result<()> {
-        let content = toml::to_string_pretty(self).context("failed to serialize config")?;
-
-        if let Some(parent) = path.as_ref().parent() {
-            fs::create_dir_all(parent).context("failed to create config directory")?;
-        }
-
-        fs::write(path.as_ref(), content).context("failed to write config file")?;
-
-        Ok(())
-    }
-
-    pub fn example() -> String {
-        let example = Self::default();
-        toml::to_string_pretty(&example).unwrap_or_default()
-    }
-
-    pub fn merge_with_cli(
-        &mut self,
-        moduledir: Option<PathBuf>,
-        tempdir: Option<PathBuf>,
-        mountsource: Option<String>,
-        verbose: bool,
-        umount: bool,
-        partitions: Vec<String>,
-    ) {
-        if let Some(dir) = moduledir {
-            self.moduledir = dir;
-        }
-        if tempdir.is_some() {
-            self.tempdir = tempdir;
-        }
-        if let Some(source) = mountsource {
-            self.mountsource = source;
-        }
-        if verbose {
-            self.verbose = true;
-        }
-        if umount {
-            self.umount = true;
-        }
-        if !partitions.is_empty() {
-            self.partitions = partitions;
-        }
     }
 }
