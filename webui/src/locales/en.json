@@ -36,6 +36,8 @@
     "autoPlaceholder": "Auto",
     "reload": "Reload",
     "save": "Save",
+    "reset": "Reset to Auto",
+    "invalidPath": "Invalid path detected",
     "loadSuccess": "Config loaded",
     "loadError": "Failed to load config",
     "loadDefault": "Using default config",

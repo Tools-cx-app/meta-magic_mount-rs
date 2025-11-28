@@ -14,7 +14,7 @@
 
   function save() {
     if (invalidModuleDir || invalidTempDir) {
-      store.showToast("Invalid path detected", "error");
+      store.showToast(store.L.config.invalidPath, "error");
       return;
     }
     store.config.partitions = partitionInput.split(',').map(s => s.trim()).filter(Boolean);
@@ -63,7 +63,7 @@
     <label for="c-tempdir">{store.L.config.tempDir}</label>
     
     {#if store.config.tempdir}
-      <button class="icon-reset" onclick={resetTempDir} title="Reset to Auto">
+      <button class="icon-reset" onclick={resetTempDir} title={store.L.config.reset}>
         ✕
       </button>
     {/if}

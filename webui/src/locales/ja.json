@@ -36,6 +36,8 @@
     "autoPlaceholder": "自動",
     "reload": "再読み込み",
     "save": "保存",
+    "reset": "自動にリセット",
+    "invalidPath": "無効なパスが検出されました",
     "loadSuccess": "設定を読み込みました",
     "loadError": "設定の読み込みに失敗しました",
     "loadDefault": "デフォルト設定を使用します",

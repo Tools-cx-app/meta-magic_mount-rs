@@ -35,7 +35,7 @@ export const store = $state({
         lang: { display: "English" },
         tabs: { status: "Status", config: "Config", modules: "Modules", logs: "Logs" },
         status: { storageTitle: "Storage", storageDesc: "", moduleTitle: "Modules", moduleActive: "Active", modeStats: "Stats", modeAuto: "Auto", modeMagic: "Magic" },
-        config: { title: "Config", verboseLabel: "Verbose", verboseOff: "Off", verboseOn: "On", forceExt4: "Force Ext4", enableNuke: "Nuke LKM", moduleDir: "Dir", tempDir: "Temp", mountSource: "Source", logFile: "Log", partitions: "Partitions", autoPlaceholder: "Auto", reload: "Reload", save: "Save", loadSuccess: "", loadError: "", loadDefault: "", saveSuccess: "", saveFailed: "" },
+        config: { title: "Config", verboseLabel: "Verbose", verboseOff: "Off", verboseOn: "On", forceExt4: "Force Ext4", enableNuke: "Nuke LKM", moduleDir: "Dir", tempDir: "Temp", mountSource: "Source", logFile: "Log", partitions: "Partitions", autoPlaceholder: "Auto", reload: "Reload", save: "Save", reset: "Reset to Auto", invalidPath: "Invalid path detected", loadSuccess: "", loadError: "", loadDefault: "", saveSuccess: "", saveFailed: "" },
         modules: { title: "Modules", desc: "", modeAuto: "Overlay", modeMagic: "Magic", scanning: "...", reload: "Refresh", save: "Save", empty: "Empty", scanError: "", saveSuccess: "", saveFailed: "", searchPlaceholder: "Search", filterLabel: "Filter", filterAll: "All" },
         logs: { title: "Logs", loading: "...", refresh: "Refresh", empty: "Empty", copy: "Copy", copySuccess: "Copied", copyFail: "Failed", searchPlaceholder: "Search", filterLabel: "Filter", levels: { all: "All", info: "Info", warn: "Warn", error: "Error" } }
     };
@@ -146,11 +146,9 @@ export const store = $state({
 
   async loadLogs(silent = false) {
     if (!silent) this.loading.logs = true;
-    // Do not clear logs if silent refresh, to avoid flicker
     if (!silent) this.logs = []; 
     
     try {
-      // Limit to 1000 lines
       const raw = await API.readLogs(this.config.logfile, 1000);
       
       if (!raw) {
@@ -165,7 +163,6 @@ export const store = $state({
         });
       }
     } catch (e) {
-      // Show actual error instead of generic "Empty"
       console.error(e);
       this.logs = [{ text: `Error: ${e.message}`, type: 'error' }];
       if (!silent) this.showToast(this.L.logs.readFailed, 'error');
