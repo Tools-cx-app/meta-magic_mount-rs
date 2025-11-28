@@ -173,9 +173,6 @@ function serializeKvConfig(cfg) {
 
   lines.push(`umount=${cfg.umount ? 'true' : 'false'}`);
 
-  const logFile = cfg.logfile || DEFAULT_CONFIG.logfile;
-  lines.push(`log_file=${q(logFile)}`);
-
   lines.push(`debug=${cfg.verbose ? 'true' : 'false'}`);
 
   if (cfg.partitions.length > 0) {
