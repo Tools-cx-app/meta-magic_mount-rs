@@ -1,12 +1,10 @@
 mod node;
-// Removed mod try_umount;
 
 // Only keep XATTR const
 pub(super) const REPLACE_DIR_FILE_NAME: &str = ".replace";
 pub(super) const REPLACE_DIR_XATTR: &str = "trusted.overlay.opaque";
 
-use std::sync::atomic::AtomicBool;
-pub static UMOUNT: AtomicBool = AtomicBool::new(false);
+// Removed unused static UMOUNT
 
 use std::{
     fs::{self, DirEntry, create_dir, create_dir_all, read_dir, read_link},
@@ -14,7 +12,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-// Removed 'bail' from imports to fix unused import warning
 use anyhow::{Context, Result};
 use rustix::{
     fs::{Gid, Mode, Uid, chmod, chown},
@@ -24,7 +21,6 @@ use rustix::{
     },
 };
 
-// Changed import to utils
 use crate::{
     magic_mount::node::{Node, NodeFileType},
     utils::{ensure_dir_exists, lgetfilecon, lsetfilecon, send_unmountable},

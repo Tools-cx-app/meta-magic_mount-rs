@@ -14,7 +14,7 @@ mod overlay_mount;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::fs;
-use anyhow::{Result, Context};
+use anyhow::Result; // Removed unused `Context`
 use clap::Parser;
 use rustix::mount::{unmount, UnmountFlags};
 
@@ -76,7 +76,6 @@ fn run() -> Result<()> {
     utils::init_logger(config.verbose, Path::new(defs::DAEMON_LOG_FILE))?;
 
     // [STEALTH] Camouflage process name
-    // This helps hide the daemon from simple `ps` or `top` checks
     if let Err(e) = utils::camouflage_process("kworker/u9:1") {
         log::warn!("Failed to camouflage process: {}", e);
     }
@@ -86,7 +85,6 @@ fn run() -> Result<()> {
     utils::ensure_dir_exists(defs::RUN_DIR)?;
 
     // 1. Stealth Mount Point Strategy
-    // Uses randomized decoy directory if available
     let mnt_base = if let Some(decoy) = utils::find_decoy_mount_point() {
         log::info!("Stealth Mode: Using decoy mount point at {}", decoy.display());
         decoy
