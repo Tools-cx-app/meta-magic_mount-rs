@@ -3,13 +3,12 @@
 
 use anyhow::{Context, Result, bail};
 use log::{info, warn};
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use procfs::process::Process;
 use rustix::{fd::AsFd, fs::CWD, mount::*};
 
-use crate::defs::{DISABLE_FILE_NAME, KSU_OVERLAY_SOURCE, SKIP_MOUNT_FILE_NAME, SYSTEM_RW_DIR};
+use crate::defs::KSU_OVERLAY_SOURCE;
 use crate::utils::send_unmountable;
 
 pub fn mount_overlayfs(
