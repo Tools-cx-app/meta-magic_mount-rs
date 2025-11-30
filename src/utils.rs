@@ -249,36 +249,6 @@ pub fn select_temp_dir() -> Result<PathBuf> {
     Ok(work_dir)
 }
 
-pub fn get_kernel_release() -> Result<String> {
-    let output = Command::new("uname").arg("-r").output()?;
-    let release = String::from_utf8(output.stdout)?.trim().to_string();
-    Ok(release)
-}
-
-pub struct ScopedKptrRestrict {
-    original: String,
-}
-
-impl ScopedKptrRestrict {
-    pub fn new() -> Self {
-        let path = "/proc/sys/kernel/kptr_restrict";
-        let original = std::fs::read_to_string(path).unwrap_or_else(|_| "2".to_string()).trim().to_string();
-        
-        if let Err(e) = write(path, "0") {
-            log::warn!("Failed to lower kptr_restrict: {}", e);
-        }
-        
-        Self { original }
-    }
-}
-
-impl Drop for ScopedKptrRestrict {
-    fn drop(&mut self) {
-        let path = "/proc/sys/kernel/kptr_restrict";
-        let _ = write(path, &self.original);
-    }
-}
-
 const KSU_INSTALL_MAGIC1: u32 = 0xDEADBEEF;
 const KSU_INSTALL_MAGIC2: u32 = 0xCAFEBABE;
 const KSU_IOCTL_NUKE_EXT4_SYSFS: u32 = 0x40004b11; 
