@@ -6,7 +6,7 @@ use crate::{defs, utils, core::state};
 /// Represents an active storage backend
 pub struct StorageHandle {
     pub mount_point: PathBuf,
-    pub mode: String,
+    pub mode: String, // "tmpfs" or "ext4"
 }
 
 /// Sets up the storage backend (Tmpfs or Ext4 Image)
@@ -38,6 +38,10 @@ fn try_setup_tmpfs(target: &Path) -> Result<bool> {
     }
 
     if utils::is_xattr_supported(target) {
+        if let Err(e) = utils::lsetfilecon(target, "u:object_r:system_file:s0") {
+            log::warn!("Failed to set root context on tmpfs: {}", e);
+        }
+        
         log::info!("Tmpfs mode active (XATTR supported).");
         Ok(true)
     } else {
