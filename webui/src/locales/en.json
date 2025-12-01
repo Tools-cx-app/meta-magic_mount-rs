@@ -13,7 +13,8 @@
     "status": "Status",
     "config": "Config",
     "modules": "Modules",
-    "logs": "Logs"
+    "logs": "Logs",
+    "info": "Info"
   },
   "status": {
     "storageTitle": "Storage",
@@ -92,5 +93,14 @@
     "copySuccess": "Logs copied to clipboard",
     "copyFail": "Failed to copy logs",
     "exportFail": "Failed to export logs"
+  },
+  "info": {
+    "title": "About",
+    "projectLink": "Repository",
+    "donate": "Donate",
+    "contributors": "Contributors",
+    "loading": "Loading contributors...",
+    "loadFail": "Failed to load (API Rate Limit)",
+    "noBio": "No bio available"
   }
 }

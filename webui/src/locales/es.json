@@ -13,7 +13,8 @@
     "status": "Estado",
     "config": "Config",
     "modules": "Módulos",
-    "logs": "Registros"
+    "logs": "Registros",
+    "info": "Info"
   },
   "status": {
     "storageTitle": "Almacenamiento",
@@ -92,5 +93,14 @@
     "copySuccess": "Registros copiados",
     "copyFail": "Fallo al copiar",
     "exportFail": "Fallo al exportar"
+  },
+  "info": {
+    "title": "Acerca de",
+    "projectLink": "Repositorio",
+    "donate": "Donar",
+    "contributors": "Colaboradores",
+    "loading": "Cargando colaboradores...",
+    "loadFail": "Error al cargar (Límite de API)",
+    "noBio": "Sin biografía disponible"
   }
 }

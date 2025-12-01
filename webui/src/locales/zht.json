@@ -13,7 +13,8 @@
     "status": "狀態",
     "config": "設定",
     "modules": "模組",
-    "logs": "日誌"
+    "logs": "日誌",
+    "info": "關於"
   },
   "status": {
     "storageTitle": "儲存空間",
@@ -92,5 +93,14 @@
     "copySuccess": "日誌已複製",
     "copyFail": "複製失敗",
     "exportFail": "匯出失敗"
+  },
+  "info": {
+    "title": "關於專案",
+    "projectLink": "專案地址",
+    "donate": "捐贈支持",
+    "contributors": "貢獻者",
+    "loading": "載入貢獻者中...",
+    "loadFail": "載入失敗 (可能觸發 API 限制)",
+    "noBio": "這位開發者很懶，什麼都沒寫"
   }
 }

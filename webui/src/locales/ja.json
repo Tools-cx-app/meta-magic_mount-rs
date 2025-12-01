@@ -13,7 +13,8 @@
     "status": "ステータス",
     "config": "設定",
     "modules": "モジュール",
-    "logs": "ログ"
+    "logs": "ログ",
+    "info": "情報"
   },
   "status": {
     "storageTitle": "ストレージ",
@@ -92,5 +93,14 @@
     "copySuccess": "コピーしました",
     "copyFail": "コピーに失敗しました",
     "exportFail": "エクスポートに失敗しました"
+  },
+  "info": {
+    "title": "アプリについて",
+    "projectLink": "リポジトリ",
+    "donate": "寄付",
+    "contributors": "貢献者",
+    "loading": "読み込み中...",
+    "loadFail": "読み込み失敗 (API制限)",
+    "noBio": "自己紹介なし"
   }
 }

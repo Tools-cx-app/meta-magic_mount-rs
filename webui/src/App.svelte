@@ -9,13 +9,16 @@
   import ConfigTab from './routes/ConfigTab.svelte';
   import ModulesTab from './routes/ModulesTab.svelte';
   import LogsTab from './routes/LogsTab.svelte';
+  import InfoTab from './routes/InfoTab.svelte';
   import './app.css';
   import './layout.css';
+  
   let activeTab = $state('status');
   let transitionDirection = $state(1);
   let touchStartX = 0;
   let touchEndX = 0;
-  const TABS = ['status', 'config', 'modules', 'logs'];
+
+  const TABS = ['status', 'config', 'modules', 'logs', 'info'];
   function switchTab(id) {
     const currentIndex = TABS.indexOf(activeTab);
     const newIndex = TABS.indexOf(id);
@@ -23,14 +26,17 @@
     transitionDirection = newIndex > currentIndex ? 1 : -1;
     activeTab = id;
   }
+
   function handleTouchStart(e) {
     touchStartX = e.changedTouches[0].screenX;
   }
+
   function handleTouchEnd(e) {
     touchEndX = e.changedTouches[0].screenX;
     const threshold = 50;
     const diff = touchStartX - touchEndX;
     const currentIndex = TABS.indexOf(activeTab);
+    
     if (Math.abs(diff) < threshold) return;
     if (diff > 0 && currentIndex < TABS.length - 1) {
       switchTab(TABS[currentIndex + 1]);
@@ -38,17 +44,21 @@
       switchTab(TABS[currentIndex - 1]);
     }
   }
+
   onMount(() => {
     store.init();
   });
 </script>
+
 <div class="app-root">
   <NavBar {activeTab} onTabChange={switchTab} />
+
   <main class="main-content" ontouchstart={handleTouchStart} ontouchend={handleTouchEnd}>
     {#key activeTab}
       <div class="tab-pane" 
            in:fly={{ x: 30 * transitionDirection, duration: 250, delay: 90, easing: cubicOut }} 
            out:fly={{ x: -30 * transitionDirection, duration: 150, easing: cubicIn }}>
+        
         {#if activeTab === 'status'}
           <StatusTab />
         {:else if activeTab === 'config'}
@@ -57,9 +67,12 @@
           <ModulesTab />
         {:else if activeTab === 'logs'}
           <LogsTab />
+        {:else if activeTab === 'info'}
+          <InfoTab />
         {/if}
       </div>
     {/key}
   </main>
+
   <Toast />
 </div>

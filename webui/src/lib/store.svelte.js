@@ -1,7 +1,9 @@
 import { API } from './api';
 import { DEFAULT_CONFIG, DEFAULT_SEED } from './constants';
 import { Monet } from './theme';
+
 const localeModules = import.meta.glob('../locales/*.json', { eager: true });
+
 export const store = $state({
   config: { ...DEFAULT_CONFIG },
   modules: [],
@@ -9,14 +11,18 @@ export const store = $state({
   storage: { used: '-', size: '-', percent: '0%' },
   systemInfo: { kernel: '-', selinux: '-', mountBase: '-' },
   activePartitions: [], 
+  version: 'v0.2.8', 
+
   loading: { config: false, modules: false, logs: false, status: false },
   saving: { config: false, modules: false },
   toast: { text: '', type: 'info', visible: false },
-  theme: 'auto', 
+  
+  theme: 'auto',
   isSystemDark: false,
   lang: 'en',
   seed: DEFAULT_SEED,
-  loadedLocale: null, 
+  loadedLocale: null,
+
   get availableLanguages() {
     return Object.entries(localeModules).map(([path, mod]) => {
       const match = path.match(/\/([^/]+)\.json$/);
@@ -29,20 +35,24 @@ export const store = $state({
       return a.code.localeCompare(b.code);
     });
   },
+
   get L() {
     return this.loadedLocale || this.getFallbackLocale();
   },
+
   getFallbackLocale() {
     return {
         common: { appName: "Hybrid Mount", saving: "...", theme: "Theme", language: "Language", themeAuto: "Auto", themeLight: "Light", themeDark: "Dark" },
         lang: { display: "English" },
-        tabs: { status: "Status", config: "Config", modules: "Modules", logs: "Logs" },
+        tabs: { status: "Status", config: "Config", modules: "Modules", logs: "Logs", info: "Info" },
         status: { storageTitle: "Storage", storageDesc: "", moduleTitle: "Modules", moduleActive: "Active", modeStats: "Stats", modeAuto: "Auto", modeMagic: "Magic", sysInfoTitle: "System Info", kernel: "Kernel", selinux: "SELinux", mountBase: "Mount Base", activePartitions: "Active Partitions" },
         config: { title: "Config", verboseLabel: "Verbose", verboseOff: "Off", verboseOn: "On", forceExt4: "Force Ext4", enableNuke: "Nuke LKM", disableUmount: "Disable Umount", moduleDir: "Dir", tempDir: "Temp", mountSource: "Source", logFile: "Log", partitions: "Partitions", autoPlaceholder: "Auto", reload: "Reload", save: "Save", reset: "Reset to Auto", invalidPath: "Invalid path detected", loadSuccess: "", loadError: "", loadDefault: "", saveSuccess: "", saveFailed: "" },
         modules: { title: "Modules", desc: "", modeAuto: "Overlay", modeMagic: "Magic", scanning: "...", reload: "Refresh", save: "Save", empty: "Empty", scanError: "", saveSuccess: "", saveFailed: "", searchPlaceholder: "Search", filterLabel: "Filter", filterAll: "All" },
-        logs: { title: "Logs", loading: "...", refresh: "Refresh", empty: "Empty", copy: "Copy", copySuccess: "Copied", copyFail: "Failed", searchPlaceholder: "Search", filterLabel: "Filter", levels: { all: "All", info: "Info", warn: "Warn", error: "Error" } }
+        logs: { title: "Logs", loading: "...", refresh: "Refresh", empty: "Empty", copy: "Copy", copySuccess: "Copied", copyFail: "Failed", searchPlaceholder: "Search", filterLabel: "Filter", levels: { all: "All", info: "Info", warn: "Warn", error: "Error" } },
+        info: { title: "About", projectLink: "Repository", donate: "Donate", contributors: "Contributors", loading: "Loading...", loadFail: "Failed to load", noBio: "No bio available" }
     };
   },
+
   get modeStats() {
     let auto = 0;
     let magic = 0;
@@ -52,21 +62,25 @@ export const store = $state({
     });
     return { auto, magic };
   },
+
   showToast(msg, type = 'info') {
     this.toast = { text: msg, type, visible: true };
     setTimeout(() => { this.toast.visible = false; }, 3000);
   },
+
   applyTheme() {
     const isDark = this.theme === 'auto' ? this.isSystemDark : this.theme === 'dark';
     const attr = isDark ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', attr);
     Monet.apply(this.seed, isDark);
   },
+
   setTheme(newTheme) {
     this.theme = newTheme;
-    localStorage.setItem('mm-theme', newTheme);
+    localStorage.setItem('hm-theme', newTheme);
     this.applyTheme();
   },
+
   async setLang(code) {
     const path = `../locales/${code}.json`;
     if (localeModules[path]) {
@@ -74,32 +88,38 @@ export const store = $state({
         const mod = localeModules[path];
         this.loadedLocale = mod.default; 
         this.lang = code;
-        localStorage.setItem('mm-lang', code);
+        localStorage.setItem('hm-lang', code);
       } catch (e) {
         console.error(`Failed to load locale: ${code}`, e);
         if (code !== 'en') await this.setLang('en');
       }
     }
   },
+
   async init() {
-    const savedLang = localStorage.getItem('mm-lang') || 'en';
+    const savedLang = localStorage.getItem('hm-lang') || 'en';
     await this.setLang(savedLang);
-    this.theme = localStorage.getItem('mm-theme') || 'auto';
+    this.theme = localStorage.getItem('hm-theme') || 'auto';
+    
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     this.isSystemDark = mediaQuery.matches;
+    
     mediaQuery.addEventListener('change', (e) => {
       this.isSystemDark = e.matches;
       if (this.theme === 'auto') {
         this.applyTheme();
       }
     });
+    
     const sysColor = await API.fetchSystemColor();
     if (sysColor) {
       this.seed = sysColor;
     }
+    
     this.applyTheme();
     await this.loadConfig();
   },
+
   async loadConfig() {
     this.loading.config = true;
     try {
@@ -114,6 +134,7 @@ export const store = $state({
     }
     this.loading.config = false;
   },
+
   async saveConfig() {
     this.saving.config = true;
     try {
@@ -124,6 +145,7 @@ export const store = $state({
     }
     this.saving.config = false;
   },
+
   async loadModules() {
     this.loading.modules = true;
     this.modules = [];
@@ -134,6 +156,7 @@ export const store = $state({
     }
     this.loading.modules = false;
   },
+
   async saveModules() {
     this.saving.modules = true;
     try {
@@ -144,11 +167,14 @@ export const store = $state({
     }
     this.saving.modules = false;
   },
+
   async loadLogs(silent = false) {
     if (!silent) this.loading.logs = true;
     if (!silent) this.logs = []; 
+    
     try {
       const raw = await API.readLogs(this.config.logfile, 1000);
+      
       if (!raw) {
         this.logs = [{ text: this.L.logs.empty, type: 'debug' }];
       } else {
@@ -167,6 +193,7 @@ export const store = $state({
     }
     this.loading.logs = false;
   },
+
   async loadStatus() {
     this.loading.status = true;
     try {
@@ -175,13 +202,16 @@ export const store = $state({
         API.getSystemInfo(),
         API.getActiveMounts(this.config.mountsource)
       ]);
+      
       this.storage = storageData;
       this.systemInfo = sysInfoData;
       this.activePartitions = activeMounts;
+
       if (this.modules.length === 0) {
         this.modules = await API.scanModules(this.config.moduledir);
       }
     } catch (e) {
+      // ignore
     }
     this.loading.status = false;
   }
