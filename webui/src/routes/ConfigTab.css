@@ -4,20 +4,17 @@
   justify-content: space-between;
   padding: 4px 0;
 }
-
 .md3-switch {
   position: relative;
   width: 52px;
   height: 32px;
   display: inline-block;
 }
-
 .md3-switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 .track {
   position: absolute;
   inset: 0;
@@ -26,7 +23,6 @@
   border: 2px solid var(--md-sys-color-outline);
   transition: .3s;
 }
-
 .thumb {
   position: absolute;
   height: 16px;
@@ -37,12 +33,10 @@
   border-radius: 50%;
   transition: .3s;
 }
-
 .md3-switch input:checked + .track {
   background-color: var(--md-sys-color-primary);
   border-color: var(--md-sys-color-primary);
 }
-
 .md3-switch input:checked + .track .thumb {
   background-color: var(--md-sys-color-on-primary);
   transform: translateX(20px);
@@ -51,17 +45,13 @@
   bottom: 4px;
   left: 4px;
 }
-
-/* Input Validation & Reset Button Styles */
 .text-field.error input {
   border-color: var(--md-sys-color-error);
   color: var(--md-sys-color-error);
 }
-
 .text-field.error label {
   color: var(--md-sys-color-error);
 }
-
 .icon-reset {
   position: absolute;
   right: 8px;
@@ -78,7 +68,6 @@
   border-radius: 50%;
   z-index: 5;
 }
-
 .icon-reset:hover {
   background-color: var(--md-sys-color-surface-variant);
 }

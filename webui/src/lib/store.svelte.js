@@ -1,31 +1,22 @@
 import { API } from './api';
 import { DEFAULT_CONFIG, DEFAULT_SEED } from './constants';
 import { Monet } from './theme';
-
 const localeModules = import.meta.glob('../locales/*.json', { eager: true });
-
-// Global state using Svelte 5 Runes
 export const store = $state({
   config: { ...DEFAULT_CONFIG },
   modules: [],
   logs: [],
   storage: { used: '-', size: '-', percent: '0%' },
   systemInfo: { kernel: '-', selinux: '-', mountBase: '-' },
-  activePartitions: [], // List of currently mounted partitions
-  
-  // UI State
+  activePartitions: [], 
   loading: { config: false, modules: false, logs: false, status: false },
   saving: { config: false, modules: false },
   toast: { text: '', type: 'info', visible: false },
-  
-  // Settings
-  theme: 'auto', // 'auto' | 'light' | 'dark'
+  theme: 'auto', 
   isSystemDark: false,
   lang: 'en',
   seed: DEFAULT_SEED,
-  loadedLocale: null, // Stores the content of the loaded JSON
-
-  // Computed: Available languages list for UI
+  loadedLocale: null, 
   get availableLanguages() {
     return Object.entries(localeModules).map(([path, mod]) => {
       const match = path.match(/\/([^/]+)\.json$/);
@@ -38,13 +29,9 @@ export const store = $state({
       return a.code.localeCompare(b.code);
     });
   },
-
-  // Getters
   get L() {
     return this.loadedLocale || this.getFallbackLocale();
   },
-
-  // Helper for initial safe state
   getFallbackLocale() {
     return {
         common: { appName: "Hybrid Mount", saving: "...", theme: "Theme", language: "Language", themeAuto: "Auto", themeLight: "Light", themeDark: "Dark" },
@@ -56,7 +43,6 @@ export const store = $state({
         logs: { title: "Logs", loading: "...", refresh: "Refresh", empty: "Empty", copy: "Copy", copySuccess: "Copied", copyFail: "Failed", searchPlaceholder: "Search", filterLabel: "Filter", levels: { all: "All", info: "Info", warn: "Warn", error: "Error" } }
     };
   },
-
   get modeStats() {
     let auto = 0;
     let magic = 0;
@@ -66,27 +52,21 @@ export const store = $state({
     });
     return { auto, magic };
   },
-
-  // Actions
   showToast(msg, type = 'info') {
     this.toast = { text: msg, type, visible: true };
     setTimeout(() => { this.toast.visible = false; }, 3000);
   },
-
-  // Internal helper to apply theme
   applyTheme() {
     const isDark = this.theme === 'auto' ? this.isSystemDark : this.theme === 'dark';
     const attr = isDark ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', attr);
     Monet.apply(this.seed, isDark);
   },
-
   setTheme(newTheme) {
     this.theme = newTheme;
     localStorage.setItem('mm-theme', newTheme);
     this.applyTheme();
   },
-
   async setLang(code) {
     const path = `../locales/${code}.json`;
     if (localeModules[path]) {
@@ -101,35 +81,25 @@ export const store = $state({
       }
     }
   },
-
   async init() {
     const savedLang = localStorage.getItem('mm-lang') || 'en';
     await this.setLang(savedLang);
-    
-    // Theme Logic
     this.theme = localStorage.getItem('mm-theme') || 'auto';
-    
-    // System dark mode listener
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     this.isSystemDark = mediaQuery.matches;
-    
     mediaQuery.addEventListener('change', (e) => {
       this.isSystemDark = e.matches;
       if (this.theme === 'auto') {
         this.applyTheme();
       }
     });
-    
-    // Fetch system color for monet
     const sysColor = await API.fetchSystemColor();
     if (sysColor) {
       this.seed = sysColor;
     }
-    
     this.applyTheme();
     await this.loadConfig();
   },
-
   async loadConfig() {
     this.loading.config = true;
     try {
@@ -144,7 +114,6 @@ export const store = $state({
     }
     this.loading.config = false;
   },
-
   async saveConfig() {
     this.saving.config = true;
     try {
@@ -155,7 +124,6 @@ export const store = $state({
     }
     this.saving.config = false;
   },
-
   async loadModules() {
     this.loading.modules = true;
     this.modules = [];
@@ -166,7 +134,6 @@ export const store = $state({
     }
     this.loading.modules = false;
   },
-
   async saveModules() {
     this.saving.modules = true;
     try {
@@ -177,14 +144,11 @@ export const store = $state({
     }
     this.saving.modules = false;
   },
-
   async loadLogs(silent = false) {
     if (!silent) this.loading.logs = true;
     if (!silent) this.logs = []; 
-    
     try {
       const raw = await API.readLogs(this.config.logfile, 1000);
-      
       if (!raw) {
         this.logs = [{ text: this.L.logs.empty, type: 'debug' }];
       } else {
@@ -203,7 +167,6 @@ export const store = $state({
     }
     this.loading.logs = false;
   },
-
   async loadStatus() {
     this.loading.status = true;
     try {
@@ -212,16 +175,13 @@ export const store = $state({
         API.getSystemInfo(),
         API.getActiveMounts(this.config.mountsource)
       ]);
-      
       this.storage = storageData;
       this.systemInfo = sysInfoData;
       this.activePartitions = activeMounts;
-
       if (this.modules.length === 0) {
         this.modules = await API.scanModules(this.config.moduledir);
       }
     } catch (e) {
-      // ignore
     }
     this.loading.status = false;
   }

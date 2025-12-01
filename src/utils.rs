@@ -1,4 +1,3 @@
-// src/utils.rs
 use std::{
     ffi::CString,
     fs::{self, create_dir_all, remove_dir_all, remove_file, write},
@@ -14,7 +13,6 @@ use std::{
 use anyhow::{Context, Result, bail};
 use rustix::mount::{mount, MountFlags};
 
-// Tracing imports
 use tracing::{Event, Subscriber};
 use tracing_subscriber::{
     fmt::{self, FmtContext, FormatEvent, FormatFields},
@@ -67,29 +65,24 @@ pub fn init_logging(verbose: bool, log_path: &Path) -> Result<WorkerGuard> {
     
     let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
 
-    // 2. Define filter levels
     let filter = if verbose {
         EnvFilter::new("debug")
     } else {
         EnvFilter::new("info")
     };
 
-    // 3. Setup formatting layer for file
     let file_layer = fmt::layer()
         .with_ansi(false)
         .with_writer(non_blocking)
         .event_format(SimpleFormatter);
 
-    // 4. Initialize subscriber
     tracing_subscriber::registry()
         .with(filter)
         .with(file_layer)
         .init();
 
-    // 5. Redirect standard `log` macros to `tracing`
     tracing_log::LogTracer::init().ok();
 
-    // 6. Install Panic Hook
     let log_path_buf = log_path.to_path_buf();
     std::panic::set_hook(Box::new(move |info| {
         let msg = match info.payload().downcast_ref::<&str>() {
@@ -112,7 +105,6 @@ pub fn init_logging(verbose: bool, log_path: &Path) -> Result<WorkerGuard> {
     Ok(guard)
 }
 
-// --- File System Utils ---
 
 pub fn lsetfilecon<P: AsRef<Path>>(path: P, con: &str) -> Result<()> {
     #[cfg(any(target_os = "linux", target_os = "android"))]
@@ -159,7 +151,6 @@ pub fn ensure_dir_exists<T: AsRef<Path>>(dir: T) -> Result<()> {
     Ok(())
 }
 
-// --- Stealth Utils (Process) ---
 
 pub fn camouflage_process(name: &str) -> Result<()> {
     let c_name = CString::new(name)?;
@@ -169,7 +160,6 @@ pub fn camouflage_process(name: &str) -> Result<()> {
     Ok(())
 }
 
-// --- Smart Storage Utils ---
 
 pub fn is_xattr_supported(path: &Path) -> bool {
     let test_file = path.join(XATTR_TEST_FILE);

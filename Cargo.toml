@@ -11,7 +11,6 @@ edition = "2021"
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 extattr = "1"
-# Log facade is kept for compatibility with dependencies using log
 log = "0.4"
 rustix = { version = "0.38", features = ["fs", "mount", "process", "thread", "param"] }
 libc = "0.2"
@@ -23,13 +22,11 @@ procfs = "0.17"
 env_logger = "0.11.8"
 mimalloc = { version = "0.1.48", features = ["no_thp", "override"] }
 
-# Tracing Ecosystem
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 tracing-appender = "0.2"
-tracing-log = "0.2" # Captures logs from 'log' crate macros
+tracing-log = "0.2"
 
-# Android specific
 [target.aarch64-linux-android.dependencies]
 android_logger = "0.13"
 

@@ -1,4 +1,3 @@
-// Monet color generation engine
 export const Monet = {
   hexToRgb: (hex) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -39,16 +38,12 @@ export const Monet = {
     const rgb = Monet.hexToRgb(seedHex);
     if (!rgb) return;
     const base = Monet.rgbToHsl(rgb.r, rgb.g, rgb.b);
-    
-    // Tonal palettes
     const p = { h: base.h, s: Math.min(base.s, 90) };
     const s = { h: base.h, s: Math.min(base.s, 40) };
     const t = { h: (base.h + 60) % 360, s: Math.min(base.s, 50) };
     const n = { h: base.h, s: Math.min(base.s, 10) };
     const nv = { h: base.h, s: Math.min(base.s, 15) };
     const err = { h: 350, s: 80 };
-
-    // Generate theme colors
     const tones = isDark ? {
       primary: Monet.getTone(p, 80), onPrimary: Monet.getTone(p, 20),
       primaryCont: Monet.getTone(p, 30), onPrimaryCont: Monet.getTone(p, 90),
@@ -80,8 +75,6 @@ export const Monet = {
       surfContLow: Monet.getTone(n, 96), surfCont: Monet.getTone(n, 94),
       surfContHigh: Monet.getTone(n, 92), surfContHighest: Monet.getTone(n, 90),
     };
-
-    // Inject CSS variables
     const root = document.documentElement.style;
     for (const [key, value] of Object.entries(tones)) {
       let cssVar = '';
@@ -113,7 +106,6 @@ export const Monet = {
       else if(key === 'surfCont') cssVar = '--md-sys-color-surface-container';
       else if(key === 'surfContHigh') cssVar = '--md-sys-color-surface-container-high';
       else if(key === 'surfContHighest') cssVar = '--md-sys-color-surface-container-highest';
-      
       if (cssVar) root.setProperty(cssVar, value);
     }
   }

@@ -1,4 +1,3 @@
-// src/mount/magic.rs
 
 pub(super) const REPLACE_DIR_FILE_NAME: &str = ".replace";
 pub(super) const REPLACE_DIR_XATTR: &str = "trusted.overlay.opaque";
@@ -24,7 +23,6 @@ use rustix::{
 
 use crate::utils::{ensure_dir_exists, lgetfilecon, lsetfilecon, send_unmountable};
 
-// --- Node Logic (Formerly node.rs) ---
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub(super) enum NodeFileType {
@@ -53,7 +51,6 @@ pub(super) struct Node {
     pub(super) name: String,
     pub(super) file_type: NodeFileType,
     pub(super) children: HashMap<String, Node>,
-    // the module that owned this node
     pub(super) module_path: Option<PathBuf>,
     pub(super) replace: bool,
     pub(super) skip: bool,
@@ -72,7 +69,6 @@ impl fmt::Display for NodeFileType {
 
 impl fmt::Display for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // Recursive helper to print the tree
         fn print_tree(
             node: &Node, 
             f: &mut fmt::Formatter<'_>, 
@@ -84,7 +80,6 @@ impl fmt::Display for Node {
             
             let name = if node.name.is_empty() { "/" } else { &node.name };
             
-            // Collect flags
             let mut flags = Vec::new();
             if node.replace { flags.push("REPLACE"); }
             if node.skip { flags.push("SKIP"); }
@@ -95,17 +90,14 @@ impl fmt::Display for Node {
                 format!(" [{}]", flags.join("|")) 
             };
 
-            // Source path info
             let source_str = if let Some(p) = &node.module_path {
                 format!(" -> {}", p.display())
             } else {
                 String::new()
             };
 
-            // Line format: ├── name [TYPE] [FLAGS] -> /path
             writeln!(f, "{}{}{} [{}]{}{}", prefix, connector, name, node.file_type, flag_str, source_str)?;
 
-            // Calculate prefix for children
             let child_prefix = if is_root {
                 ""
             } else if is_last {
@@ -115,7 +107,6 @@ impl fmt::Display for Node {
             };
             let new_prefix = format!("{}{}", prefix, child_prefix);
 
-            // Sort children by name for deterministic logs
             let mut children: Vec<_> = node.children.values().collect();
             children.sort_by(|a, b| a.name.cmp(&b.name));
 
@@ -135,7 +126,6 @@ impl Node {
         let dir = module_dir.as_ref();
         let mut has_file = false;
         
-        // Using read_dir flattening to safely handle errors
         if let Ok(entries) = dir.read_dir() {
             for entry in entries.flatten() {
                 let name = entry.file_name().to_string_lossy().to_string();
@@ -168,8 +158,6 @@ impl Node {
             }
         }
 
-        // Using rustix or CString/libc logic to check for .replace file presence
-        // This logic was in original node.rs. We use libc::open/faccessat as in original.
         let path_str = path.as_ref().to_string_lossy();
         let c_path = CString::new(path_str.as_bytes())?;
         
@@ -232,7 +220,6 @@ impl Node {
     }
 }
 
-// --- Mounting Logic (Formerly mod.rs) ---
 
 fn collect_module_files(content_paths: &[PathBuf], extra_partitions: &[String]) -> Result<Option<Node>> {
     let mut root = Node::new_root("");
@@ -250,9 +237,6 @@ fn collect_module_files(content_paths: &[PathBuf], extra_partitions: &[String]) 
     }
 
     if has_file {
-        // We use string literals here since this logic is specific to recursive magic mount structure,
-        // but ideally we could use BUILTIN_PARTITIONS if imported. 
-        // For now, keeping local constant to match original logic.
         const BUILTIN_PARTITIONS: [(&str, bool); 4] = [
             ("vendor", true),
             ("system_ext", true),
@@ -292,7 +276,6 @@ fn collect_module_files(content_paths: &[PathBuf], extra_partitions: &[String]) 
 
             let path_of_root = Path::new("/").join(partition);
             let path_of_system = Path::new("/system").join(partition);
-            // Default to not requiring symlink for extra partitions
             let require_symlink = false;
 
             if path_of_root.is_dir() && (!require_symlink || path_of_system.is_symlink()) {
@@ -388,10 +371,8 @@ fn mount_symlink<WP: AsRef<Path>>(
 fn should_create_tmpfs(node: &Node, path: &Path, has_tmpfs: bool) -> bool {
     if has_tmpfs { return true; }
     
-    // Explicit replace flag
     if node.replace && node.module_path.is_some() { return true; }
 
-    // Check children for conflicts requiring tmpfs
     for (name, child) in &node.children {
         let real_path = path.join(name);
         
@@ -403,7 +384,7 @@ fn should_create_tmpfs(node: &Node, path: &Path, has_tmpfs: bool) -> bool {
                     let ft = NodeFileType::from_file_type(meta.file_type()).unwrap_or(NodeFileType::Whiteout);
                     ft != child.file_type || ft == NodeFileType::Symlink
                 } else { 
-                    true // Path doesn't exist on real fs, need tmpfs to create it
+                    true
                 }
             }
         };
@@ -455,7 +436,6 @@ fn mount_directory_children<P: AsRef<Path>, WP: AsRef<Path>>(
     has_tmpfs: bool,
     disable_umount: bool,
 ) -> Result<()> {
-    // 1. Mirror existing files if using tmpfs and NOT replacing
     if has_tmpfs && path.as_ref().exists() && !node.replace {
         for entry in path.as_ref().read_dir()?.flatten() {
             let name = entry.file_name().to_string_lossy().to_string();
@@ -465,7 +445,6 @@ fn mount_directory_children<P: AsRef<Path>, WP: AsRef<Path>>(
         }
     }
 
-    // 2. Mount/Process children defined in the module
     for (_name, child_node) in node.children {
         if child_node.skip { continue; }
 

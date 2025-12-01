@@ -1,4 +1,3 @@
-// src/core/modules.rs
 use std::fs;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
@@ -28,9 +27,6 @@ fn read_prop(path: &Path, key: &str) -> Option<String> {
     None
 }
 
-// Check if a directory recursively contains any files (or symlinks/devices)
-// Returns true if at least one non-directory entry is found.
-// Used by print_list to determine if a module is "effective".
 fn has_files_recursive(path: &Path) -> bool {
     if let Ok(entries) = fs::read_dir(path) {
         for entry in entries.flatten() {
@@ -39,8 +35,6 @@ fn has_files_recursive(path: &Path) -> bool {
                 Err(_) => continue,
             };
 
-            // If it's a directory, recurse. 
-            // If it's a file or symlink (or block/char device), it counts as content.
             if file_type.is_dir() {
                 if has_files_recursive(&entry.path()) {
                     return true;
@@ -111,9 +105,6 @@ pub fn print_list(config: &config::Config) -> Result<()> {
             if id == "meta-hybrid" || id == "lost+found" { continue; }
             if path.join(defs::DISABLE_FILE_NAME).exists() || path.join(defs::REMOVE_FILE_NAME).exists() || path.join(defs::SKIP_MOUNT_FILE_NAME).exists() { continue; }
 
-            // Check content recursively to determine if the module effectively has content.
-            // We check both source (if not mounted yet) and destination (if mounted)
-            // ensuring that even if storage is empty, we report what *should* be there from source.
             let has_content = defs::BUILTIN_PARTITIONS.iter().any(|p| {
                 let p_src = path.join(p);
                 let p_dst = mnt_base.join(&id).join(p);
@@ -132,7 +123,6 @@ pub fn print_list(config: &config::Config) -> Result<()> {
             }
         }
     }
-    // Sort alphabetically by name for display
     modules.sort_by(|a, b| a.name.cmp(&b.name));
     println!("{}", serde_json::to_string(&modules)?);
     Ok(())

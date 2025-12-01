@@ -1,4 +1,3 @@
-// src/core/inventory.rs
 use std::fs;
 use std::path::{Path, PathBuf};
 use anyhow::Result;
@@ -8,7 +7,7 @@ use crate::{defs, conf::config};
 pub struct Module {
     pub id: String,
     pub source_path: PathBuf,
-    pub mode: String, // "auto", "magic", etc.
+    pub mode: String,
 }
 
 /// Scans the source directory for enabled modules.
@@ -19,7 +18,6 @@ pub fn scan(source_dir: &Path, _config: &config::Config) -> Result<Vec<Module>> 
         return Ok(modules);
     }
 
-    // load_module_modes is a standalone function, doesn't need Config instance
     let module_modes = config::load_module_modes();
 
     for entry in fs::read_dir(source_dir)? {
@@ -30,10 +28,8 @@ pub fn scan(source_dir: &Path, _config: &config::Config) -> Result<Vec<Module>> 
         
         let id = entry.file_name().to_string_lossy().to_string();
         
-        // Skip internal or system directories
         if id == "meta-hybrid" || id == "lost+found" || id == ".git" { continue; }
 
-        // Check for disable flags
         if path.join(defs::DISABLE_FILE_NAME).exists() || 
            path.join(defs::REMOVE_FILE_NAME).exists() || 
            path.join(defs::SKIP_MOUNT_FILE_NAME).exists() { 
@@ -49,7 +45,6 @@ pub fn scan(source_dir: &Path, _config: &config::Config) -> Result<Vec<Module>> 
         });
     }
 
-    // Sort by ID descending (Z->A) for OverlayFS priority.
     modules.sort_by(|a, b| b.id.cmp(&a.id));
 
     Ok(modules)

@@ -32,23 +32,10 @@ jobs:
         with:
           ndk-version: r26b
 
-      # [DISABLED] Cache Zakosign Build
-      # - name: Cache Zakosign Build
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: |
-      #       zakosign/boringssl/build-host
-      #       zakosign/obj
-      #       zakosign/bin
-      #     key: ${{ runner.os }}-zakosign-host-${{ hashFiles('zakosign/Makefile', 'zakosign/.gitmodules') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-zakosign-host-
 
       - name: Install Build Dependencies
         run: |
           sudo apt-get update
-          # [DISABLED] zakosign deps
-          # sudo apt-get install -y ninja-build clang cmake
 
       - name: Setup Rust Toolchain
         uses: dtolnay/rust-toolchain@nightly
@@ -91,19 +78,6 @@ jobs:
           
           cat "$PROP_FILE"
 
-      # [DISABLED] Prepare Signing Key
-      # - name: Prepare Signing Key
-      #   id: key_prep
-      #   env:
-      #     ZAKOSIGN_KEY_CONTENT: ${{ secrets.ZAKOSIGN_KEY }}
-      #   run: |
-      #     if [ -n "$ZAKOSIGN_KEY_CONTENT" ]; then
-      #       echo "$ZAKOSIGN_KEY_CONTENT" > /tmp/private.pem
-      #       echo "has_key=true" >> $GITHUB_OUTPUT
-      #     else
-      #       echo "No signing key found in secrets."
-      #       echo "has_key=false" >> $GITHUB_OUTPUT
-      #     fi
 
       - name: Build Project
         run: |

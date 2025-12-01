@@ -4,43 +4,30 @@
   import { onMount, tick, onDestroy } from 'svelte';
   import Skeleton from '../components/Skeleton.svelte';
   import './LogsTab.css';
-
   let searchLogQuery = $state('');
-  let filterLevel = $state('all'); // all, info, warn, error
+  let filterLevel = $state('all'); 
   let logContainer;
-  
-  // Auto Refresh State
   let autoRefresh = $state(false);
   let refreshInterval;
-
-  // Derived state: Filter logs based on search query and level
   let filteredLogs = $derived(store.logs.filter(line => {
     const text = line.text.toLowerCase();
     const matchesSearch = text.includes(searchLogQuery.toLowerCase());
-    
     let matchesLevel = true;
     if (filterLevel !== 'all') {
       matchesLevel = line.type === filterLevel;
     }
-    
     return matchesSearch && matchesLevel;
   }));
-
-  // Auto-scroll function
   async function scrollToBottom() {
-    if (logContainer && autoRefresh) { // Only auto-scroll if auto-refresh is on or initial load
+    if (logContainer && autoRefresh) { 
       await tick();
       logContainer.scrollTop = logContainer.scrollHeight;
     }
   }
-
-  // Load logs and scroll
   async function refreshLogs(silent = false) {
     await store.loadLogs(silent);
-    if (!silent) scrollToBottom(); // Force scroll on manual refresh
+    if (!silent) scrollToBottom(); 
   }
-  
-  // Actions
   async function copyLogs() {
     if (filteredLogs.length === 0) return;
     const text = filteredLogs.map(l => l.text).join('\n');
@@ -51,29 +38,24 @@
       store.showToast(store.L.logs.copyFail, 'error');
     }
   }
-
-  // Auto Refresh Effect
   $effect(() => {
     if (autoRefresh) {
-      refreshLogs(true); // Initial immediate refresh
+      refreshLogs(true); 
       refreshInterval = setInterval(() => {
-        refreshLogs(true); // Silent refresh
+        refreshLogs(true); 
       }, 3000);
     } else {
       if (refreshInterval) clearInterval(refreshInterval);
     }
     return () => { if (refreshInterval) clearInterval(refreshInterval); };
   });
-
   onMount(() => {
-    refreshLogs(); // Initial load
+    refreshLogs(); 
   });
-  
   onDestroy(() => {
     if (refreshInterval) clearInterval(refreshInterval);
   });
 </script>
-
 <div class="logs-controls">
   <svg viewBox="0 0 24 24" width="20" height="20" style="fill: var(--md-sys-color-on-surface-variant)">
     <path d={ICONS.search} />
@@ -84,14 +66,11 @@
     placeholder={store.L.logs.searchPlaceholder}
     bind:value={searchLogQuery}
   />
-  
   <div style="display:flex; align-items:center; gap:6px; margin-right:8px;">
     <input type="checkbox" id="auto-refresh" bind:checked={autoRefresh} style="accent-color: var(--md-sys-color-primary);" />
     <label for="auto-refresh" style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); cursor: pointer; white-space: nowrap;">Auto</label>
   </div>
-
   <div style="height: 16px; width: 1px; background: var(--md-sys-color-outline-variant); margin: 0 8px;"></div>
-
   <span style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); white-space: nowrap;">
     {store.L.logs.filterLabel}
   </span>
@@ -102,7 +81,6 @@
     <option value="error">{store.L.logs.levels.error}</option>
   </select>
 </div>
-
 <div class="log-container" bind:this={logContainer}>
   {#if store.loading.logs}
     <div style="display:flex; flex-direction:column; gap:8px;">
@@ -120,13 +98,11 @@
         <span class="log-{line.type}">{line.text}</span>
       </span>
     {/each}
-    
     <div style="text-align: center; padding: 12px; font-size: 11px; opacity: 0.5; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 12px;">
       — Showing last 1000 lines —
     </div>
   {/if}
 </div>
-
 <div class="bottom-actions">
   <button class="btn-tonal" onclick={copyLogs} disabled={filteredLogs.length === 0} title={store.L.logs.copy}>
     <svg viewBox="0 0 24 24" width="20" height="20"><path d={ICONS.copy} fill="currentColor"/></svg>

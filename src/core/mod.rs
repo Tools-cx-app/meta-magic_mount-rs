@@ -1,4 +1,3 @@
-// src/core/mod.rs
 pub mod executor;
 pub mod inventory;
 pub mod planner;

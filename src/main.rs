@@ -1,4 +1,3 @@
-// src/main.rs
 mod conf;
 mod core;
 mod defs;

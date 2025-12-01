@@ -2,21 +2,18 @@
   import { store } from '../lib/store.svelte';
   import { ICONS } from '../lib/constants';
   import './NavBar.css';
-  
   let { activeTab, onTabChange } = $props();
   let showLangMenu = $state(false);
   let navContainer = $state();
   let langButtonRef = $state();
   let menuRef = $state();
   let tabRefs = $state({});
-  
   const TABS = [
     { id: 'status', icon: ICONS.home },
     { id: 'config', icon: ICONS.settings },
     { id: 'modules', icon: ICONS.modules },
     { id: 'logs', icon: ICONS.description }
   ];
-
   $effect(() => {
     if (activeTab && tabRefs[activeTab] && navContainer) {
       const tab = tabRefs[activeTab];
@@ -24,18 +21,15 @@
       const tabLeft = tab.offsetLeft;
       const tabWidth = tab.clientWidth;
       const scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
-      
       navContainer.scrollTo({
         left: scrollLeft,
         behavior: 'smooth'
       });
     }
   });
-
   function toggleTheme() {
     let nextTheme;
     let toastMsg;
-
     if (store.theme === 'auto') {
       nextTheme = 'light';
       toastMsg = store.L.common.themeLight;
@@ -46,23 +40,18 @@
       nextTheme = 'auto';
       toastMsg = store.L.common.themeAuto;
     }
-
     store.setTheme(nextTheme);
     store.showToast(toastMsg, 'info');
   }
-
   function getThemeIcon() {
     if (store.theme === 'auto') return ICONS.auto_mode;
     if (store.theme === 'light') return ICONS.light_mode;
     return ICONS.dark_mode;
   }
-
   function setLang(code) {
     store.setLang(code);
     showLangMenu = false;
   }
-  
-  // Close menu when clicking outside
   function handleOutsideClick(e) {
     if (showLangMenu && 
         menuRef && !menuRef.contains(e.target) && 
@@ -71,9 +60,7 @@
     }
   }
 </script>
-
 <svelte:window onclick={handleOutsideClick} />
-
 <header class="app-bar">
   <div class="app-bar-content">
     <h1 class="screen-title">{store.L.common.appName}</h1>
@@ -91,7 +78,6 @@
       </button>
     </div>
   </div>
-  
   {#if showLangMenu}
     <div class="menu-dropdown" bind:this={menuRef}>
       {#each store.availableLanguages as l}
@@ -99,7 +85,6 @@
       {/each}
     </div>
   {/if}
-
   <nav class="nav-tabs" bind:this={navContainer}>
     {#each TABS as tab}
       <button 

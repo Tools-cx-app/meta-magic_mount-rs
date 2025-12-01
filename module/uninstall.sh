@@ -1,8 +1,4 @@
 #!/system/bin/sh
-############################################
-# meta-hybrid uninstall.sh
-# Cleanup script for metamodule removal
-############################################
 
 BASE_DIR="/data/adb/meta-hybrid"
 MNT_DIR="$BASE_DIR/img_mnt"

@@ -2,29 +2,23 @@
 
 ui_print "- Detecting device architecture..."
 
-# Detect architecture using ro.product.cpu.abi
 ABI=$(grep_get_prop ro.product.cpu.abi)
 ui_print "- Detected ABI: $ABI"
 
-# Verification
 if [ ! -f "$MODPATH/meta-hybrid" ]; then
     abort "! Binary not found: meta-hybrid"
 fi
 
-# Set permissions
 chmod 755 "$MODPATH/meta-hybrid"
 
-# Base directory setup
 BASE_DIR="/data/adb/meta-hybrid"
 mkdir -p "$BASE_DIR"
 
-# Handle Config
 if [ ! -f "$BASE_DIR/config.toml" ]; then
   ui_print "- Installing default config"
   cat "$MODPATH/config.toml" > "$BASE_DIR/config.toml"
 fi
 
-# Handle Image Creation (Borrowed from meta-overlayfs)
 IMG_FILE="$BASE_DIR/modules.img"
 IMG_SIZE_MB=2048
 
@@ -32,7 +26,6 @@ if [ ! -f "$IMG_FILE" ]; then
     ui_print "- Creating 2GB ext4 image for module storage..."
     truncate -s ${IMG_SIZE_MB}M "$IMG_FILE"
     
-    # [Stealth Update] Remove journal to prevent creating jbd2 sysfs node/threads
     /system/bin/mke2fs -t ext4 -O ^has_journal -F "$IMG_FILE" >/dev/null 2>&1
     
     if [ $? -ne 0 ]; then

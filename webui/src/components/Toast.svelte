@@ -1,10 +1,7 @@
 <script>
   import { store } from '../lib/store.svelte';
   import { fade, fly } from 'svelte/transition';
-  
-  // Icon logic or simply text for now
 </script>
-
 {#if store.toast.visible}
   <div 
     class="toast toast-{store.toast.type}" 
@@ -14,7 +11,6 @@
     <span>{store.toast.text}</span>
   </div>
 {/if}
-
 <style>
   .toast {
     position: fixed;
@@ -33,20 +29,14 @@
     text-align: center;
     white-space: nowrap;
   }
-  
-  /* Info (Default) */
   .toast-info {
     background: var(--md-sys-color-inverse-surface);
     color: var(--md-sys-color-inverse-on-surface);
   }
-  
-  /* Error */
   .toast-error {
     background: var(--md-sys-color-error-container);
     color: var(--md-sys-color-on-error-container);
   }
-  
-  /* Success */
   .toast-success {
     background: var(--md-sys-color-primary-container);
     color: var(--md-sys-color-on-primary-container);

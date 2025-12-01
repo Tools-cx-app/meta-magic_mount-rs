@@ -1,4 +1,3 @@
-// src/core/sync.rs
 use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
@@ -10,14 +9,11 @@ use crate::{defs, utils, core::inventory::Module};
 pub fn perform_sync(modules: &[Module], target_base: &Path) -> Result<()> {
     log::info!("Starting smart module sync to {}", target_base.display());
 
-    // 1. Prune orphaned directories (Cleanup disabled/removed modules)
     prune_orphaned_modules(modules, target_base)?;
 
-    // 2. Sync each module
     for module in modules {
         let dst = target_base.join(&module.id);
         
-        // Recursively check if the module has actual content for known partitions
         let has_content = defs::BUILTIN_PARTITIONS.iter().any(|p| {
             let part_path = module.source_path.join(p);
             part_path.exists() && has_files_recursive(&part_path)
@@ -27,7 +23,6 @@ pub fn perform_sync(modules: &[Module], target_base: &Path) -> Result<()> {
             if should_sync(&module.source_path, &dst) {
                 log::info!("Syncing module: {} (Updated/New)", module.id);
                 
-                // Ensure clean state for this module before copying
                 if dst.exists() {
                     if let Err(e) = fs::remove_dir_all(&dst) {
                         log::warn!("Failed to clean target dir for {}: {}", module.id, e);
@@ -37,7 +32,6 @@ pub fn perform_sync(modules: &[Module], target_base: &Path) -> Result<()> {
                 if let Err(e) = utils::sync_dir(&module.source_path, &dst) {
                     log::error!("Failed to sync module {}: {}", module.id, e);
                 } else {
-                    // 3. Context Mirroring (Only needed after a fresh sync)
                     repair_module_contexts(&dst, &module.id);
                 }
             } else {
@@ -63,7 +57,6 @@ fn prune_orphaned_modules(modules: &[Module], target_base: &Path) -> Result<()> 
         let name_os = entry.file_name();
         let name = name_os.to_string_lossy();
 
-        // Skip internal files/dirs
         if name == "lost+found" || name == "meta-hybrid" { continue; }
 
         if !active_ids.contains(name.as_ref()) {
@@ -89,21 +82,16 @@ fn should_sync(src: &Path, dst: &Path) -> bool {
         return true;
     }
 
-    // Compare module.prop
     let src_prop = src.join("module.prop");
     let dst_prop = dst.join("module.prop");
 
     if !src_prop.exists() || !dst_prop.exists() {
-        // If prop file is missing in either, force sync to be safe
         return true;
     }
 
-    // Read and compare contents
-    // We use read_to_string/bytes. If checking file size/mtime is preferred for speed,
-    // we could do that, but content check is more robust against 'touch'.
     match (fs::read(&src_prop), fs::read(&dst_prop)) {
-        (Ok(s), Ok(d)) => s != d, // Sync if content differs
-        _ => true, // Sync on IO errors
+        (Ok(s), Ok(d)) => s != d,
+        _ => true,
     }
 }
 
@@ -121,13 +109,10 @@ fn repair_module_contexts(module_root: &Path, module_id: &str) {
 fn recursive_context_repair(base: &Path, current: &Path) -> Result<()> {
     if !current.exists() { return Ok(()); }
     
-    // Calculate path relative to module root to find system equivalent
-    // e.g. /mnt/modA/system/bin/app -> /system/bin/app
     let relative = current.strip_prefix(base)?;
     let system_path = Path::new("/").join(relative);
 
     if system_path.exists() {
-        // Copy context from real system file
         let _ = utils::copy_path_context(&system_path, current);
     }
 
@@ -147,7 +132,7 @@ fn has_files_recursive(path: &Path) -> bool {
                 if ft.is_dir() {
                     if has_files_recursive(&entry.path()) { return true; }
                 } else {
-                    return true; // Found a file/symlink/device
+                    return true;
                 }
             }
         }

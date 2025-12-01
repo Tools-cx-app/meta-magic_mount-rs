@@ -1,4 +1,3 @@
-// src/core/executor.rs
 use std::path::{Path, PathBuf};
 use anyhow::Result;
 use crate::{
@@ -26,11 +25,9 @@ fn extract_module_root(partition_path: &Path) -> Option<PathBuf> {
 pub fn execute(plan: &MountPlan, config: &config::Config) -> Result<ExecutionResult> {
     let mut magic_queue = plan.magic_module_paths.clone();
     
-    // Tracking active IDs
     let mut final_overlay_ids = plan.overlay_module_ids.clone();
     let mut fallback_ids = Vec::new();
 
-    // 1. Execute Overlay Operations
     for op in &plan.overlay_ops {
         let lowerdir_strings: Vec<String> = op.lowerdirs.iter()
             .map(|p| p.display().to_string())
@@ -38,12 +35,9 @@ pub fn execute(plan: &MountPlan, config: &config::Config) -> Result<ExecutionRes
             
         log::info!("Mounting {} [OVERLAY] ({} layers)", op.target, lowerdir_strings.len());
         
-        // Note: mount_overlay now expects lowerdirs, workdir, etc.
-        // We pass None for workdir/upperdir implying read-only overlay (standard for Magisk modules)
         if let Err(e) = overlay::mount_overlay(&op.target, &lowerdir_strings, None, None, config.disable_umount) {
             log::warn!("OverlayFS failed for {}: {}. Triggering fallback.", op.target, e);
             
-            // Fallback: Add all involved modules to magic queue
             for layer_path in &op.lowerdirs {
                 if let Some(root) = extract_module_root(layer_path) {
                     magic_queue.push(root.clone());
@@ -55,15 +49,11 @@ pub fn execute(plan: &MountPlan, config: &config::Config) -> Result<ExecutionRes
         }
     }
 
-    // Adjust ID lists based on fallbacks
     if !fallback_ids.is_empty() {
         final_overlay_ids.retain(|id| !fallback_ids.contains(id));
         log::info!("{} modules fell back to Magic Mount.", fallback_ids.len());
     }
 
-    // 2. Execute Magic Mounts
-    // Deduplicate queue first (a module might span multiple partitions, 
-    // failure in one partition shouldn't add it twice)
     magic_queue.sort();
     magic_queue.dedup();
 
@@ -76,7 +66,6 @@ pub fn execute(plan: &MountPlan, config: &config::Config) -> Result<ExecutionRes
             utils::select_temp_dir()? 
         };
         
-        // Re-calculate magic IDs based on final queue
         for path in &magic_queue {
             if let Some(name) = path.file_name() {
                 final_magic_ids.push(name.to_string_lossy().to_string());
@@ -95,14 +84,12 @@ pub fn execute(plan: &MountPlan, config: &config::Config) -> Result<ExecutionRes
             config.disable_umount
         ) {
             log::error!("Magic Mount critical failure: {:#}", e);
-            // If magic mount fails, we assume partial or total failure for these modules
             final_magic_ids.clear();
         }
         
         utils::cleanup_temp_dir(&tempdir);
     }
 
-    // Final cleanup of ID lists
     final_overlay_ids.sort();
     final_overlay_ids.dedup();
     final_magic_ids.sort();

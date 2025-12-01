@@ -1,4 +1,3 @@
-// meta-hybrid_mount/src/config.rs
 use std::{
     collections::HashMap,
     fs,
@@ -22,17 +21,12 @@ pub struct Config {
     #[serde(default, deserialize_with = "deserialize_partitions_flexible")]
     pub partitions: Vec<String>,
     
-    // Stealth Configuration
-    // If true, forces the use of ext4 loop image even if tmpfs supports xattr.
     #[serde(default)]
     pub force_ext4: bool,
 
-    // If true, attempts to load the Nuke LKM to hide ext4 traces.
     #[serde(default)]
     pub enable_nuke: bool,
 
-    // If true, skips the try_umount logic (namespace detaching).
-    // Useful for debugging or if the kernel doesn't support it well.
     #[serde(default)]
     pub disable_umount: bool,
 }

@@ -6,7 +6,6 @@
   display: flex;
   flex-direction: column;
 }
-
 .main-content {
   flex: 1;
   overflow-y: hidden;
@@ -15,7 +14,6 @@
   grid-template-rows: 1fr;
   grid-template-columns: 1fr;
 }
-
 .tab-pane {
   grid-row: 1;
   grid-column: 1;

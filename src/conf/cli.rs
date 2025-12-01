@@ -1,7 +1,5 @@
-// meta-hybrid_mount/src/conf/cli.rs
 use std::path::PathBuf;
 use clap::{Parser, Subcommand};
-// Adjusted import path
 use super::config::CONFIG_FILE_DEFAULT;
 
 #[derive(Parser, Debug)]

@@ -3,8 +3,6 @@
   flex-direction: column;
   gap: 16px;
 }
-
-/* Storage Card Styles */
 .storage-card {
   background-color: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
@@ -15,30 +13,25 @@
   gap: 16px;
   box-shadow: var(--md-sys-elevation-1);
 }
-
 .storage-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
 }
-
 .storage-title {
   font-size: 14px;
   font-weight: 500;
   opacity: 0.8;
 }
-
 .storage-value {
   font-size: 32px;
   font-weight: 400;
   font-family: var(--md-ref-typeface-mono);
 }
-
 .storage-unit {
   font-size: 16px;
   opacity: 0.6;
 }
-
 .progress-track {
   height: 8px;
   background-color: rgba(0, 0, 0, 0.1);
@@ -46,14 +39,12 @@
   overflow: hidden;
   width: 100%;
 }
-
 .progress-fill {
   height: 100%;
   background-color: var(--md-sys-color-primary);
   border-radius: 4px;
   transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .storage-details {
   display: flex;
   justify-content: space-between;
@@ -61,14 +52,11 @@
   opacity: 0.7;
   font-family: var(--md-ref-typeface-mono);
 }
-
-/* Stats Row */
 .stats-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
-
 .stat-card {
   background-color: var(--md-sys-color-surface-container);
   border-radius: 16px;
@@ -81,7 +69,6 @@
   gap: 8px;
   box-shadow: var(--md-sys-elevation-1);
 }
-
 .stat-value {
   font-size: 24px;
   font-weight: 500;
@@ -92,13 +79,10 @@
   text-overflow: ellipsis;
   max-width: 100%;
 }
-
 .stat-label {
   font-size: 12px;
   color: var(--md-sys-color-on-surface-variant);
 }
-
-/* Mode Distribution & System Info Card */
 .mode-card {
   background-color: var(--md-sys-color-surface-container-low);
   border-radius: 16px;
@@ -107,13 +91,11 @@
   flex-direction: column;
   gap: 12px;
 }
-
 .mode-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-
 .mode-name {
   display: flex;
   align-items: center;
@@ -121,43 +103,35 @@
   font-size: 14px;
   color: var(--md-sys-color-on-surface);
 }
-
 .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
-
 .mode-count {
   font-weight: 500;
   color: var(--md-sys-color-on-surface);
 }
-
-/* System Info Grid */
 .info-grid {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .info-item {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-
 .info-item.full-width {
   padding-top: 0;
   border-top: none;
 }
-
 .info-label {
   font-size: 11px;
   color: var(--md-sys-color-on-surface-variant);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .info-val {
   font-size: 13px;
   color: var(--md-sys-color-on-surface);
@@ -165,19 +139,15 @@
   word-break: break-all;
   line-height: 1.4;
 }
-
 .info-val.mono {
   font-family: var(--md-ref-typeface-mono);
   font-size: 12px;
 }
-
-/* Partition Status Grid */
 .partition-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-
 .part-chip {
   padding: 4px 10px;
   border-radius: 8px;
@@ -187,20 +157,16 @@
   transition: all 0.3s;
   border: 1px solid transparent;
 }
-
 .part-chip.active {
   background-color: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
   border-color: var(--md-sys-color-primary);
 }
-
 .part-chip.inactive {
   background-color: rgba(0, 0, 0, 0.05);
   color: var(--md-sys-color-outline);
   border-color: var(--md-sys-color-outline-variant);
 }
-
-/* Storage Type Badges */
 .storage-type-badge {
   font-size: 10px;
   padding: 2px 8px;
@@ -210,12 +176,10 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .type-tmpfs {
   background-color: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
 }
-
 .type-ext4 {
   background-color: var(--md-sys-color-secondary);
   color: var(--md-sys-color-on-secondary);

@@ -32,23 +32,10 @@ jobs:
         with:
           ndk-version: r26b
 
-      # [DISABLED] Cache Zakosign Build
-      # - name: Cache Zakosign Build
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: |
-      #       zakosign/boringssl/build-host
-      #       zakosign/obj
-      #       zakosign/bin
-      #     key: ${{ runner.os }}-zakosign-host-${{ hashFiles('zakosign/Makefile', 'zakosign/.gitmodules') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-zakosign-host-
 
       - name: Install Build Dependencies
         run: |
           sudo apt-get update
-          # [DISABLED] Removed ninja-build and cmake as zakosign is disabled
-          # sudo apt-get install -y ninja-build clang cmake
 
       - name: Setup Rust Toolchain
         uses: dtolnay/rust-toolchain@nightly
@@ -76,7 +63,6 @@ jobs:
 
       - name: Build Project
         run: |
-          # Standard build without signing
           cargo run -p xtask -- build --release
           
           if [ -f "output/version" ]; then

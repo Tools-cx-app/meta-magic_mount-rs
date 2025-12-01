@@ -1,4 +1,3 @@
-// src/core/storage.rs
 use std::path::{Path, PathBuf};
 use anyhow::{Context, Result, bail};
 use rustix::mount::{unmount, UnmountFlags};
@@ -7,16 +6,14 @@ use crate::{defs, utils, core::state};
 /// Represents an active storage backend
 pub struct StorageHandle {
     pub mount_point: PathBuf,
-    pub mode: String, // "tmpfs" or "ext4"
+    pub mode: String,
 }
 
 /// Sets up the storage backend (Tmpfs or Ext4 Image)
 pub fn setup(mnt_dir: &Path, image_path: &Path, force_ext4: bool) -> Result<StorageHandle> {
     log::info!("Setting up storage at {}", mnt_dir.display());
 
-    // Clean up previous mounts if necessary to ensure a clean state
     if mnt_dir.exists() { 
-        // Best effort unmount, ignore errors if not mounted
         let _ = unmount(mnt_dir, UnmountFlags::DETACH); 
     }
     utils::ensure_dir_exists(mnt_dir)?;
@@ -59,25 +56,19 @@ fn setup_ext4_image(target: &Path, image_path: &Path) -> Result<String> {
     utils::mount_image(image_path, target)
         .context("Failed to mount modules.img")?;
 
-    // CRITICAL FIX: Repair root permissions immediately after mount.
-    // OverlayFS requires the lowerdir root to be accessible and have correct context.
     log::info!("Repairing storage root permissions...");
     
-    // 1. Chmod 0755
     use std::os::unix::fs::PermissionsExt;
     let mut perms = std::fs::metadata(target)?.permissions();
     perms.set_mode(0o755);
     std::fs::set_permissions(target, perms)?;
 
-    // 2. Chown 0:0 (Root:Root)
-    // Using rustix for direct chown
     use rustix::fs::{chown, Uid, Gid};
     unsafe {
         chown(target, Some(Uid::from_raw(0)), Some(Gid::from_raw(0)))
             .context("Failed to chown storage root")?;
     }
 
-    // 3. Restore SELinux Context (u:object_r:system_file:s0 is standard for system overlays)
     utils::lsetfilecon(target, "u:object_r:system_file:s0")
         .context("Failed to set SELinux context on storage root")?;
         
