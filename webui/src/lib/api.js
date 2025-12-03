@@ -1,11 +1,23 @@
-import { exec } from 'kernelsu';
 import { DEFAULT_CONFIG, PATHS } from './constants';
+import { MockAPI } from './api.mock';
 
-export const API = {
+let ksuExec;
+try {
+  const ksu = await import('kernelsu').catch(() => null);
+  ksuExec = ksu ? ksu.exec : null;
+} catch (e) {
+  console.warn("KernelSU module not found, defaulting to Mock/Fallback.");
+}
+
+const shouldUseMock = import.meta.env.DEV || !ksuExec;
+
+console.log(`[API Init] Mode: ${shouldUseMock ? '🛠️ MOCK (Dev/Browser)' : '🚀 REAL (Device)'}`);
+
+const RealAPI = {
   loadConfig: async () => {
     const cmd = `${PATHS.BINARY} show-config`;
     try {
-      const { errno, stdout } = await exec(cmd);
+      const { errno, stdout } = await ksuExec(cmd);
       if (errno === 0 && stdout) {
         return JSON.parse(stdout);
       } else {
@@ -39,7 +51,7 @@ export const API = {
     }
 
     const cmd = `${PATHS.BINARY} save-config --payload ${hexPayload}`;
-    const { errno, stderr } = await exec(cmd);
+    const { errno, stderr } = await ksuExec(cmd);
     
     if (errno !== 0) {
       throw new Error(`Failed to save config: ${stderr}`);
@@ -49,7 +61,7 @@ export const API = {
   scanModules: async () => {
     const cmd = `${PATHS.BINARY} modules`;
     try {
-      const { errno, stdout } = await exec(cmd);
+      const { errno, stdout } = await ksuExec(cmd);
       if (errno === 0 && stdout) {
         return JSON.parse(stdout);
       }
@@ -68,14 +80,17 @@ export const API = {
     });
     
     const data = content.replace(/'/g, "'\\''");
-    const { errno } = await exec(`mkdir -p "$(dirname "${PATHS.MODE_CONFIG}")" && printf '%s\n' '${data}' > "${PATHS.MODE_CONFIG}"`);
+    const modeConfigPath = PATHS.MODE_CONFIG || "/data/adb/meta-hybrid/module_mode.conf";
+    const cmd = `mkdir -p "$(dirname "${modeConfigPath}")" && printf '%s\n' '${data}' > "${modeConfigPath}"`;
+    
+    const { errno } = await ksuExec(cmd);
     if (errno !== 0) throw new Error('Failed to save modes');
   },
 
   readLogs: async (logPath, lines = 1000) => {
     const f = logPath || DEFAULT_CONFIG.logfile;
     const cmd = `[ -f "${f}" ] && tail -n ${lines} "${f}" || echo ""`;
-    const { errno, stdout, stderr } = await exec(cmd);
+    const { errno, stdout, stderr } = await ksuExec(cmd);
     
     if (errno === 0) return stdout || "";
     throw new Error(stderr || "Log file not found or unreadable");
@@ -84,17 +99,10 @@ export const API = {
   getStorageUsage: async () => {
     try {
       const cmd = `${PATHS.BINARY} storage`;
-      const { errno, stdout } = await exec(cmd);
+      const { errno, stdout } = await ksuExec(cmd);
       
       if (errno === 0 && stdout) {
-        const data = JSON.parse(stdout);
-        return {
-          size: data.size || '-',
-          used: data.used || '-',
-          avail: data.avail || '-', 
-          percent: data.percent || '0%',
-          type: data.type || null
-        };
+        return JSON.parse(stdout);
       }
     } catch (e) {
       console.error("Storage check failed:", e);
@@ -105,7 +113,7 @@ export const API = {
   getSystemInfo: async () => {
     try {
       const cmdSys = `echo "KERNEL:$(uname -r)"; echo "SELINUX:$(getenforce)"`;
-      const { errno: errSys, stdout: outSys } = await exec(cmdSys);
+      const { errno: errSys, stdout: outSys } = await ksuExec(cmdSys);
       
       let info = { kernel: '-', selinux: '-', mountBase: '-' };
       if (errSys === 0 && outSys) {
@@ -115,8 +123,9 @@ export const API = {
         });
       }
 
-      const cmdState = `cat "${PATHS.DAEMON_STATE}"`;
-      const { errno: errState, stdout: outState } = await exec(cmdState);
+      const stateFile = PATHS.DAEMON_STATE || "/data/adb/meta-hybrid/run/daemon_state.json";
+      const cmdState = `cat "${stateFile}"`;
+      const { errno: errState, stdout: outState } = await ksuExec(cmdState);
       
       if (errState === 0 && outState) {
         try {
@@ -138,7 +147,7 @@ export const API = {
     try {
       const src = sourceName || DEFAULT_CONFIG.mountsource;
       const cmd = `mount | grep "${src}"`; 
-      const { errno, stdout } = await exec(cmd);
+      const { errno, stdout } = await ksuExec(cmd);
       
       const mountedParts = [];
       if (errno === 0 && stdout) {
@@ -160,12 +169,12 @@ export const API = {
   openLink: async (url) => {
     const safeUrl = url.replace(/"/g, '\\"');
     const cmd = `am start -a android.intent.action.VIEW -d "${safeUrl}"`;
-    await exec(cmd);
+    await ksuExec(cmd);
   },
 
   fetchSystemColor: async () => {
     try {
-      const { stdout } = await exec('settings get secure theme_customization_overlay_packages');
+      const { stdout } = await ksuExec('settings get secure theme_customization_overlay_packages');
       if (stdout) {
         const match = /["']?android\.theme\.customization\.system_palette["']?\s*:\s*["']?#?([0-9a-fA-F]{6,8})["']?/i.exec(stdout) || 
                       /["']?source_color["']?\s*:\s*["']?#?([0-9a-fA-F]{6,8})["']?/i.exec(stdout);
@@ -179,3 +188,5 @@ export const API = {
     return null;
   }
 };
+
+export const API = shouldUseMock ? MockAPI : RealAPI;
