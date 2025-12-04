@@ -66,6 +66,8 @@ where
                 target.as_ref().display(),
                 io::Error::last_os_error()
             );
+
+            return Err(anyhow::anyhow!("{}", io::Error::last_os_error()));
         }
 
         log::info!("umount {} successful!", target.as_ref().display());
