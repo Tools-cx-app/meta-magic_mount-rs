@@ -39,7 +39,7 @@
     "verboseLabel": "Verbose Logging",
     "verboseOff": "Off",
     "verboseOn": "On",
-    "umountLabel": "Unmount Modules",
+    "umountLabel": "Disable Unmount Modules",
     "umountOff": "Default",
     "umountOn": "Enabled",
     "moduleDir": "Module Directory",
