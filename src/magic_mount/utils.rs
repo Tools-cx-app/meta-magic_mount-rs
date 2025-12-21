@@ -51,7 +51,7 @@ where
         Some(Uid::from_raw(metadata.uid())),
         Some(Gid::from_raw(metadata.gid())),
     )?;
-    lsetfilecon(work_dir_path, lgetfilecon(path)?.as_str())?;
+    lsetfilecon(work_dir_path, lgetfilecon(path)?.as_str());
 
     Ok(())
 }
@@ -86,7 +86,7 @@ where
             Some(Uid::from_raw(metadata.uid())),
             Some(Gid::from_raw(metadata.gid())),
         )?;
-        lsetfilecon(&work_dir_path, lgetfilecon(&path)?.as_str())?;
+        lsetfilecon(&work_dir_path, lgetfilecon(&path)?.as_str());
         for entry in path.read_dir()?.flatten() {
             mount_mirror(&path, &work_dir_path, &entry)?;
         }
@@ -237,7 +237,7 @@ where
 {
     let src_symlink = read_link(src.as_ref())?;
     symlink(&src_symlink, dst.as_ref())?;
-    lsetfilecon(dst.as_ref(), lgetfilecon(src.as_ref())?.as_str())?;
+    lsetfilecon(dst.as_ref(), lgetfilecon(src.as_ref())?.as_str());
     log::debug!(
         "clone symlink {} -> {}({})",
         dst.as_ref().display(),
