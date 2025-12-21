@@ -28,18 +28,18 @@ pub fn validate_module_id(module_id: &str) -> Result<()> {
     }
 }
 
-pub fn lsetfilecon<P: AsRef<Path>>(path: P, con: &str) {
+pub fn lsetfilecon<P: AsRef<Path>>(path: P, con: &str) -> Result<()> {
     #[cfg(any(target_os = "linux", target_os = "android"))]
     {
         log::debug!("file: {},con: {}", path.as_ref().display(), con);
-        if let Err(e) = xattr_set(&path, SELINUX_XATTR, con.as_bytes()) {
-            log::warn!(
-                "Failed to change SELinux context for {}, more info {}, skip change!!",
-                path.as_ref().display(),
-                e
-            );
-        }
+        xattr_set(&path, SELINUX_XATTR, con.as_bytes()).with_context(|| {
+            format!(
+                "Failed to change SELinux context for {}",
+                path.as_ref().display()
+            )
+        })?;
     }
+    Ok(())
 }
 
 #[cfg(any(target_os = "linux", target_os = "android"))]
