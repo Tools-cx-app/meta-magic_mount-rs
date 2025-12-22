@@ -145,7 +145,7 @@ button:active {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 16px 24px calc(16px + env(safe-area-inset-bottom)) 24px;
+  padding: 16px 24px calc(16px + var(--safe-area-inset-bottom, 0px)) 24px;
   background: linear-gradient(to top, var(--md-sys-color-surface) 85%, transparent);
   display: flex;
   justify-content: flex-end;

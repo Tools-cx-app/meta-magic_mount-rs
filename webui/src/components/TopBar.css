@@ -2,28 +2,28 @@
   flex-shrink: 0;
   background-color: var(--md-sys-color-surface-container);
   color: var(--md-sys-color-on-surface);
-  height: 120px;
-  padding-top: max(0px, env(safe-area-inset-top, 0px));
+  height: 64px;
+  padding-top: var(--safe-area-inset-top, 0px);
   transition: background-color 0.3s ease, height 0.3s ease;
   position: relative;
   z-index: 20;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  overflow: visible; 
+  align-items: center;
+  overflow: visible;
 }
 .top-bar-content {
   height: 100%;
   width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
   position: relative;
 }
 .screen-title {
-  position: absolute;
-  bottom: 24px;
-  left: 24px;
+  flex-grow: 1;
   margin: 0;
   font-size: 32px;
-  line-height: 40px;
   font-weight: 600;
   letter-spacing: 0;
   transform-origin: left bottom;
@@ -31,9 +31,6 @@
   white-space: nowrap;
 }
 .top-actions {
-  position: absolute;
-  bottom: 20px; 
-  right: 20px;
   display: flex;
   align-items: center;
   gap: 8px;
