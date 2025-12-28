@@ -9,12 +9,15 @@ mod magic_mount;
 mod scanner;
 mod utils;
 
-use std::io::Write;
+use std::{io::Write, path::PathBuf};
 
 use anyhow::{Context, Result};
 use env_logger::Builder;
 use mimalloc::MiMalloc;
-use rustix::mount::{MountFlags, mount};
+use rustix::{
+    mount::{MountFlags, mount},
+    path::Arg,
+};
 
 use crate::config::Config;
 
@@ -89,7 +92,13 @@ fn main() -> Result<()> {
         std::fs::read_to_string("/proc/self/attr/current")?
     );
 
-    let tempdir = utils::select_temp_dir().context("failed to select temp dir automatically")?;
+    let tempdir = if let Some(p) = config.tmpfsdir {
+        PathBuf::from(p)
+    } else {
+        utils::select_temp_dir().context("failed to select temp dir automatically")?
+    };
+
+    let _ = ksu::try_umount::TMPFS.set(tempdir.as_str()?.to_string());
 
     utils::ensure_dir_exists(&tempdir)?;
 

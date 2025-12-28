@@ -13,6 +13,7 @@ pub struct Config {
     pub mountsource: String,
     pub verbose: bool,
     pub partitions: Vec<String>,
+    pub tmpfsdir: Option<String>,
     #[cfg(any(target_os = "linux", target_os = "android"))]
     pub umount: bool,
 }
@@ -31,6 +32,7 @@ impl Default for Config {
             moduledir: default_moduledir(),
             mountsource: default_mountsource(),
             verbose: false,
+            tmpfsdir: None,
             umount: false,
             partitions: Vec::new(),
         }
