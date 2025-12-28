@@ -111,13 +111,19 @@ pub fn collect_module_files(
     let module_root = module_dir;
     let mut has_file = false;
 
+    log::debug!("begin collect module files: {}", module_root.display());
+
     for entry in module_root.read_dir()?.flatten() {
         if !entry.file_type()?.is_dir() {
             continue;
         }
 
+        let id = entry.file_name().to_str().unwrap().to_string();
+        log::debug!("processing new module: {id}");
+
         let prop = entry.path().join("module.prop");
         if !prop.exists() {
+            log::debug!("skipped module {id}, because not found module.prop");
             continue;
         }
         let string = fs::read_to_string(prop)?;
@@ -133,11 +139,13 @@ pub fn collect_module_files(
             || entry.path().join(REMOVE_FILE_NAME).exists()
             || entry.path().join(SKIP_MOUNT_FILE_NAME).exists()
         {
+            log::debug!("skipped module {id}, due to disable/remove/skip_mount");
             continue;
         }
 
         let mod_system = entry.path().join("system");
         if !mod_system.is_dir() {
+            log::debug!("{id} due not modify system");
             continue;
         }
 
