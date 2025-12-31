@@ -15,18 +15,18 @@ importers:
         specifier: ^2.4.1
         version: 2.4.1
       kernelsu:
-        specifier: ^2.1.1
-        version: 2.1.1
+        specifier: ^3.0.0
+        version: 3.0.0
     devDependencies:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^6.2.1
-        version: 6.2.1(svelte@5.46.0)(vite@7.3.0)
+        version: 6.2.1(svelte@5.46.1)(vite@7.3.0)
       svelte:
-        specifier: ^5.46.0
-        version: 5.46.0
+        specifier: ^5.46.1
+        version: 5.46.1
       svelte-check:
         specifier: ^4.3.5
-        version: 4.3.5(picomatch@4.0.3)(svelte@5.46.0)(typescript@5.9.3)
+        version: 4.3.5(picomatch@4.0.3)(svelte@5.46.1)(typescript@5.9.3)
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -424,8 +424,8 @@ packages:
   is-reference@3.0.3:
     resolution: {integrity: sha512-ixkJoqQvAP88E6wLydLGGqCJsrFUnqoH6HnaczB8XmDH1oaWU+xxdptvikTgaEhtZ53Ky6YXiBuUI2WXLMCwjw==}
 
-  kernelsu@2.1.1:
-    resolution: {integrity: sha512-P5kC9E4NLzdZbU2O6AysMWC2P2a2TM2VU4ugKjh262bm6Q+FelKhcfdbJD/+ZI7m4OAtldb+8U2c7ZxvQvJRdQ==}
+  kernelsu@3.0.0:
+    resolution: {integrity: sha512-7BUHzVe7MOaYV6h9sbhPAf9hFnkXy4Ea1fC1wOF4vrwjExIcFi0OQLSphdZ0sebmIfb14/rgpMXagCYM8RmepQ==}
 
   lit-element@4.2.1:
     resolution: {integrity: sha512-WGAWRGzirAgyphK2urmYOV72tlvnxw7YfyLDgQ+OZnM9vQQBQnumQ7jUJe6unEzwGU3ahFOjuz1iz1jjrpCPuw==}
@@ -490,8 +490,8 @@ packages:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
 
-  svelte@5.46.0:
-    resolution: {integrity: sha512-ZhLtvroYxUxr+HQJfMZEDRsGsmU46x12RvAv/zi9584f5KOX7bUrEbhPJ7cKFmUvZTJXi/CFZUYwDC6M1FigPw==}
+  svelte@5.46.1:
+    resolution: {integrity: sha512-ynjfCHD3nP2el70kN5Pmg37sSi0EjOm9FgHYQdC4giWG/hzO3AatzXXJJgP305uIhGQxSufJLuYWtkY8uK/8RA==}
     engines: {node: '>=18'}
 
   tinyglobby@0.2.15:
@@ -739,22 +739,22 @@ snapshots:
     dependencies:
       acorn: 8.15.0
 
-  '@sveltejs/vite-plugin-svelte-inspector@5.0.1(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.46.0)(vite@7.3.0))(svelte@5.46.0)(vite@7.3.0)':
+  '@sveltejs/vite-plugin-svelte-inspector@5.0.1(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.46.1)(vite@7.3.0))(svelte@5.46.1)(vite@7.3.0)':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 6.2.1(svelte@5.46.0)(vite@7.3.0)
+      '@sveltejs/vite-plugin-svelte': 6.2.1(svelte@5.46.1)(vite@7.3.0)
       debug: 4.4.3
-      svelte: 5.46.0
+      svelte: 5.46.1
       vite: 7.3.0
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.46.0)(vite@7.3.0)':
+  '@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.46.1)(vite@7.3.0)':
     dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 5.0.1(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.46.0)(vite@7.3.0))(svelte@5.46.0)(vite@7.3.0)
+      '@sveltejs/vite-plugin-svelte-inspector': 5.0.1(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.46.1)(vite@7.3.0))(svelte@5.46.1)(vite@7.3.0)
       debug: 4.4.3
       deepmerge: 4.3.1
       magic-string: 0.30.21
-      svelte: 5.46.0
+      svelte: 5.46.1
       vite: 7.3.0
       vitefu: 1.1.1(vite@7.3.0)
     transitivePeerDependencies:
@@ -830,7 +830,7 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.8
 
-  kernelsu@2.1.1: {}
+  kernelsu@3.0.0: {}
 
   lit-element@4.2.1:
     dependencies:
@@ -906,19 +906,19 @@ snapshots:
 
   source-map-js@1.2.1: {}
 
-  svelte-check@4.3.5(picomatch@4.0.3)(svelte@5.46.0)(typescript@5.9.3):
+  svelte-check@4.3.5(picomatch@4.0.3)(svelte@5.46.1)(typescript@5.9.3):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       chokidar: 4.0.3
       fdir: 6.5.0(picomatch@4.0.3)
       picocolors: 1.1.1
       sade: 1.8.1
-      svelte: 5.46.0
+      svelte: 5.46.1
       typescript: 5.9.3
     transitivePeerDependencies:
       - picomatch
 
-  svelte@5.46.0:
+  svelte@5.46.1:
     dependencies:
       '@jridgewell/remapping': 2.3.5
       '@jridgewell/sourcemap-codec': 1.5.5
