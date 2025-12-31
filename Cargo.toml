@@ -31,7 +31,7 @@ regex-lite = "0.1.8"
 [build-dependencies]
 anyhow = "1.0.100"
 toml = "0.9.10"
-serde_json = "1.0.145"
+serde_json = "1.0.148"
 serde = { version = "1.0.228", features = ["derive"] }
 
 [profile.release]
