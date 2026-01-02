@@ -168,7 +168,7 @@ fn build() -> Result<()> {
             "metainstall.sh",
             "metauninstall.sh",
             "metamount.sh",
-            "daemonize-mmrs",
+            "loader",
             "uninstall.sh",
         ])?;
     } else {
