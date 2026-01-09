@@ -81,11 +81,14 @@ jobs:
           VERSION=$(grep "^version=" "$PROP_FILE" | cut -d= -f2 | sed 's/-.*//')
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           git-cliff "$PREV_TAG".."$VERSION" -o /tmp/changelog.md
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
+      - name: Create Release with GitHub CLI
         if: startsWith(github.ref, 'refs/tags/')
-        with:
-          draft: false
-          prerelease: false
-          files: output/*.zip
-          body_path: /tmp/changelog.md
+        run: |
+          gh release create ${{ github.ref_name }} \
+            --title "Release ${{ github.ref_name }}" \
+            --notes-file /tmp/changelog.md \
+            --draft=false \
+            --prerelease=false \
+            output/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
