@@ -8,9 +8,9 @@ import { createEffect, createMemo, createSignal } from "solid-js";
 
 import BottomActions from "../components/BottomActions";
 import ChipInput from "../components/ChipInput";
-import type { MagicConfig } from "../lib/api";
 import { ICONS } from "../lib/constants";
 import { store } from "../lib/store";
+import type { MagicConfig } from "../types";
 
 import "./ConfigTab.css";
 import "@material/web/textfield/outlined-text-field.js";

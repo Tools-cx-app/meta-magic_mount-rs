@@ -12,7 +12,7 @@ import type {
   MagicModule,
   StorageUsage,
   SystemInfo,
-} from "./api";
+} from "../types";
 import { API } from "./api";
 import { DEFAULT_CONFIG, DEFAULT_SEED } from "./constants";
 import { availableLanguages, locales } from "./i18n";

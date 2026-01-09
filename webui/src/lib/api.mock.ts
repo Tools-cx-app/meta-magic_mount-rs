@@ -4,21 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type {
-  DeviceStatus,
-  MagicConfig,
-  MagicModule,
-  StorageUsage,
-  SystemInfo,
-} from "./api";
+import type { APIType } from "../types";
 import { DEFAULT_CONFIG } from "./constants";
 
 const MOCK_DELAY = 600;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const MockAPI = {
-  loadConfig: async (): Promise<MagicConfig> => {
+export const MockAPI: APIType = {
+  loadConfig: async () => {
     await delay(MOCK_DELAY);
     console.log("[MockAPI] loadConfig");
 
@@ -30,12 +24,12 @@ export const MockAPI = {
     };
   },
 
-  saveConfig: async (config: MagicConfig) => {
+  saveConfig: async (config) => {
     await delay(MOCK_DELAY);
     console.log("[MockAPI] saveConfig:", config);
   },
 
-  scanModules: async (): Promise<MagicModule[]> => {
+  scanModules: async () => {
     await delay(MOCK_DELAY);
     console.log("[MockAPI] scanModules");
 
@@ -73,7 +67,7 @@ export const MockAPI = {
     ];
   },
 
-  getStorageUsage: async (): Promise<StorageUsage> => {
+  getStorageUsage: async () => {
     await delay(MOCK_DELAY);
 
     return {
@@ -85,7 +79,7 @@ export const MockAPI = {
     };
   },
 
-  getSystemInfo: async (): Promise<SystemInfo> => {
+  getSystemInfo: async () => {
     await delay(MOCK_DELAY);
 
     return {
@@ -96,7 +90,7 @@ export const MockAPI = {
     };
   },
 
-  getDeviceStatus: async (): Promise<DeviceStatus> => {
+  getDeviceStatus: async () => {
     await delay(MOCK_DELAY);
 
     return {
@@ -107,24 +101,24 @@ export const MockAPI = {
     };
   },
 
-  getVersion: async (): Promise<string> => {
+  getVersion: async () => {
     await delay(MOCK_DELAY);
 
     return "1.2.0-mock";
   },
 
-  reboot: async (): Promise<void> => {
+  reboot: async () => {
     console.log("[MockAPI] Reboot requested");
     // eslint-disable-next-line no-alert
     alert("Reboot requested (Mock)");
   },
 
-  openLink: async (url: string) => {
+  openLink: async (url) => {
     console.log("[MockAPI] Open link:", url);
     window.open(url, "_blank");
   },
 
-  fetchSystemColor: async (): Promise<string | null> => {
+  fetchSystemColor: async () => {
     await delay(500);
 
     return "#50a48f";

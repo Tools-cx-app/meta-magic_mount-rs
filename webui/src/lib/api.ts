@@ -4,51 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import type { APIType, MagicConfig } from "../types";
 import { MockAPI } from "./api.mock";
 import { DEFAULT_CONFIG, PATHS } from "./constants";
-
-export interface MagicConfig {
-  tempdir?: string;
-  mountsource: string;
-  umount: boolean;
-  partitions: string[];
-  [key: string]: any;
-}
-
-export interface MagicModule {
-  id: string;
-  name: string;
-  version: string;
-  author: string;
-  description: string;
-  is_mounted: boolean;
-  mode: string;
-  disabledByFlag?: boolean;
-  skipMount?: boolean;
-  rules: { default_mode: string; paths: Record<string, any> };
-}
-
-export interface SystemInfo {
-  kernel: string;
-  selinux: string;
-  mountBase: string;
-  activeMounts: string[];
-}
-
-export interface StorageUsage {
-  type: string | null;
-  percent: string;
-  size: string;
-  used: string;
-  hymofs_available: boolean;
-}
-
-export interface DeviceStatus {
-  model: string;
-  android: string;
-  kernel: string;
-  selinux: string;
-}
 
 interface KsuExecResult {
   errno: number;
@@ -171,8 +129,8 @@ function formatBytes(bytes: number, decimals = 2): string {
   return `${Number.parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
 }
 
-const RealAPI = {
-  loadConfig: async (): Promise<MagicConfig> => {
+const RealAPI: APIType = {
+  loadConfig: async () => {
     try {
       const { errno, stdout } = await ksuExec!(
         `[ -f "${PATHS.CONFIG}" ] && cat "${PATHS.CONFIG}" || echo ""`,
@@ -187,7 +145,7 @@ const RealAPI = {
     return DEFAULT_CONFIG;
   },
 
-  saveConfig: async (config: MagicConfig): Promise<void> => {
+  saveConfig: async (config) => {
     const content = serializeKvConfig(config);
     const cmd = `
       mkdir -p "$(dirname "${PATHS.CONFIG}")"
@@ -202,7 +160,7 @@ EOF_CONFIG
     }
   },
 
-  scanModules: async (): Promise<MagicModule[]> => {
+  scanModules: async () => {
     const cmd = "/data/adb/modules/magic_mount_rs/meta-mm scan --json";
     try {
       const { errno, stdout, stderr } = await ksuExec!(cmd);
@@ -235,7 +193,7 @@ EOF_CONFIG
     return [];
   },
 
-  getStorageUsage: async (): Promise<StorageUsage> => {
+  getStorageUsage: async () => {
     try {
       const { stdout } = await ksuExec!("df -k /data/adb/modules | tail -n 1");
       if (stdout) {
@@ -265,7 +223,7 @@ EOF_CONFIG
     };
   },
 
-  getSystemInfo: async (): Promise<SystemInfo> => {
+  getSystemInfo: async () => {
     try {
       const cmd = `
         echo "KERNEL:$(uname -r)"
@@ -300,7 +258,7 @@ EOF_CONFIG
     }
   },
 
-  getDeviceStatus: async (): Promise<DeviceStatus> => {
+  getDeviceStatus: async () => {
     const cmd = "getprop ro.product.model; getprop ro.build.version.release";
     const { stdout } = await ksuExec!(cmd);
     const lines = stdout ? stdout.split("\n") : [];
@@ -313,7 +271,7 @@ EOF_CONFIG
     };
   },
 
-  getVersion: async (): Promise<string> => {
+  getVersion: async () => {
     const cmd = "/data/adb/modules/magic_mount_rs/meta-mm version";
     try {
       const { errno, stdout } = await ksuExec!(cmd);
@@ -327,13 +285,13 @@ EOF_CONFIG
     return "Unknown";
   },
 
-  openLink: async (url: string) => {
+  openLink: async (url) => {
     const safeUrl = url.replace(/"/g, '\\"');
     const cmd = `am start -a android.intent.action.VIEW -d "${safeUrl}"`;
     await ksuExec!(cmd);
   },
 
-  fetchSystemColor: async (): Promise<string | null> => {
+  fetchSystemColor: async () => {
     try {
       const { stdout } = await ksuExec!(
         "settings get secure theme_customization_overlay_packages",
@@ -360,7 +318,7 @@ EOF_CONFIG
     return null;
   },
 
-  reboot: async (): Promise<void> => {
+  reboot: async () => {
     const cmd = "svc power reboot || reboot";
     await ksuExec!(cmd);
   },
