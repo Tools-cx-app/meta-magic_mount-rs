@@ -24,12 +24,10 @@ fn default_mountsource() -> String {
 
 impl fmt::Display for Config {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "mount source: {}", self.mountsource)?;
-        if self.partitions.is_empty() {
-            write!(f, "no extra partitions")
-        } else {
-            write!(f, "extra partitions is {:?}", self.partitions)
-        }
+        let toml = toml::to_string_pretty(self)
+            .context("Failed to serialize config to toml")
+            .unwrap();
+        write!(f, "{}", toml)
     }
 }
 
