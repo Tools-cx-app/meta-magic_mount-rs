@@ -23,7 +23,7 @@ where
     if !super::KSU.load(std::sync::atomic::Ordering::Relaxed) {
         return Ok(());
     }
-    
+
     if LAST.load(std::sync::atomic::Ordering::Relaxed) {
         return Ok(());
     }
