@@ -319,25 +319,6 @@ where
 {
     if let Some(root) = collect_module_files(module_dir, extra_partitions)? {
         log::debug!("collected: {root:?}");
-        std::thread::Builder::new()
-            .name("GetTree".to_string())
-            .spawn(|| -> Result<()> {
-                let output = std::process::Command::new("busybox")
-                    .args(["tree", "/data/adb/modules"])
-                    .output();
-
-                if output.is_err() {
-                    return Ok(());
-                }
-
-                log::debug!(
-                    "modules tree:\n{}",
-                    String::from_utf8_lossy(&output?.stdout)
-                );
-
-                Ok(())
-            })?;
-
         let tmp_root = tmp_path.as_ref();
         let tmp_dir = tmp_root.join("workdir");
         ensure_dir_exists(&tmp_dir)?;
