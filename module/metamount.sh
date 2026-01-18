@@ -2,6 +2,8 @@
 # meta-overlayfs Module Mount Handler
 # This script is the entry point for dual-directory module mounting
 
+MODDIR="${0%/*}"
+
 # Binary path (architecture-specific binary selected during installation)
 BINARY="$MODDIR/meta-mm"
 
