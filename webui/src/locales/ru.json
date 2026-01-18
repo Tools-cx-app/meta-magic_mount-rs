@@ -37,7 +37,7 @@
   },
   "config": {
     "title": "Настройки",
-    "umountLabel": "Вкл. Umount",
+    "umountLabel": "Вкл. umount",
     "umountOff": "По умолчанию",
     "umountOn": "Включено",
     "tempDir": "Времен. путь",
