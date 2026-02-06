@@ -29,8 +29,6 @@
     "androidLabel": "安卓版本",
     "kernelLabel": "内核版本",
     "selinuxLabel": "SELinux",
-    "copy": "复制调试信息",
-    "copySuccess": "日志已复制",
     "refresh": "刷新"
   },
   "config": {
@@ -38,7 +36,6 @@
     "umountLabel": "开启 Umount",
     "umountOff": "默认",
     "umountOn": "强制卸载",
-    "tempDir": "临时挂载点",
     "mountSource": "挂载源 (Mount Source)",
     "mountSourceDesc": "全局挂载源命名空间 (如 KSU)",
     "partitions": "额外分区",

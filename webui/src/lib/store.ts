@@ -49,7 +49,6 @@ function createStore() {
     size: "-",
     percent: "0%",
     type: null,
-    hymofs_available: false,
   });
   const [systemInfo, setSystemInfo] = createSignal<SystemInfo>({
     kernel: "-",
@@ -58,12 +57,10 @@ function createStore() {
     activeMounts: [],
   });
   const [activePartitions, setActivePartitions] = createSignal<string[]>([]);
-  const [diagnostics, setDiagnostics] = createSignal<any[]>([]);
 
   const [loadingConfig, setLoadingConfig] = createSignal(false);
   const [loadingModules, setLoadingModules] = createSignal(false);
   const [loadingStatus, setLoadingStatus] = createSignal(false);
-  const [loadingDiagnostics, setLoadingDiagnostics] = createSignal(false);
 
   const [savingConfig, setSavingConfig] = createSignal(false);
   const [savingModules] = createSignal(false);
@@ -71,7 +68,7 @@ function createStore() {
   const L = createMemo(() => locales[lang()] ?? locales.en);
 
   const modeStats = createMemo(() => {
-    const stats = { auto: 0, magic: 0, hymofs: 0 };
+    const stats = { auto: 0, magic: 0 };
     for (const m of modules()) {
       if (!m.is_mounted) {
         continue;
@@ -211,7 +208,6 @@ function createStore() {
 
   async function loadStatus() {
     setLoadingStatus(true);
-    setLoadingDiagnostics(true);
     try {
       const baseDevice = await API.getDeviceStatus();
       setVersion(await API.getVersion());
@@ -219,7 +215,6 @@ function createStore() {
       const sysInfo = await API.getSystemInfo();
       setSystemInfo(sysInfo);
       setActivePartitions(sysInfo.activeMounts || []);
-      setDiagnostics([]);
 
       setDevice({
         ...baseDevice,
@@ -232,7 +227,6 @@ function createStore() {
       }
     } catch {}
     setLoadingStatus(false);
-    setLoadingDiagnostics(false);
   }
 
   async function rebootDevice() {
@@ -311,9 +305,6 @@ function createStore() {
     get activePartitions() {
       return activePartitions();
     },
-    get diagnostics() {
-      return diagnostics();
-    },
     loadStatus,
     rebootDevice,
 
@@ -322,7 +313,6 @@ function createStore() {
         config: loadingConfig(),
         modules: loadingModules(),
         status: loadingStatus(),
-        diagnostics: loadingDiagnostics(),
       };
     },
     get saving() {

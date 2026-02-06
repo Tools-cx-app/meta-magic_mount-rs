@@ -75,7 +75,6 @@ export const MockAPI: APIType = {
       percent: "42%",
       size: "118 GB",
       used: "50 GB",
-      hymofs_available: false,
     };
   },
 

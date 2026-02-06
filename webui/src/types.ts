@@ -1,5 +1,4 @@
 export interface MagicConfig {
-  tempdir?: string;
   mountsource: string;
   umount: boolean;
   partitions: string[];
@@ -30,7 +29,6 @@ export interface StorageUsage {
   percent: string;
   size: string;
   used: string;
-  hymofs_available: boolean;
 }
 
 export interface DeviceStatus {

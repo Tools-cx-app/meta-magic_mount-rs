@@ -81,11 +81,6 @@ function parseKvConfig(text: string): MagicConfig {
       value = stripQuotes(value);
 
       switch (key) {
-        case "tempdir": {
-          result.tempdir = value;
-
-          break;
-        }
         case "mountsource": {
           result.mountsource = value;
 
@@ -111,9 +106,6 @@ function serializeKvConfig(cfg: MagicConfig): string {
   const q = (s: string) => `"${s}"`;
   const lines = ["# Magic Mount Configuration File", ""];
 
-  if (cfg.tempdir) {
-    lines.push(`tempdir = ${q(cfg.tempdir)}`);
-  }
   lines.push(`mountsource = ${q(cfg.mountsource)}`);
   lines.push(`umount = ${cfg.umount}`);
   const parts = cfg.partitions.map((p) => q(p)).join(", ");
@@ -213,7 +205,6 @@ EOF_CONFIG
             percent,
             size: formatBytes(total),
             used: formatBytes(used),
-            hymofs_available: false,
           };
         }
       }
@@ -224,7 +215,6 @@ EOF_CONFIG
       used: "-",
       percent: "0%",
       type: null,
-      hymofs_available: false,
     };
   },
 

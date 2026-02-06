@@ -32,7 +32,6 @@ export default function StatusTab() {
       `Kernel: ${store.device.kernel}\n` +
       `SELinux: ${store.device.selinux}`;
     navigator.clipboard.writeText(info);
-    store.showToast(store.L.status.copySuccess, "success");
   }
 
   const [showRebootConfirm, setShowRebootConfirm] = createSignal(false);
@@ -108,16 +107,6 @@ export default function StatusTab() {
             </div>
           </div>
           <div class="hero-actions">
-            <md-icon-button
-              on:click={copyDebugInfo}
-              prop:title={store.L.status.copy}
-            >
-              <md-icon>
-                <svg viewBox="0 0 24 24">
-                  <path d={ICONS.copy} />
-                </svg>
-              </md-icon>
-            </md-icon-button>
           </div>
         </div>
 

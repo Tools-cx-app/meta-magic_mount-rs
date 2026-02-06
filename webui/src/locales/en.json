@@ -31,8 +31,6 @@
     "androidLabel": "Android",
     "kernelLabel": "Kernel",
     "selinuxLabel": "SELinux",
-    "copy": "Copy Info",
-    "copySuccess": "Copied to clipboard",
     "refresh": "Refresh"
   },
   "config": {
@@ -40,7 +38,6 @@
     "umountLabel": "Enable Unmount",
     "umountOff": "Default",
     "umountOn": "Enabled",
-    "tempDir": "Temp Directory",
     "mountSource": "Mount Source",
     "mountSourceDesc": "Global mount source namespace (e.g. KSU)",
     "partitions": "Extra Partitions",

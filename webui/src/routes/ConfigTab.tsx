@@ -1,9 +1,3 @@
-/**
- * Copyright 2025 Magic Mount-rs Authors
- *
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-
 import { createEffect, createMemo, createSignal } from "solid-js";
 
 import BottomActions from "../components/BottomActions";
@@ -18,7 +12,10 @@ import "@material/web/button/filled-button.js";
 import "@material/web/iconbutton/filled-tonal-icon-button.js";
 import "@material/web/iconbutton/icon-button.js";
 import "@material/web/icon/icon.js";
-import "@material/web/ripple/ripple.js";
+import "@material/web/list/list.js";
+import "@material/web/list/list-item.js";
+import "@material/web/divider/divider.js";
+import "@material/web/switch/switch.js";
 
 export default function ConfigTab() {
   const [initialConfigStr, setInitialConfigStr] = createSignal("");
@@ -27,7 +24,6 @@ export default function ConfigTab() {
     if (!initialConfigStr()) {
       return false;
     }
-
     return JSON.stringify(store.config) !== initialConfigStr();
   });
 
@@ -100,11 +96,6 @@ export default function ConfigTab() {
                 }
                 class="full-width-field"
               >
-                <md-icon slot="leading-icon">
-                  <svg viewBox="0 0 24 24">
-                    <path d={ICONS.ksu} />
-                  </svg>
-                </md-icon>
               </md-outlined-text-field>
             </div>
           </div>
@@ -136,44 +127,50 @@ export default function ConfigTab() {
         </section>
 
         <section class="config-group">
-          <div class="options-grid">
-            <button
-              class={`option-tile clickable tertiary ${store.config.umount ? "active" : ""}`}
-              onClick={() => toggle("umount")}
-            >
-              <md-ripple />
-              <div class="tile-top">
-                <div class="tile-icon">
+          <div class="config-card no-padding-v">
+            <md-list>
+              <md-list-item
+                prop:type="button"
+                on:click={() => toggle("umount")}
+              >
+                <div slot="start">
                   <md-icon>
-                    <svg viewBox="0 0 24 24">
-                      <path d={ICONS.anchor} />
-                    </svg>
+                    <svg viewBox="0 0 24 24"><path d={ICONS.anchor} /></svg>
                   </md-icon>
                 </div>
-              </div>
-              <div class="tile-bottom">
-                <span class="tile-label">{store.L.config.umountLabel}</span>
-              </div>
-            </button>
+                <div slot="headline">{store.L.config.umountLabel}</div>
+                <div slot="supporting-text">
+                  {store.config.umount ? store.L.config.umountOn : store.L.config.umountOff}
+                </div>
+                <md-switch
+                  slot="end"
+                  prop:selected={store.config.umount}
+                  prop:touch-target="wrapper"
+                />
+              </md-list-item>
 
-            <button
-              class={`option-tile clickable secondary ${store.fixBottomNav ? "active" : ""}`}
-              onClick={store.toggleBottomNavFix}
-            >
-              <md-ripple />
-              <div class="tile-top">
-                <div class="tile-icon">
+              <md-divider />
+
+              <md-list-item
+                prop:type="button"
+                on:click={store.toggleBottomNavFix}
+              >
+                <div slot="start">
                   <md-icon>
-                    <svg viewBox="0 0 24 24">
-                      <path d="M21 5v14H3V5h18zm0-2H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8 17h5v-6H8v6zm0-8h5V7H8v2zM6 17h2V7H6v10zm12-6h-2v6h2v-6zm0-4h-2v2h2V7z" />
-                    </svg>
+                    <svg viewBox="0 0 24 24"><path d="M21 5v14H3V5h18zm0-2H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8 17h5v-6H8v6zm0-8h5V7H8v2zM6 17h2V7H6v10zm12-6h-2v6h2v-6zm0-4h-2v2h2V7z" /></svg>
                   </md-icon>
                 </div>
-              </div>
-              <div class="tile-bottom">
-                <span class="tile-label">{store.L.config.fixBottomNav}</span>
-              </div>
-            </button>
+                <div slot="headline">{store.L.config.fixBottomNav}</div>
+                <div slot="supporting-text">
+                   {store.L.config.webuiLabel}
+                </div>
+                <md-switch
+                  slot="end"
+                  prop:selected={store.fixBottomNav}
+                  prop:touch-target="wrapper"
+                />
+              </md-list-item>
+            </md-list>
           </div>
         </section>
       </div>

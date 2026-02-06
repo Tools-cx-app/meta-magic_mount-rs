@@ -31,8 +31,6 @@
     "androidLabel": "Android",
     "kernelLabel": "Ядро",
     "selinuxLabel": "SELinux",
-    "copy": "Скопировать информацию",
-    "copySuccess": "Скопировано в буфер обмена",
     "refresh": "Обновить"
   },
   "config": {
@@ -40,7 +38,6 @@
     "umountLabel": "Вкл. umount",
     "umountOff": "По умолчанию",
     "umountOn": "Включено",
-    "tempDir": "Времен. путь",
     "mountSource": "Источник монтирования",
     "mountSourceDesc": "Глобальное пространство имен монтирования (например KSU)",
     "partitions": "Доп. разделы",
