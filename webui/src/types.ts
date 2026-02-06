@@ -47,6 +47,5 @@ export interface APIType {
   getDeviceStatus: () => Promise<DeviceStatus>;
   getVersion: () => Promise<string>;
   openLink: (url: string) => Promise<void>;
-  fetchSystemColor: () => Promise<string | null>;
   reboot: () => Promise<void>;
 }

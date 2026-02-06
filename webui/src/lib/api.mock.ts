@@ -116,10 +116,4 @@ export const MockAPI: APIType = {
     console.log("[MockAPI] Open link:", url);
     window.open(url, "_blank");
   },
-
-  fetchSystemColor: async () => {
-    await delay(500);
-
-    return "#50a48f";
-  },
 };

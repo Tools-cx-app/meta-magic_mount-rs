@@ -286,33 +286,6 @@ EOF_CONFIG
     await ksuExec!(cmd);
   },
 
-  fetchSystemColor: async () => {
-    try {
-      const { stdout } = await ksuExec!(
-        "settings get secure theme_customization_overlay_packages",
-      );
-      if (stdout) {
-        const match =
-          /["']?android\.theme\.customization\.system_palette["']?\s*:\s*["']?#?([0-9a-f]{6,8})["']?/i.exec(
-            stdout,
-          ) ??
-          /["']?source_color["']?\s*:\s*["']?#?([0-9a-f]{6,8})["']?/i.exec(
-            stdout,
-          );
-        if (match?.[1]) {
-          let hex = match[1];
-          if (hex.length === 8) {
-            hex = hex.slice(2);
-          }
-
-          return `#${hex}`;
-        }
-      }
-    } catch {}
-
-    return null;
-  },
-
   reboot: async () => {
     const cmd = "svc power reboot || reboot";
     await ksuExec!(cmd);

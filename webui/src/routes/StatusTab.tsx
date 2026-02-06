@@ -106,8 +106,7 @@ export default function StatusTab() {
               </Show>
             </div>
           </div>
-          <div class="hero-actions">
-          </div>
+          <div class="hero-actions"></div>
         </div>
 
         <div class="stats-row">

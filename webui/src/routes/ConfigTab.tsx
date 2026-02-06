@@ -95,8 +95,7 @@ export default function ConfigTab() {
                   )
                 }
                 class="full-width-field"
-              >
-              </md-outlined-text-field>
+              ></md-outlined-text-field>
             </div>
           </div>
         </section>
@@ -135,17 +134,21 @@ export default function ConfigTab() {
               >
                 <div slot="start">
                   <md-icon>
-                    <svg viewBox="0 0 24 24"><path d={ICONS.anchor} /></svg>
+                    <svg viewBox="0 0 24 24">
+                      <path d={ICONS.anchor} />
+                    </svg>
                   </md-icon>
                 </div>
                 <div slot="headline">{store.L.config.umountLabel}</div>
                 <div slot="supporting-text">
-                  {store.config.umount ? store.L.config.umountOn : store.L.config.umountOff}
+                  {store.config.umount
+                    ? store.L.config.umountOn
+                    : store.L.config.umountOff}
                 </div>
                 <md-switch
                   slot="end"
                   prop:selected={store.config.umount}
-                  prop:touch-target="wrapper"
+                  attr:touch-target="wrapper"
                 />
               </md-list-item>
 
@@ -157,17 +160,17 @@ export default function ConfigTab() {
               >
                 <div slot="start">
                   <md-icon>
-                    <svg viewBox="0 0 24 24"><path d="M21 5v14H3V5h18zm0-2H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8 17h5v-6H8v6zm0-8h5V7H8v2zM6 17h2V7H6v10zm12-6h-2v6h2v-6zm0-4h-2v2h2V7z" /></svg>
+                    <svg viewBox="0 0 24 24">
+                      <path d="M21 5v14H3V5h18zm0-2H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8 17h5v-6H8v6zm0-8h5V7H8v2zM6 17h2V7H6v10zm12-6h-2v6h2v-6zm0-4h-2v2h2V7z" />
+                    </svg>
                   </md-icon>
                 </div>
                 <div slot="headline">{store.L.config.fixBottomNav}</div>
-                <div slot="supporting-text">
-                   {store.L.config.webuiLabel}
-                </div>
+                <div slot="supporting-text">{store.L.config.webuiLabel}</div>
                 <md-switch
                   slot="end"
                   prop:selected={store.fixBottomNav}
-                  prop:touch-target="wrapper"
+                  attr:touch-target="wrapper"
                 />
               </md-list-item>
             </md-list>

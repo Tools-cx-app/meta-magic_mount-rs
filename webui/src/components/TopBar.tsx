@@ -16,37 +16,6 @@ export default function TopBar() {
   let langButtonRef: HTMLButtonElement | undefined;
   let menuRef: HTMLDivElement | undefined;
 
-  function toggleTheme() {
-    let nextTheme;
-    let toastMsg;
-    const common = store.L.common;
-
-    if (store.theme === "auto") {
-      nextTheme = "light";
-      toastMsg = common.themeLight;
-    } else if (store.theme === "light") {
-      nextTheme = "dark";
-      toastMsg = common.themeDark;
-    } else {
-      nextTheme = "auto";
-      toastMsg = common.themeAuto;
-    }
-
-    store.setTheme(nextTheme);
-    store.showToast(toastMsg, "info");
-  }
-
-  function getThemeIcon() {
-    if (store.theme === "auto") {
-      return ICONS.auto_mode;
-    }
-    if (store.theme === "light") {
-      return ICONS.light_mode;
-    }
-
-    return ICONS.dark_mode;
-  }
-
   function setLang(code: string) {
     store.setLang(code);
     setShowLangMenu(false);
@@ -74,16 +43,6 @@ export default function TopBar() {
       <div class="top-bar-content">
         <h1 class="screen-title">{store.L.common.appName}</h1>
         <div class="top-actions">
-          <button
-            class="btn-icon"
-            onClick={toggleTheme}
-            title={store.L.common.theme}
-          >
-            <svg viewBox="0 0 24 24">
-              <path d={getThemeIcon()} fill="currentColor" />
-            </svg>
-          </button>
-
           <button
             class="btn-icon"
             ref={langButtonRef}

@@ -14,17 +14,11 @@ import type {
   SystemInfo,
 } from "../types";
 import { API } from "./api";
-import { DEFAULT_CONFIG, DEFAULT_SEED } from "./constants";
+import { DEFAULT_CONFIG } from "./constants";
 import { availableLanguages, locales } from "./i18n";
-import { Monet } from "./theme";
-
-let darkModeQuery: MediaQueryList;
 
 function createStore() {
-  const [theme, setThemeSignal] = createSignal("auto");
-  const [isSystemDark, setIsSystemDark] = createSignal(false);
   const [lang, setLangSignal] = createSignal("en");
-  const [seed, setSeed] = createSignal(DEFAULT_SEED);
   const [toast, setToast] = createSignal({
     id: "init",
     text: "",
@@ -95,12 +89,6 @@ function createStore() {
     }, 3000);
   }
 
-  function setTheme(t: string) {
-    setThemeSignal(t);
-    localStorage.setItem("mm-theme", t);
-    applyTheme();
-  }
-
   function toggleBottomNavFix() {
     setFixBottomNav((prev) => {
       const newValue = !prev;
@@ -108,15 +96,6 @@ function createStore() {
 
       return newValue;
     });
-  }
-
-  function applyTheme() {
-    const isDark = theme() === "auto" ? isSystemDark() : theme() === "dark";
-    document.documentElement.setAttribute(
-      "data-theme",
-      isDark ? "dark" : "light",
-    );
-    Monet.apply(seed(), isDark);
   }
 
   function setLang(code: string) {
@@ -128,33 +107,10 @@ function createStore() {
     const savedLang = localStorage.getItem("mm-lang") ?? "en";
     setLangSignal(savedLang);
 
-    const savedTheme = localStorage.getItem("mm-theme");
-    if (savedTheme) {
-      setThemeSignal(savedTheme);
-    }
-
     const savedNavFix = localStorage.getItem("mm-fix-nav");
     if (savedNavFix === "true") {
       setFixBottomNav(true);
     }
-
-    if (!darkModeQuery && typeof window !== "undefined") {
-      darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      setIsSystemDark(darkModeQuery.matches);
-      darkModeQuery.addEventListener("change", (e) => {
-        setIsSystemDark(e.matches);
-        applyTheme();
-      });
-    }
-
-    try {
-      const sysColor = await API.fetchSystemColor();
-      if (sysColor) {
-        setSeed(sysColor);
-      }
-    } catch {}
-
-    applyTheme();
 
     await Promise.all([loadConfig(), loadStatus()]);
   }
@@ -238,17 +194,8 @@ function createStore() {
   }
 
   return {
-    get theme() {
-      return theme();
-    },
-    get isSystemDark() {
-      return isSystemDark();
-    },
     get lang() {
       return lang();
-    },
-    get seed() {
-      return seed();
     },
     get availableLanguages() {
       return availableLanguages;
@@ -263,7 +210,6 @@ function createStore() {
       return toasts();
     },
     showToast,
-    setTheme,
     setLang,
     init,
 
