@@ -5,7 +5,6 @@ pub const MODULE_PATH: &str = "/data/adb/modules/";
 
 // utils
 pub const SELINUX_XATTR: &str = "security.selinux";
-pub const TMPFS_CANDIDATES: &[&str] = &["/debug_ramdisk", "/patch_hw", "/oem", "/root", "/sbin"];
 // magic_mount
 pub const DISABLE_FILE_NAME: &str = "disable";
 pub const REMOVE_FILE_NAME: &str = "remove";

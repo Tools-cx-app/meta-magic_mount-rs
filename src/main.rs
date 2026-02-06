@@ -9,9 +9,9 @@ mod magic_mount;
 mod scanner;
 mod utils;
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use mimalloc::MiMalloc;
 use rustix::{
     mount::{MountFlags, mount},
@@ -94,11 +94,7 @@ fn main() -> Result<()> {
         std::fs::read_to_string("/proc/self/attr/current")?
     );
 
-    let tempdir = if let Some(p) = config.tmpfsdir {
-        PathBuf::from(p)
-    } else {
-        utils::select_temp_dir().context("failed to select temp dir automatically")?
-    };
+    let tempdir = utils::generate_tmp();
 
     let _ = utils::ksucalls::try_umount::TMPFS.set(tempdir.as_str()?.to_string());
 
