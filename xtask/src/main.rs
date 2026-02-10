@@ -44,7 +44,6 @@ fn main() -> Result<()> {
     }
 
     match args[1].as_str() {
-        "build" | "b" => build()?,
         "update" | "u" => update()?,
         _ => {}
     }
@@ -82,34 +81,6 @@ fn cal_git_code() -> Result<i32> {
     )?
     .trim()
     .parse::<i32>()?)
-}
-
-fn update() -> Result<()> {
-    let toml = fs::read_to_string("Cargo.toml")?;
-    let data: CargoConfig = toml::from_str(&toml)?;
-
-    //build()?;
-
-    let json = UpdateJson {
-        versioncode: cal_version_code(&data.package.version)?,
-        // Fixed typo here as well
-        version: data.package.version.clone(),
-        zipurl: format!(
-            "https://github.com/Tools-cx-app/meta-magic_mount/releases/download/v{}/magic_mount_rs-{}-{}.zip",
-            data.package.version.clone(),
-            &data.package.version,
-            &cal_git_code()?
-        ),
-        changelog: String::from(
-            "https://github.com/Tools-cx-app/meta-magic_mount/raw/master/update/changelog.md",
-        ),
-    };
-
-    let raw_json = serde_json::to_string_pretty(&json)?;
-
-    fs::write("update/update.json", raw_json)?;
-
-    Ok(())
 }
 
 fn build() -> Result<()> {
