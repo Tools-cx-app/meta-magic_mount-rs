@@ -7,7 +7,6 @@
   display: flex;
   background-color: var(--md-sys-color-surface-container);
   border-top: none;
-  box-shadow: none;
   padding-bottom: max(16px, var(--safe-area-inset-bottom, 0px));
   padding-top: 16px;
   padding-left: 24px;

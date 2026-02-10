@@ -74,7 +74,6 @@
   z-index: 1000;
   min-width: 200px;
   overflow: hidden;
-  box-shadow: var(--md-sys-elevation-2);
 }
 .menu-item {
   width: 100%;
