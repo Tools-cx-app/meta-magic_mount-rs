@@ -94,6 +94,9 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
+          COMMIT_MESSAGE: ${{ format('{0}', github.event.head_commit.message) }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+          RUN_ID: ${{ github.run_number }}
         run: |
           if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ] || [ -z "${BOT_CI_SESSION:-}" ]; then
             exit 0
