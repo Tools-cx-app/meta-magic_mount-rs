@@ -1,6 +1,5 @@
 /**
  * Copyright 2025 Magic Mount-rs Authors
- *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -12,10 +11,9 @@ import { ICONS } from "../lib/constants";
 import { store } from "../lib/store";
 
 import "./ModulesTab.css";
-import "@material/web/textfield/outlined-text-field.js";
-import "@material/web/icon/icon.js";
-import "@material/web/ripple/ripple.js";
 import "@material/web/iconbutton/filled-tonal-icon-button.js";
+import "@material/web/button/filled-button.js";
+import "@material/web/icon/icon.js";
 
 export default function ModulesTab() {
   const [searchQuery, setSearchQuery] = createSignal("");
@@ -30,7 +28,6 @@ export default function ModulesTab() {
       const q = searchQuery().toLowerCase();
       const matchSearch =
         m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q);
-
       return matchSearch;
     }),
   );
@@ -39,160 +36,124 @@ export default function ModulesTab() {
     setExpandedId(expandedId() === id ? null : id);
   }
 
-  function handleKeydown(e: KeyboardEvent, id: string) {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      toggleExpand(id);
-    }
+  function getModeLabel(isMounted: boolean) {
+    return isMounted ? "Mounted" : "Unmounted";
   }
 
-  function handleInput(e: Event) {
-    setSearchQuery((e.target as HTMLInputElement).value);
+  function getModeClass(isMounted: boolean) {
+    return isMounted ? "mode-mounted" : "mode-unmounted";
   }
 
   return (
     <>
-      <div class="modules-container">
-        <div class="desc-card">
-          <div class="desc-icon">
-            <md-icon>
-              <svg viewBox="0 0 24 24">
-                <path d={ICONS.info} />
-              </svg>
-            </md-icon>
+      <div class="modules-page">
+        <div class="header-section">
+          <div class="search-bar">
+            <svg class="search-icon" viewBox="0 0 24 24">
+              <path d={ICONS.search} />
+            </svg>
+            <input
+              type="text"
+              class="search-input"
+              placeholder={store.L.modules.searchPlaceholder}
+              value={searchQuery()}
+              onInput={(e) => setSearchQuery(e.currentTarget.value)}
+            />
           </div>
-          <p class="desc-text">{store.L.modules.desc}</p>
         </div>
 
-        <div class="search-section">
-          <md-outlined-text-field
-            prop:label={store.L.modules.searchPlaceholder}
-            prop:value={searchQuery()}
-            on:input={handleInput}
-            class="search-field"
-          >
-            <md-icon slot="leading-icon">
-              <svg viewBox="0 0 24 24">
-                <path d={ICONS.search} />
-              </svg>
-            </md-icon>
-          </md-outlined-text-field>
-        </div>
-
-        <Show
-          when={!store.loading.modules}
-          fallback={
-            <div class="modules-list">
-              <For each={Array.from({ length: 5 })}>
-                {() => (
-                  <div class="module-card skeleton-card">
-                    <Skeleton width="60%" height="20px" />
-                    <Skeleton width="40%" height="14px" />
-                  </div>
-                )}
-              </For>
-            </div>
-          }
-        >
+        <div class="modules-list">
           <Show
-            when={filteredModules().length > 0}
+            when={!store.loading.modules}
             fallback={
-              <div class="empty-state">
-                <div class="empty-icon">
-                  <md-icon>
-                    <svg viewBox="0 0 24 24">
-                      <path d={ICONS.modules} />
-                    </svg>
-                  </md-icon>
-                </div>
-                <p>
-                  {store.modules.length === 0
-                    ? store.L.modules.empty
-                    : "No matching modules"}
-                </p>
-              </div>
+              <For each={Array(6)}>
+                {() => <Skeleton height="64px" borderRadius="16px" />}
+              </For>
             }
           >
-            <div class="modules-list">
+            <Show
+              when={filteredModules().length > 0}
+              fallback={
+                <div class="empty-state">
+                  <div class="empty-icon">
+                    <md-icon>
+                      <svg viewBox="0 0 24 24">
+                        <path d={ICONS.modules} />
+                      </svg>
+                    </md-icon>
+                  </div>
+                  <p>
+                    {store.modules.length === 0
+                      ? store.L.modules.empty
+                      : "No matching modules"}
+                  </p>
+                </div>
+              }
+            >
               <For each={filteredModules()}>
                 {(mod) => (
                   <div
-                    class={`module-card ${expandedId() === mod.id ? "expanded" : ""} ${
-                      mod.is_mounted ? "" : "unmounted"
-                    }`}
+                    class={`module-card ${expandedId() === mod.id ? "expanded" : ""} ${!mod.is_mounted ? "unmounted" : ""}`}
                   >
                     <div
-                      class="card-main clickable"
+                      class="module-header"
                       onClick={() => toggleExpand(mod.id)}
-                      onKeyDown={(e) => handleKeydown(e, mod.id)}
                       role="button"
-                      tabindex="0"
+                      tabIndex={0}
+                      onKeyDown={(e) =>
+                        (e.key === "Enter" || e.key === " ") &&
+                        toggleExpand(mod.id)
+                      }
                     >
-                      <md-ripple />
                       <div class="module-info">
-                        <span class="module-name">{mod.name}</span>
-                        <div class="module-meta-row">
+                        <div class="module-name">{mod.name}</div>
+                        <div class="module-meta">
                           <span class="module-id">{mod.id}</span>
-                          <span class="version-tag">{mod.version}</span>
+                          <span class="version-badge">{mod.version}</span>
                         </div>
                       </div>
-
-                      <div
-                        class={`status-badge ${mod.is_mounted ? "magic" : "skipped"}`}
-                      >
-                        {mod.is_mounted ? "Magic" : "Skipped"}
+                      <div class={`mode-indicator ${getModeClass(mod.is_mounted)}`}>
+                        {getModeLabel(mod.is_mounted)}
                       </div>
                     </div>
 
-                    <Show when={expandedId() === mod.id}>
-                      <div class="detail-row">
-                        <span class="detail-label">
-                          {store.L.modules.authorLabel}
-                        </span>
-                        <span class="detail-value">
-                          {mod.author || store.L.modules.unknownLabel}
-                        </span>
-                      </div>
-                      <div class="detail-row description">
-                        <span class="detail-label">
-                          {store.L.modules.descriptionLabel}
-                        </span>
-                        <p class="detail-value">
-                          {mod.description ||
-                            store.L.modules.noDescriptionLabel}
-                        </p>
-                      </div>
-                      <Show when={!mod.is_mounted}>
-                        <div class="status-alert">
-                          <md-icon class="alert-icon">
-                            <svg viewBox="0 0 24 24">
-                              <path d={ICONS.info} />
-                            </svg>
-                          </md-icon>
-                          <span>
-                            {mod.disabledByFlag
-                              ? "Disabled via Manager or 'disable' file."
-                              : mod.skipMount
-                                ? "Skipped via 'skip_mount' flag."
-                                : "Not mounted."}
-                          </span>
+                    <div class="module-body-wrapper">
+                      <div class="module-body-inner">
+                        <div class="module-body-content">
+                          <div class="body-section">
+                            <div class="section-label">
+                              {store.L.modules.descriptionLabel}
+                            </div>
+                            <p class="module-desc">
+                              {mod.description ||
+                                store.L.modules.noDescriptionLabel}
+                            </p>
+                          </div>
+
+                          <div class="body-section">
+                            <div class="section-label">
+                              {store.L.modules.authorLabel}
+                            </div>
+                            <div class="module-author">
+                              {mod.author || store.L.modules.unknownLabel}
+                            </div>
+                          </div>
                         </div>
-                      </Show>
-                    </Show>
+                      </div>
+                    </div>
                   </div>
                 )}
               </For>
-            </div>
+            </Show>
           </Show>
-        </Show>
+        </div>
       </div>
 
       <BottomActions>
         <div class="spacer" />
         <md-filled-tonal-icon-button
-          on:click={() => store.loadModules()}
-          prop:disabled={store.loading.modules}
-          prop:title={store.L.modules.reload}
+          onClick={() => store.loadModules()}
+          title={store.L.modules.reload}
         >
           <md-icon>
             <svg viewBox="0 0 24 24">
