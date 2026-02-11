@@ -1,19 +1,17 @@
 <div align="center">
 
-# Magic Mount Metamodule
+# Magic Mount Metamodule Fork
 
 [![Telegram][telegram-badge]][telegram-url]
 
-[English](README_en.md) [Русский](README_ru.md)
+[English](README_en.md)
 
 </div>
 
 [telegram-badge]: https://img.shields.io/badge/Group-blue?style=for-the-badge&logo=telegram&label=Telegram
-[telegram-url]: https://t.me/mmrs_ci
+[telegram-url]: https://t.me/EdLSPesodITed
 
 为 KernelSU 提供 Systemless 修改功能。
-
-作者由于学业原因，更新会放缓
 
 ---
 
@@ -25,6 +23,12 @@
 
 ```toml
 mountsource = "KSU"
+umount = false
+partitions = []
+```
+
+```toml
+mountsource = "APatch"
 umount = false
 partitions = []
 ```
@@ -68,11 +72,12 @@ cargo xtask b
 
 构建产物将位于：
 
-* output/magic_mount_rs.zip
+* output/magic_mount_rs-`VersionName`-`VersionCode`.zip
 
 ## 致谢
 
 *  [5ec1cff/KernelSU](https://github.com/5ec1cff/KernelSU/blob/52f1f575ce2bd0ca46ebf644fd00a838af9f344e/userspace/ksud/src/magic_mount.rs)：原始实现
+*  [Tools-cx-app/meta-magic_mount-rs](https://github.com/Tools-cx-app/meta-magic_mount-rs/)：原始仓库
 * [YuzakiKokuban](https://github.com/YuzakiKokuban) Webui修改
 
 ## 许可证
