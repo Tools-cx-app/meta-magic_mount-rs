@@ -43,6 +43,11 @@ jobs:
           components: rustfmt, clippy
       - name: Check style
         run: cargo fmt --message-format=json --all
+  webui-check:
+    uses: so1ve/workflows/.github/workflows/conventional-ci.yml@v1
+    with:
+      skip-test: true
+      working-directory: webui
   shellcheck:
     runs-on: ubuntu-latest
     steps:
