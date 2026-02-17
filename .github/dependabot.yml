@@ -27,9 +27,6 @@ updates:
       crates:
         patterns:
           - "*"
-    ignore:
-      - dependency-name: "lodash"
-      - dependency-name: "diff"
   - package-ecosystem: "github-actions" # See documentation for possible values
      directory: "/" # Location of package manifests
      schedule:
