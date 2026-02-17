@@ -9,11 +9,11 @@ description = "An implementation of a metamodule using Magic Mount, Based on MKS
 authors = ["7a72", "Tools-cx-app", "YuzakiKokuban"]
 license = "GPL-3.0"
 readme = "README.md"
-repository = "https://github.com/Tools-cx-app/meta-magic_mount/"
+repository = "https://github.com/Tools-cx-app/meta-magic_mount-rs/"
 
 [package.metadata.magic_mount_rs]
 name = "Magic Mount-rs"
-update = "https://github.com/Tools-cx-app/meta-magic_mount/raw/master/update/update.json"
+update = "https://github.com/Tools-cx-app/meta-magic_mount-rs/raw/master/update/update.json"
 
 [dependencies]
 anyhow = "1"
