@@ -45,7 +45,7 @@ strip = true
 android_logger = "0.15.1"
 
 [target.'cfg(any(target_os = "linux", target_os = "android"))'.dependencies]
-ksu = { git = "https://github.com/Tools-cx-app/ksu.git", version = "0.1.1", tag = "v0.1.1" }
+ksu = { git = "https://github.com/Tools-cx-app/ksu.git", version = "0.2.0" }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 env_logger = "0.11.9"

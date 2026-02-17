@@ -341,8 +341,10 @@ where
         #[cfg(any(target_os = "linux", target_os = "android"))]
         {
             if crate::utils::ksucalls::KSU.load(std::sync::atomic::Ordering::Relaxed) {
+                use ksu::TryUmountFlags;
+
                 let mut ksu = LIST.lock().unwrap();
-                ksu.flags(2);
+                ksu.flags(TryUmountFlags::MNT_DETACH);
                 ksu.format_msg(|p| format!("umount {p:?} successful"));
                 ksu.umount()?;
             }
