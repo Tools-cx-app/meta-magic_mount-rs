@@ -19,7 +19,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
 jobs:
-  lints-check:
+  clippy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,13 +29,20 @@ jobs:
           toolchain: nightly
           targets: aarch64-linux-android
           components: rustfmt, clippy
-      - name: Format codes
-        uses: LoliGothick/rustfmt-check@master
-        with:
-          token: ${{ github.token }}
-          working-directory: ./
       - name: Clippy code
         run: cargo clippy --all-targets -- -D warnings
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+          targets: aarch64-linux-android
+          components: rustfmt, clippy
+      - name: Check style
+        run: cargo fmt --message-format=json --all
   shellcheck:
     runs-on: ubuntu-latest
     steps:
