@@ -14,6 +14,7 @@ import { store } from "./lib/store";
 import type { TabId } from "./lib/tabs";
 import { TABS } from "./lib/tabs";
 import ConfigTab from "./routes/ConfigTab";
+import InfoTab from "./routes/InfoTab";
 import ModulesTab from "./routes/ModulesTab";
 import StatusTab from "./routes/StatusTab";
 
@@ -150,6 +151,11 @@ export default function App() {
             <div class="swipe-page">
               <div class="page-scroller">
                 <ModulesTab />
+              </div>
+            </div>
+            <div class="swipe-page">
+              <div class="page-scroller">
+                <InfoTab />
               </div>
             </div>
           </div>
