@@ -108,6 +108,7 @@ fn gen_module_prop(data: &CargoConfig) -> Result<()> {
         package.metadata.magic_mount_rs.update
     )?;
     writeln!(file, "description={}", package.description)?;
+    writeln!(file, "actionIcon=launcher.png")?;
     writeln!(file, "metamodule=1")?;
     Ok(())
 }
