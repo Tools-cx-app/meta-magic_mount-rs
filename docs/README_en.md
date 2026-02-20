@@ -25,14 +25,12 @@ Example:
 
 ```toml
 mountsource = "KSU"
-umount = false
 partitions = []
 ```
 
 | Field | Description |
 | ------------- | -------------- |
 | `mountsource` | Identifier for the Systemless mount source. Default is `"KSU"` to match KernelSU behavior. |
-| `umount` | Whether to attempt unmount (depends on KernelSU's umount). |
 | `partitions` | A list of specific partitions to perform Systemless operations on, e.g. `"mi_ext"`, `"my_stock"`. |
 | `tmpfsdir` | Temporary directory, default is `/debug_ramdisk`. This option is optional. |
 
