@@ -13,8 +13,6 @@ pub struct Config {
     #[serde(default = "default_mountsource")]
     pub mountsource: String,
     pub partitions: Vec<String>,
-    #[cfg(any(target_os = "linux", target_os = "android"))]
-    pub umount: bool,
 }
 
 fn default_mountsource() -> String {

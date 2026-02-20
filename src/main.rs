@@ -115,8 +115,6 @@ fn main() -> Result<()> {
         Path::new(MODULE_PATH),
         &config.mountsource,
         &config.partitions,
-        #[cfg(any(target_os = "linux", target_os = "android"))]
-        config.umount,
     );
 
     match result {
