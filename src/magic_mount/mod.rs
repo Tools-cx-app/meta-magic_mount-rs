@@ -340,7 +340,10 @@ where
         }
         #[cfg(any(target_os = "linux", target_os = "android"))]
         {
-            if crate::utils::ksucalls::KSU.load(std::sync::atomic::Ordering::Relaxed) {
+            if crate::utils::ksucalls::KSU.load(std::sync::atomic::Ordering::Relaxed)
+                && !crate::utils::ksucalls::try_umount::LAST
+                    .load(std::sync::atomic::Ordering::Relaxed)
+            {
                 use ksu::TryUmountFlags;
 
                 let mut ksu = LIST.lock().unwrap();
