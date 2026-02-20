@@ -1,3 +1,2 @@
 mountsource = "APatch"
-umount = false
 partitions = []
