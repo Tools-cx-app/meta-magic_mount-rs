@@ -35,9 +35,6 @@
   },
   "config": {
     "title": "Configuration",
-    "umountLabel": "Enable Unmount",
-    "umountOff": "Default",
-    "umountOn": "Enabled",
     "mountSource": "Mount Source",
     "mountSourceDesc": "Global mount source namespace (e.g. KSU)",
     "partitions": "Extra Partitions",

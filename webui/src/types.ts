@@ -1,6 +1,5 @@
 export interface MagicConfig {
   mountsource: string;
-  umount: boolean;
   partitions: string[];
 }
 

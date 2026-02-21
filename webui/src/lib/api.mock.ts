@@ -19,7 +19,6 @@ export const MockAPI: APIType = {
     return {
       ...DEFAULT_CONFIG,
       mountsource: "KSU",
-      umount: true,
       partitions: ["product", "system_ext", "vendor"],
     };
   },

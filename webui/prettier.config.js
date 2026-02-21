@@ -4,4 +4,4 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-export { default } from "@so1ve/prettier-config";
+export { default } from "@rayxiom/prettier-config";
