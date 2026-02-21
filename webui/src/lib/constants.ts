@@ -6,7 +6,6 @@
 
 export const DEFAULT_CONFIG = {
   mountsource: "KSU",
-  umount: true,
   partitions: [],
 };
 export const PATHS = {
