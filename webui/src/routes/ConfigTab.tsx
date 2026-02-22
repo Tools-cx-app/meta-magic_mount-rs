@@ -24,7 +24,6 @@ export default function ConfigTab() {
     if (!initialConfigStr()) {
       return false;
     }
-
     return JSON.stringify(store.config) !== initialConfigStr();
   });
 
@@ -51,12 +50,12 @@ export default function ConfigTab() {
     });
   }
 
-  // function toggle(key: keyof MagicConfig) {
-  //   const current = store.config[key];
-  //   if (typeof current === "boolean") {
-  //     store.setConfig({ ...store.config, [key]: !current });
-  //   }
-  // }
+  function toggle(key: keyof MagicConfig) {
+    const current = store.config[key];
+    if (typeof current === "boolean") {
+      store.setConfig({ ...store.config, [key]: !current });
+    }
+  }
 
   function handleInput(key: keyof MagicConfig, value: string) {
     store.setConfig({ ...store.config, [key]: value });
@@ -96,7 +95,7 @@ export default function ConfigTab() {
                   )
                 }
                 class="full-width-field"
-              />
+              ></md-outlined-text-field>
             </div>
           </div>
         </section>
@@ -129,6 +128,32 @@ export default function ConfigTab() {
         <section class="config-group">
           <div class="config-card no-padding-v">
             <md-list>
+              <md-list-item
+                prop:type="button"
+                on:click={() => toggle("umount")}
+              >
+                <div slot="start">
+                  <md-icon>
+                    <svg viewBox="0 0 24 24">
+                      <path d={ICONS.anchor} />
+                    </svg>
+                  </md-icon>
+                </div>
+                <div slot="headline">{store.L.config.umountLabel}</div>
+                <div slot="supporting-text">
+                  {store.config.umount
+                    ? store.L.config.umountOn
+                    : store.L.config.umountOff}
+                </div>
+                <md-switch
+                  slot="end"
+                  prop:selected={store.config.umount}
+                  attr:touch-target="wrapper"
+                />
+              </md-list-item>
+
+              <md-divider />
+
               <md-list-item
                 prop:type="button"
                 on:click={store.toggleBottomNavFix}

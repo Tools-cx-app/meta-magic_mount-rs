@@ -27,6 +27,12 @@ try {
 const shouldUseMock = import.meta.env.DEV || !ksuExec;
 console.log(`[API Init] Mode: ${shouldUseMock ? "🛠️ MOCK" : "🚀 REAL"}`);
 
+function isTrueValue(v: any): boolean {
+  const s = String(v).trim().toLowerCase();
+
+  return s === "1" || s === "true" || s === "yes" || s === "on";
+}
+
 function stripQuotes(v: string): string {
   if (v.startsWith('"') && v.endsWith('"')) {
     return v.slice(1, -1);
@@ -71,11 +77,17 @@ function parseKvConfig(text: string): MagicConfig {
         continue;
       }
 
+      const rawValue = value;
       value = stripQuotes(value);
 
       switch (key) {
         case "mountsource": {
           result.mountsource = value;
+
+          break;
+        }
+        case "umount": {
+          result.umount = isTrueValue(rawValue);
 
           break;
         }
@@ -95,6 +107,7 @@ function serializeKvConfig(cfg: MagicConfig): string {
   const lines = ["# Magic Mount Configuration File", ""];
 
   lines.push(`mountsource = ${q(cfg.mountsource)}`);
+  lines.push(`umount = ${cfg.umount}`);
   const parts = cfg.partitions.map((p) => q(p)).join(", ");
   lines.push(`partitions = [${parts}]`);
 

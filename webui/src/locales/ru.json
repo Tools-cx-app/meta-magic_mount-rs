@@ -35,6 +35,9 @@
   },
   "config": {
     "title": "Настройки",
+    "umountLabel": "Вкл. umount",
+    "umountOff": "По умолчанию",
+    "umountOn": "Включено",
     "mountSource": "Источник монтирования",
     "mountSourceDesc": "Глобальное пространство имен монтирования (например KSU)",
     "partitions": "Доп. разделы",

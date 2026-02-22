@@ -33,6 +33,9 @@
   },
   "config": {
     "title": "配置",
+    "umountLabel": "开启 Umount",
+    "umountOff": "默认",
+    "umountOn": "强制卸载",
     "mountSource": "挂载源 (Mount Source)",
     "mountSourceDesc": "全局挂载源命名空间 (如 KSU)",
     "partitions": "额外分区",

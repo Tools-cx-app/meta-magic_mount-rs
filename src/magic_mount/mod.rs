@@ -34,10 +34,18 @@ struct MagicMount {
     path: PathBuf,
     work_dir_path: PathBuf,
     has_tmpfs: bool,
+    #[cfg(any(target_os = "linux", target_os = "android"))]
+    umount: bool,
 }
 
 impl MagicMount {
-    fn new<P>(node: &Node, path: P, work_dir_path: P, has_tmpfs: bool) -> Self
+    fn new<P>(
+        node: &Node,
+        path: P,
+        work_dir_path: P,
+        has_tmpfs: bool,
+        #[cfg(any(target_os = "linux", target_os = "android"))] umount: bool,
+    ) -> Self
     where
         P: AsRef<Path>,
     {
@@ -46,6 +54,8 @@ impl MagicMount {
             path: path.as_ref().join(node.name.clone()),
             work_dir_path: work_dir_path.as_ref().join(node.name.clone()),
             has_tmpfs,
+            #[cfg(any(target_os = "linux", target_os = "android"))]
+            umount,
         }
     }
 
@@ -107,8 +117,10 @@ impl MagicMount {
 
         mount_bind(module_path, target).with_context(|| {
             #[cfg(any(target_os = "linux", target_os = "android"))]
-            // tell ksu about this mount
-            send_unmountable(target);
+            if self.umount {
+                // tell ksu about this mount
+                send_unmountable(target);
+            }
             format!(
                 "mount module file {} -> {}",
                 module_path.display(),
@@ -197,9 +209,18 @@ impl MagicMount {
                 continue;
             }
 
-            if let Err(e) =
-                { Self::new(node, &self.path, &self.work_dir_path, has_tmpfs).do_mount() }
-                    .with_context(|| format!("magic mount {}/{name}", self.path.display()))
+            if let Err(e) = {
+                Self::new(
+                    node,
+                    &self.path,
+                    &self.work_dir_path,
+                    has_tmpfs,
+                    #[cfg(any(target_os = "linux", target_os = "android"))]
+                    self.umount,
+                )
+                .do_mount()
+            }
+            .with_context(|| format!("magic mount {}/{name}", self.path.display()))
             {
                 if has_tmpfs {
                     return Err(e);
@@ -236,8 +257,10 @@ impl MagicMount {
             }
 
             #[cfg(any(target_os = "linux", target_os = "android"))]
-            // tell ksu about this one too
-            send_unmountable(&self.path);
+            if self.umount {
+                // tell ksu about this one too
+                send_unmountable(&self.path);
+            }
         }
         Ok(())
     }
@@ -253,9 +276,16 @@ impl MagicMount {
                         continue;
                     }
 
-                    Self::new(&node, &self.path, &self.work_dir_path, has_tmpfs)
-                        .do_mount()
-                        .with_context(|| format!("magic mount {}/{name}", self.path.display()))
+                    Self::new(
+                        &node,
+                        &self.path,
+                        &self.work_dir_path,
+                        has_tmpfs,
+                        #[cfg(any(target_os = "linux", target_os = "android"))]
+                        self.umount,
+                    )
+                    .do_mount()
+                    .with_context(|| format!("magic mount {}/{name}", self.path.display()))
                 } else if has_tmpfs {
                     mount_mirror(&self.path, &self.work_dir_path, &entry)
                         .with_context(|| format!("mount mirror {}/{name}", self.path.display()))
@@ -281,6 +311,7 @@ pub fn magic_mount<P>(
     module_dir: &Path,
     mount_source: &str,
     extra_partitions: &[String],
+    #[cfg(any(target_os = "linux", target_os = "android"))] umount: bool,
 ) -> Result<()>
 where
     P: AsRef<Path>,
@@ -294,17 +325,22 @@ where
         mount(mount_source, &tmp_dir, "tmpfs", MountFlags::empty(), None).context("mount tmp")?;
         mount_change(&tmp_dir, MountPropagationFlags::PRIVATE).context("make tmp private")?;
 
-        let ret = MagicMount::new(&root, Path::new("/"), tmp_dir.as_path(), false).do_mount();
+        let ret = MagicMount::new(
+            &root,
+            Path::new("/"),
+            tmp_dir.as_path(),
+            false,
+            #[cfg(any(target_os = "linux", target_os = "android"))]
+            umount,
+        )
+        .do_mount();
 
         if let Err(e) = unmount(&tmp_dir, UnmountFlags::DETACH) {
             log::error!("failed to unmount tmp {e}");
         }
         #[cfg(any(target_os = "linux", target_os = "android"))]
         {
-            if crate::utils::ksucalls::KSU.load(std::sync::atomic::Ordering::Relaxed)
-                && !crate::utils::ksucalls::try_umount::LAST
-                    .load(std::sync::atomic::Ordering::Relaxed)
-            {
+            if crate::utils::ksucalls::KSU.load(std::sync::atomic::Ordering::Relaxed) {
                 use ksu::TryUmountFlags;
 
                 let mut ksu = LIST.lock().unwrap();

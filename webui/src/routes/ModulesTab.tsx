@@ -1,6 +1,6 @@
 /**
- * Copyright 2025 Magic Mount-rs Authors SPDX-License-Identifier:
- * GPL-3.0-or-later
+ * Copyright 2025 Magic Mount-rs Authors
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { For, Show, createMemo, createSignal, onMount } from "solid-js";
@@ -28,7 +28,6 @@ export default function ModulesTab() {
       const q = searchQuery().toLowerCase();
       const matchSearch =
         m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q);
-
       return matchSearch;
     }),
   );
@@ -37,11 +36,13 @@ export default function ModulesTab() {
     setExpandedId(expandedId() === id ? null : id);
   }
 
-  const getModeLabel = (isMounted: boolean) =>
-    isMounted ? "Mounted" : "Unmounted";
+  function getModeLabel(isMounted: boolean) {
+    return isMounted ? "Mounted" : "Unmounted";
+  }
 
-  const getModeClass = (isMounted: boolean) =>
-    isMounted ? "mode-mounted" : "mode-unmounted";
+  function getModeClass(isMounted: boolean) {
+    return isMounted ? "mode-mounted" : "mode-unmounted";
+  }
 
   return (
     <>
@@ -65,7 +66,7 @@ export default function ModulesTab() {
           <Show
             when={!store.loading.modules}
             fallback={
-              <For each={Array.from({ length: 6 })}>
+              <For each={Array(6)}>
                 {() => <Skeleton height="64px" borderRadius="16px" />}
               </For>
             }
@@ -92,7 +93,7 @@ export default function ModulesTab() {
               <For each={filteredModules()}>
                 {(mod) => (
                   <div
-                    class={`module-card ${expandedId() === mod.id ? "expanded" : ""} ${mod.is_mounted ? "" : "unmounted"}`}
+                    class={`module-card ${expandedId() === mod.id ? "expanded" : ""} ${!mod.is_mounted ? "unmounted" : ""}`}
                   >
                     <div
                       class="module-header"
@@ -111,9 +112,7 @@ export default function ModulesTab() {
                           <span class="version-badge">{mod.version}</span>
                         </div>
                       </div>
-                      <div
-                        class={`mode-indicator ${getModeClass(mod.is_mounted)}`}
-                      >
+                      <div class={`mode-indicator ${getModeClass(mod.is_mounted)}`}>
                         {getModeLabel(mod.is_mounted)}
                       </div>
                     </div>

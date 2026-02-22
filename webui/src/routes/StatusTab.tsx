@@ -24,15 +24,15 @@ export default function StatusTab() {
     store.loadStatus();
   });
 
-  // function copyDebugInfo() {
-  //   const info =
-  //     `Magic Mount v${store.version}\n` +
-  //     `Model: ${store.device.model}\n` +
-  //     `Android: ${store.device.android}\n` +
-  //     `Kernel: ${store.device.kernel}\n` +
-  //     `SELinux: ${store.device.selinux}`;
-  //   navigator.clipboard.writeText(info);
-  // }
+  function copyDebugInfo() {
+    const info =
+      `Magic Mount v${store.version}\n` +
+      `Model: ${store.device.model}\n` +
+      `Android: ${store.device.android}\n` +
+      `Kernel: ${store.device.kernel}\n` +
+      `SELinux: ${store.device.selinux}`;
+    navigator.clipboard.writeText(info);
+  }
 
   const [showRebootConfirm, setShowRebootConfirm] = createSignal(false);
 
@@ -106,7 +106,7 @@ export default function StatusTab() {
               </Show>
             </div>
           </div>
-          <div class="hero-actions" />
+          <div class="hero-actions"></div>
         </div>
 
         <div class="stats-row">

@@ -1,2 +1,3 @@
 mountsource = "KSU"
+umount = false
 partitions = []

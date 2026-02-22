@@ -25,12 +25,14 @@
 
 ```toml
 mountsource = "KSU"
+umount = false
 partitions = []
 ```
 
 | 字段 | 说明 |
 | ------------- | -------------- |
 | mountsource | Systemless 挂载来源标识。默认值 "KSU" 与 KernelSU 行为保持一致。 |
+| umount | 是否尝试卸载（依赖 KernelSU umount ）。 |
 | partitions | 指定需要进行 Systemless 操作的特定分区列表，例如 "mi_ext","my_stock" 等。 |
 | tmpfsdir | 临时目录，默认 "/debug_ramdisk"，此选项可选。 |
 
