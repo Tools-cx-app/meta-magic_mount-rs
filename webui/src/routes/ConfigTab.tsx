@@ -24,6 +24,7 @@ export default function ConfigTab() {
     if (!initialConfigStr()) {
       return false;
     }
+
     return JSON.stringify(store.config) !== initialConfigStr();
   });
 
@@ -95,7 +96,7 @@ export default function ConfigTab() {
                   )
                 }
                 class="full-width-field"
-              ></md-outlined-text-field>
+              />
             </div>
           </div>
         </section>
