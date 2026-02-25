@@ -53,6 +53,8 @@ fn init_logger() {
 }
 
 fn main() -> Result<()> {
+    init_logger();
+    
     let config = Config::load()?;
 
     let args: Vec<_> = std::env::args().collect();
@@ -81,8 +83,6 @@ fn main() -> Result<()> {
             _ => {}
         }
     }
-
-    init_logger();
 
     utils::ksucalls::check_ksu();
 
