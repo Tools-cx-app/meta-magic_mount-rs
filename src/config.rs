@@ -47,7 +47,7 @@ impl Config {
 
         let config: Self = toml::from_str(&content).map_or_else(
             |e| {
-                log::error!("Failed to serialize config to toml: {e}");
+                log::error!("Failed to deserialize config to toml: {e}");
                 Config::default()
             },
             |c| c,
