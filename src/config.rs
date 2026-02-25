@@ -45,13 +45,10 @@ impl Config {
     pub fn load() -> Result<Self> {
         let content = fs::read_to_string(CONFIG_FILE).context("failed to read config file")?;
 
-        let config: Self = toml::from_str(&content).map_or_else(
-            |e| {
-                log::error!("Failed to deserialize config to toml: {e}");
-                Config::default()
-            },
-            |c| c,
-        );
+        let config: Self = toml::from_str(&content).unwrap_or_else(|e| {
+            log::error!("Failed to deserialize config to toml: {e}");
+            Self::default()
+        });
 
         Ok(config)
     }
