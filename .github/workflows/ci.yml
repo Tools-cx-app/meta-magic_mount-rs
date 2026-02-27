@@ -26,12 +26,12 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Cache NDK
         id: cache-ndk
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/ndk_temp
           key: ndk-${{ runner.os }}-ndk_temp
@@ -55,7 +55,7 @@ jobs:
           run_install: false
           package_json_file: webui/package.json
       - name: Setup node
-        uses: actions/setup-node@v6.1.0
+        uses: actions/setup-node@v6.2.0
         with:
           node-version: "lts/*"
           cache: pnpm
@@ -78,16 +78,12 @@ jobs:
           export ANDROID_NDK_HOME=$(realpath ~/ndk_temp)
           export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
           cargo xtask b
-      - name: Prepare artifacts
-        run: |
-          mkdir -p output/artifact/
-          unzip "output/*.zip" -d output/artifact/
       - name: Upload release version
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: meta-mm-${{ github.run_number }}
-          compression-level: 9
-          path: output/artifact/
+          path: output/*.zip
+          archive: false
       - name: Upload
         if: github.event_name == 'push'
         env:
