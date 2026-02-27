@@ -29,3 +29,11 @@ updates:
       crates:
         patterns:
           - "*"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
