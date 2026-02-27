@@ -78,16 +78,12 @@ jobs:
           export ANDROID_NDK_HOME=$(realpath ~/ndk_temp)
           export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
           cargo xtask b
-      - name: Prepare artifacts
-        run: |
-          mkdir -p output/artifact/
-          unzip "output/*.zip" -d output/artifact/
       - name: Upload release version
         uses: actions/upload-artifact@v7
         with:
           name: meta-mm-${{ github.run_number }}
-          compression-level: 9
-          path: output/artifact/
+          path: output/*.zip
+          archive: false
       - name: Upload
         if: github.event_name == 'push'
         env:
