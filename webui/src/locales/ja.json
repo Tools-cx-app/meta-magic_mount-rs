@@ -1,0 +1,83 @@
+{
+  "lang": { "display": "日本語" },
+  "common": {
+    "appName": "Magic Mount",
+    "saving": "保存中...",
+    "themeAuto": "自動 (システム)",
+    "themeLight": "ライトモード",
+    "themeDark": "ダークモード",
+    "cancel": "キャンセル",
+    "reboot": "再起動",
+    "rebootTitle": "システムを再起動しますか？",
+    "rebootConfirm": "本当にデバイスを再起動しますか？",
+    "rebootFailed": "再起動に失敗しました",
+    "resetSuccess": "設定をリセットしました",
+    "resetFailed": "設定のリセットに失敗しました"
+  },
+  "tabs": {
+    "status": "ステータス",
+    "config": "設定",
+    "modules": "モジュール",
+    "info": "情報"
+  },
+  "status": {
+    "sysInfoTitle": "システム詳細",
+    "deviceTitle": "デバイス情報",
+    "moduleTitle": "モジュール",
+    "moduleActive": "アクティブモジュール",
+    "modelLabel": "モデル",
+    "androidLabel": "Android",
+    "kernelLabel": "カーネル",
+    "selinuxLabel": "SELinux",
+    "refresh": "更新"
+  },
+  "config": {
+    "title": "設定",
+    "umountLabel": "Umount を有効化",
+    "umountOff": "デフォルト",
+    "umountOn": "有効",
+    "mountSource": "マウントソース (Mount Source)",
+    "mountSourceDesc": "グローバルマウントソースネームスペース (例：KSU)",
+    "partitions": "追加パーティション",
+    "partitionsDesc": "マウントするパーティションを追加",
+    "autoPlaceholder": "空欄の場合自動選択",
+    "reload": "再読み込み",
+    "save": "設定を保存",
+    "reset": "リセット",
+    "loadSuccess": "設定を読み込みました",
+    "loadError": "設定の読み込みに失敗しました",
+    "loadDefault": "デフォルト設定を読み込みました",
+    "saveSuccess": "設定を保存しました",
+    "saveFailed": "設定の保存に失敗しました",
+    "fixBottomNav": "底部ナビゲーション修正",
+    "webuiLabel": "WebUI"
+  },
+  "modules": {
+    "title": "アクティブモジュール",
+    "desc": "ここにリストされたモジュールは Magic Mount によって検出・管理されます。",
+    "scanning": "スキャン中...",
+    "reload": "更新",
+    "save": "変更を保存",
+    "empty": "アクティブモジュールが見つかりません",
+    "scanError": "モジュールのスキャンに失敗しました",
+    "saveSuccess": "保存しました",
+    "saveFailed": "保存に失敗しました",
+    "searchPlaceholder": "モジュールを検索...",
+    "filterLabel": "フィルター：",
+    "filterAll": "すべて",
+    "toggleError": "切り替えに失敗しました",
+    "authorLabel": "作者",
+    "descriptionLabel": "説明",
+    "unknownLabel": "不明",
+    "noDescriptionLabel": "説明なし"
+  },
+  "info": {
+    "title": "について",
+    "projectLink": "リポジトリ",
+    "donate": "寄付",
+    "contributors": "貢献者",
+    "loading": "貢献者を読み込み中...",
+    "loadFail": "読み込み失敗 (API 制限)",
+    "noBio": "自己紹介はありません"
+  }
+}
