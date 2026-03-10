@@ -55,7 +55,7 @@ jobs:
           run_install: false
           package_json_file: webui/package.json
       - name: Setup node
-        uses: actions/setup-node@v6.2.0
+        uses: actions/setup-node@v6.3.0
         with:
           node-version: "lts/*"
           cache: pnpm
