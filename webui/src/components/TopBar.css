@@ -73,7 +73,9 @@
   padding: 8px 0;
   z-index: 1000;
   min-width: 200px;
-  overflow: hidden;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .menu-item {
   width: 100%;
