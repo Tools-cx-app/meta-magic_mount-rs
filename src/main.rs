@@ -96,8 +96,6 @@ fn main() -> Result<()> {
 
     let tempdir = utils::generate_tmp();
 
-    let _ = utils::ksucalls::try_umount::TMPFS.set(tempdir.as_str()?.to_string());
-
     utils::ensure_dir_exists(&tempdir)?;
 
     if let Err(e) = mount(

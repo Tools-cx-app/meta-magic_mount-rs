@@ -9,7 +9,6 @@ use std::{
 use ksu::TryUmount;
 
 static LAST: AtomicBool = AtomicBool::new(false);
-pub static TMPFS: OnceLock<String> = OnceLock::new();
 pub static LIST: LazyLock<Mutex<TryUmount>> = LazyLock::new(|| Mutex::new(TryUmount::new()));
 
 pub fn send_unmountable<P>(target: P)
