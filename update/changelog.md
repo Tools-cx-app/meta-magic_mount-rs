@@ -1,33 +1,45 @@
-## 2.2.4 - 2026-02-18
+## 2.2.5 - 2026-03-14
 
-**[View changes](https://github.com/Tools-cx-app/meta-magic_mount-rs/compare/2e624c6f99b143b5dca766bb08ce220c88cb1a33...2a0dc3ded09bb6f8d0728d209e33c0a812337b99)**(2e624c6...2a0dc3d)
+**[View changes](https://github.com/Tools-cx-app/meta-magic_mount-rs/compare/2a0dc3ded09bb6f8d0728d209e33c0a812337b99...1687ab88a21be14fa8b0b71cf13d3107ecfbecec)**(2a0dc3d...1687ab8)
 
 ### <!-- 0 --> Features
 
-- Remove ZygiskNext umount conflict guard([b8c9deb](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/b8c9deb9eab838b062ed04e2d4a31de173ac5c5e))
-- Add 39 new languages (#6)([1ca24ea](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/1ca24ea129fe71bc13bda36beb1c94a6bf422877))
-- Add Literary Chinese (lzh) localization([a8c1dd7](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/a8c1dd7001aed2582ab0f61a097afc6c808f2300))
-- Enhance languages([9c8d3d1](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/9c8d3d15c28e185ba5bf84840acedae56301f6d6))
-- Better installation process([b1c6a4e](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/b1c6a4e3f04867a1efe16b7111b10f85641b9170))
+- Refine localization per North Korean language conventions (#14)([569d2e8](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/569d2e8d84f3e8503de908ffe05d83a41be8f43b))
+- Add webui shortcut button (#8)([abe7f80](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/abe7f80154f2c66fa73c8f58b290c80ffb773529))
+- Add force disbale umount([28c537c](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/28c537c7c1b3b654150902a3d34542c90427fabf))
+- Removed umount in config([fb81778](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/fb8177875a96e783913a6fb19475d2a4ec03b5a1))
+- Remove the deprecated umount from the default configuration (#10)([ff41a67](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/ff41a67571298712b97f898cf86a7bcc86a0c182))
+- Dropped umount toggle (#11)([06e2572](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/06e2572932b389da92e5f580f7efeda2def52dcd))
+- Add Literary Chinese localization (#19)([52ce484](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/52ce484305d9ab0d5a115eecd8b3fd9609933be1))
+- Add Chinese Han Traditional (#20)([241589b](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/241589b078d0c1e95e927fe27a80298ccfd19e60))
+- Add Japanese (#21)([575cd38](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/575cd38653ca73f8e2c1ad24e481626d79bc4bb2))
+- Add mount status display([e1bab59](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/e1bab59b250cefab5db13de605cacf54109dd6ed))
 
 ### <!-- 1 --> Bug Fixes
 
-- Build([68d9dc6](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/68d9dc6f7db96b16dbfaea460bde1aee84ccdfc7))
-- Correct localization terms per Taiwan usage conventions([4239601](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/423960150be29fb8779c707186ecc9a46a281b75))
+- Fix config serialization([75f3f21](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/75f3f21167219061e0402c7c9c524ec452900979))
+- Fix typo([8fc9b1f](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/8fc9b1fe195bf5a1ea7b3b370ae3a40a660cae14))
+- Limit language list height to 300px with scrollbar (#26)([18307e8](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/18307e86a4303d715f158224dc146da477bde863))
+- Correct ambiguous Chinese locale display names (#27)([8d0e3ab](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/8d0e3ab1e5222676042d805982a9d6ed0a19e69d))
 
 ### <!-- 11 --> Other
 
-- Dropped update url([9cef005](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/9cef005422bab85425693d33deeb1a10bbba8d7e))
-- Dropped webui check([5f65ae0](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/5f65ae0ec30445c19dcdb8c73fce2033038b6498))
-- Only upload files([ec4bf09](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/ec4bf09f8458993adf89613af582078d6d87dd51))
-- Remove info tab([c0467ce](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/c0467ceedb9b2f05ce2decde6f97252032f8388f))
-- Fix css format([fb327ff](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/fb327ffbcc1609a3782fb77c804a0d57ede055ce))
-- Sync modulestab with hybrid mount([f43ecbd](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/f43ecbdb330427b5c6956a48d0318586e7b7abf1))
-- Fix repo([d882170](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/d8821707fce943a4e3240fac6dcec454b6522194))
-- Opt lints logic([7b2f1c1](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/7b2f1c155181b10353627d1fbfd31a6caaf1af41))
+- Ignore eslint([6614ea7](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/6614ea71287f16917cd56d726d713affff8707d6))
+- Fix typo([60820f7](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/60820f77dd5a1bbd37e58c56924722eba91a3d66))
+- Add github actions([e68ea56](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/e68ea5619762e578cb81aad06d9cdb9e00265b63))
+
+### <!-- 4 --> Documentation
+
+- Remove deprecated umount content from the document (#9)([e16f429](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/e16f429c660afc23964348fdf1153eb1d5d579a9))
 
 ### <!-- 8 --> Miscellaneous Tasks
 
-- Fmt([078e912](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/078e9127da32e203c1c7e53a8bada438885ca138))
+- Format([e80d405](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/e80d40551bbfacd29e8be45b9c6c799e39c51655))
+- Make cargo clippy happy([843c0e8](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/843c0e89e2abdf56b20589b101e952f0252a7deb))
+- Removed a authors([e24d0de](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/e24d0de98089f5cedc1fd4c1589a685da1642ccf))
+- Cleanup customize.sh([2ad494b](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/2ad494b6425a4df874541aa533b41aa0dac311b9))
+- Fmt([4d26d81](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/4d26d813f76b29725c6072790ae6c37d9cbf2ad2))
+- Removed useless code([6f4898e](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/6f4898ead71ec9003ba31ac39db73a35fe54431c))
+- Make cargo clippy([6902d02](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/6902d02af0eb560b67dcb19aa6aff42989d66bd2))
 
 
