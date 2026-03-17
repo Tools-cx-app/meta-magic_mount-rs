@@ -35,7 +35,7 @@ jobs:
           targets: aarch64-linux-android
           components: rust-src
       - name: Install pnpm
-        uses: pnpm/action-setup@v4.2.0
+        uses: pnpm/action-setup@v5.0.0
         with:
           run_install: false
           package_json_file: webui/package.json
