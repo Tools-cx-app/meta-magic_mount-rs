@@ -21,12 +21,12 @@
   "devDependencies": {
     "@rayxiom/eslint-config": "^4.5.1",
     "@rayxiom/prettier-config": "^4.5.1",
-    "@typescript/native-preview": "7.0.0-dev.20260310.1",
+    "@typescript/native-preview": "7.0.0-dev.20260317.1",
     "eslint": "^9.39.3",
     "prettier": "^3.8.1",
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1",
-    "vite-plugin-solid": "^2.11.6"
+    "vite": "^8.0.0",
+    "vite-plugin-solid": "^2.11.11"
   }
 }
