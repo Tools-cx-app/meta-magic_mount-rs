@@ -212,7 +212,7 @@ fn cargo_ndk() -> Command {
             "+nightly",
             "ndk",
             "--platform",
-            "31",
+            "26",
             "-t",
             "arm64-v8a",
             "-t",
