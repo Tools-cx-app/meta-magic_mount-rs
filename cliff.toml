@@ -92,7 +92,7 @@ commit_parsers = [
     { message = "^chore|^ci", group = "<!-- 8 --> Miscellaneous Tasks" },
     { body = ".*security", group = "<!-- 9 --> Security" },
     { message = '^Revert "(\w+)', group = "<!-- 10 --> Reverts" },
-    { message = ".^adj", group = "<!-- 11 --> Adjust"},
+    { message = "^adj", group = "<!-- 11 --> Adjust"},
     { message = ".*", group = "<!-- 11 --> Other" },
 ]
 
