@@ -114,9 +114,20 @@ fn main() -> Result<()> {
         config.umount,
     );
 
+    let cleanup = || {
+        use rustix::mount::{unmount, UnmountFlags};
+        if let Err(e) = unmount(&tempdir, UnmountFlags::DETACH) {
+            log::warn!("failed to unmount tempdir: {e}");
+        }
+        if let Err(e) = std::fs::remove_dir(&tempdir) {
+            log::warn!("failed to remove tempdir: {e}");
+        }
+    };
+
     match result {
         Ok(()) => {
             log::info!("Magic Mount Completed Successfully");
+            cleanup();
             Ok(())
         }
         Err(e) => {
@@ -125,6 +136,7 @@ fn main() -> Result<()> {
                 log::error!("{cause:#?}");
             }
             log::error!("{:#?}", e.backtrace());
+            cleanup();
             Err(e)
         }
     }
