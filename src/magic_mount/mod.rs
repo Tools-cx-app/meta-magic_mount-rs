@@ -12,8 +12,8 @@ use std::{
 
 use anyhow::{Context, Result, bail};
 use rustix::mount::{
-    MountFlags, MountPropagationFlags, UnmountFlags, mount, mount_bind, mount_change, mount_move,
-    mount_remount, unmount,
+    MountFlags, MountPropagationFlags, mount, mount_bind, mount_change, mount_move,
+    mount_remount,
 };
 
 #[cfg(any(target_os = "linux", target_os = "android"))]
@@ -338,10 +338,6 @@ where
             umount,
         )
         .do_mount();
-
-        if let Err(e) = unmount(&tmp_dir, UnmountFlags::DETACH) {
-            log::error!("failed to unmount tmp {e}");
-        }
         #[cfg(any(target_os = "linux", target_os = "android"))]
         {
             if crate::utils::ksucalls::KSU.load(std::sync::atomic::Ordering::Relaxed) {
@@ -353,7 +349,6 @@ where
                 ksu.umount()?;
             }
         }
-        fs::remove_dir(tmp_dir).ok();
     } else {
         log::info!("no modules to mount, skipping!");
     }
