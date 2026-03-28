@@ -20,12 +20,9 @@ let ksuExec: KsuExec | null = null;
 try {
   const ksu = await import("kernelsu").catch(() => null);
   ksuExec = ksu ? ksu.exec : null;
-} catch {
-  console.warn("KernelSU module not found, defaulting to Mock.");
-}
+} catch {}
 
 const shouldUseMock = import.meta.env.DEV || !ksuExec;
-console.log(`[API Init] Mode: ${shouldUseMock ? "🛠️ MOCK" : "🚀 REAL"}`);
 
 function isTrueValue(v: any): boolean {
   const s = String(v).trim().toLowerCase();
@@ -96,15 +93,13 @@ function parseKvConfig(text: string): MagicConfig {
 
     return result;
   } catch (e) {
-    console.error("Failed to parse config:", e);
-
     return DEFAULT_CONFIG;
   }
 }
 
 function serializeKvConfig(cfg: MagicConfig): string {
   const q = (s: string) => `"${s}"`;
-  const lines = ["# Magic Mount Configuration File", ""];
+  const lines = ["", ""];
 
   lines.push(`mountsource = ${q(cfg.mountsource)}`);
   lines.push(`umount = ${cfg.umount}`);
@@ -135,9 +130,7 @@ const RealAPI: APIType = {
       if (errno === 0 && stdout.trim()) {
         return parseKvConfig(stdout);
       }
-    } catch (e) {
-      console.error("Config load error:", e);
-    }
+    } catch (e) {}
 
     return DEFAULT_CONFIG;
   },
@@ -153,14 +146,25 @@ EOF_CONFIG
     `;
     const { errno, stderr } = await ksuExec!(cmd);
     if (errno !== 0) {
-      throw new Error(`Failed to save config: ${stderr}`);
+      throw new Error(stderr);
     }
   },
 
   scanModules: async () => {
     const cmd = "/data/adb/modules/magic_mount_rs/meta-mm scan --json";
+    const ignoreListPath = "/data/adb/magic_mount/ignore.list";
     try {
-      const { errno, stdout, stderr } = await ksuExec!(cmd);
+      const { errno, stdout } = await ksuExec!(cmd);
+      const { stdout: ignoreOut } = await ksuExec!(
+        `cat "${ignoreListPath}" 2>/dev/null || echo ""`,
+      );
+      const ignoredSet = new Set(
+        ignoreOut
+          .split("\n")
+          .map((s: string) => s.trim())
+          .filter(Boolean),
+      );
+
       if (errno === 0 && stdout) {
         try {
           const rawModules = JSON.parse(stdout);
@@ -173,19 +177,14 @@ EOF_CONFIG
             description: m.description,
             is_mounted: !m.skip,
             mode: "magic",
+            is_ignored: ignoredSet.has(m.id),
             rules: { default_mode: "magic", paths: {} },
           }));
         } catch (parseError) {
-          console.error("Failed to parse module JSON:", parseError);
-
           return [];
         }
-      } else {
-        console.error("Scan command failed:", stderr);
       }
-    } catch (e) {
-      console.error("Scan modules error:", e);
-    }
+    } catch (e) {}
 
     return [];
   },
@@ -290,12 +289,22 @@ EOF_CONFIG
     const cmd = "svc power reboot || reboot";
     await ksuExec!(cmd);
   },
+
+  toggleIgnore: async (id: string, ignore: boolean) => {
+    const path = "/data/adb/magic_mount/ignore.list";
+    const cmd = ignore
+      ? `echo "${id}" >> "${path}"`
+      : `sed -i '/^${id}$/d' "${path}"`;
+    await ksuExec!(cmd);
+  },
 };
 
 if (MockAPI && !MockAPI.reboot) {
-  MockAPI.reboot = async () => {
-    console.log("Mock Reboot triggered");
-  };
+  MockAPI.reboot = async () => {};
+}
+
+if (MockAPI && !MockAPI.toggleIgnore) {
+  MockAPI.toggleIgnore = async () => {};
 }
 
 export const API = shouldUseMock ? MockAPI : RealAPI;

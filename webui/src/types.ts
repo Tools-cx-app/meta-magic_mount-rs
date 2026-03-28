@@ -12,6 +12,7 @@ export interface MagicModule {
   description: string;
   is_mounted: boolean;
   mode: string;
+  is_ignored?: boolean;
   disabledByFlag?: boolean;
   skipMount?: boolean;
   rules: { default_mode: string; paths: Record<string, any> };
@@ -48,4 +49,5 @@ export interface APIType {
   getVersion: () => Promise<string>;
   openLink: (url: string) => Promise<void>;
   reboot: () => Promise<void>;
+  toggleIgnore: (id: string, ignore: boolean) => Promise<void>;
 }
