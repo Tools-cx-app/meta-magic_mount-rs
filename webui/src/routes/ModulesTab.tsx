@@ -139,16 +139,6 @@ export default function ModulesTab() {
                               {mod.author || store.L.modules.unknownLabel}
                             </div>
                           </div>
-
-                          <div class="body-section">
-                            <md-filled-button
-                              onClick={() => store.toggleIgnoreModule(mod.id)}
-                            >
-                              {mod.is_ignored
-                                ? store.L.modules.ignoreRemove
-                                : store.L.modules.ignoreAdd}
-                            </md-filled-button>
-                          </div>
                         </div>
                       </div>
                     </div>

@@ -193,27 +193,6 @@ function createStore() {
     }
   }
 
-  async function toggleIgnoreModule(id: string) {
-    const mod = modules().find((m) => m.id === id);
-    if (!mod) return;
-
-    const newStatus = !mod.is_ignored;
-    try {
-      await API.toggleIgnore(id, newStatus);
-      setModules((prev) =>
-        prev.map((m) => (m.id === id ? { ...m, is_ignored: newStatus } : m)),
-      );
-      showToast(
-        newStatus
-          ? L().modules.ignoreAddSuccess
-          : L().modules.ignoreRemoveSuccess,
-        "success",
-      );
-    } catch (e) {
-      showToast(L().modules.ignoreFailed, "error");
-    }
-  }
-
   return {
     get lang() {
       return lang();
@@ -274,7 +253,6 @@ function createStore() {
     },
     loadStatus,
     rebootDevice,
-    toggleIgnoreModule,
 
     get loading() {
       return {

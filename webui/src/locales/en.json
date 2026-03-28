@@ -42,6 +42,8 @@
     "mountSourceDesc": "Global mount source namespace (e.g. KSU)",
     "partitions": "Extra Partitions",
     "partitionsDesc": "Add partitions to mount",
+    "ignoreList": "Ignore List",
+    "ignoreListDesc": "Directories to exclude from mounting",
     "autoPlaceholder": "Auto-select if empty",
     "reload": "Reload",
     "save": "Save Config",
@@ -71,12 +73,7 @@
     "authorLabel": "Author",
     "descriptionLabel": "Description",
     "unknownLabel": "Unknown",
-    "noDescriptionLabel": "No description",
-    "ignoreAdd": "Add to ignore.list",
-    "ignoreRemove": "Remove from ignore.list",
-    "ignoreAddSuccess": "Added to ignore.list",
-    "ignoreRemoveSuccess": "Removed from ignore.list",
-    "ignoreFailed": "Failed to update ignore.list"
+    "noDescriptionLabel": "No description"
   },
   "info": {
     "title": "About",

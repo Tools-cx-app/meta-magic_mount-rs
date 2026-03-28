@@ -42,6 +42,8 @@
     "mountSourceDesc": "Глобальное пространство имен монтирования (например KSU)",
     "partitions": "Доп. разделы",
     "partitionsDesc": "Добавить разделы для монтирования",
+    "ignoreList": "Список исключений",
+    "ignoreListDesc": "Каталоги, исключаемые из монтирования",
     "autoPlaceholder": "Автоматический выбор если пусто",
     "reload": "Перезагрузить",
     "save": "Сохранить",
@@ -71,12 +73,7 @@
     "authorLabel": "Автор",
     "descriptionLabel": "Описание",
     "unknownLabel": "Неизвестно",
-    "noDescriptionLabel": "Нет описания",
-    "ignoreAdd": "Добавить в ignore.list",
-    "ignoreRemove": "Удалить из ignore.list",
-    "ignoreAddSuccess": "Добавлено в ignore.list",
-    "ignoreRemoveSuccess": "Удалено из ignore.list",
-    "ignoreFailed": "Не удалось обновить ignore.list"
+    "noDescriptionLabel": "Нет описания"
   },
   "info": {
     "title": "О нас",

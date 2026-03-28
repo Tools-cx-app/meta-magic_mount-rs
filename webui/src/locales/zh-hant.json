@@ -40,6 +40,8 @@
     "mountSourceDesc": "全局掛載源命名空間 (如 KSU)",
     "partitions": "額外分區",
     "partitionsDesc": "添加需要掛載的分區",
+    "ignoreList": "忽略列表",
+    "ignoreListDesc": "排除掛載的目錄路徑",
     "autoPlaceholder": "留空自動選擇",
     "reload": "重載配置",
     "save": "保存配置",
@@ -69,12 +71,7 @@
     "authorLabel": "作者",
     "descriptionLabel": "描述",
     "unknownLabel": "未知",
-    "noDescriptionLabel": "沒有描述",
-    "ignoreAdd": "加入 ignore.list",
-    "ignoreRemove": "移出 ignore.list",
-    "ignoreAddSuccess": "已加入 ignore.list",
-    "ignoreRemoveSuccess": "已移出 ignore.list",
-    "ignoreFailed": "更新 ignore.list 失敗"
+    "noDescriptionLabel": "沒有描述"
   },
   "info": {
     "title": "關於項目",

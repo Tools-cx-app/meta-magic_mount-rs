@@ -40,6 +40,8 @@
     "mountSourceDesc": "グローバルマウントソースネームスペース (例：KSU)",
     "partitions": "追加パーティション",
     "partitionsDesc": "マウントするパーティションを追加",
+    "ignoreList": "除外リスト",
+    "ignoreListDesc": "マウントから除外するディレクトリパス",
     "autoPlaceholder": "空欄の場合自動選択",
     "reload": "再読み込み",
     "save": "設定を保存",
@@ -69,12 +71,7 @@
     "authorLabel": "作者",
     "descriptionLabel": "説明",
     "unknownLabel": "不明",
-    "noDescriptionLabel": "説明なし",
-    "ignoreAdd": "ignore.list に追加",
-    "ignoreRemove": "ignore.list から削除",
-    "ignoreAddSuccess": "ignore.list に追加しました",
-    "ignoreRemoveSuccess": "ignore.list から削除しました",
-    "ignoreFailed": "ignore.list の更新に失敗しました"
+    "noDescriptionLabel": "説明なし"
   },
   "info": {
     "title": "について",

@@ -26,7 +26,6 @@ const shouldUseMock = import.meta.env.DEV || !ksuExec;
 
 function isTrueValue(v: any): boolean {
   const s = String(v).trim().toLowerCase();
-
   return s === "1" || s === "true" || s === "yes" || s === "on";
 }
 
@@ -34,7 +33,6 @@ function stripQuotes(v: string): string {
   if (v.startsWith('"') && v.endsWith('"')) {
     return v.slice(1, -1);
   }
-
   return v;
 }
 
@@ -63,14 +61,12 @@ function parseKvConfig(text: string): MagicConfig {
           if (key === "partitions") {
             result.partitions = [];
           }
-
           continue;
         }
         const parts = value.split(",").map((s) => stripQuotes(s.trim()));
         if (key === "partitions") {
           result.partitions = parts;
         }
-
         continue;
       }
 
@@ -80,17 +76,14 @@ function parseKvConfig(text: string): MagicConfig {
       switch (key) {
         case "mountsource": {
           result.mountsource = value;
-
           break;
         }
         case "umount": {
           result.umount = isTrueValue(rawValue);
-
           break;
         }
       }
     }
-
     return result;
   } catch (e) {
     return DEFAULT_CONFIG;
@@ -123,26 +116,44 @@ function formatBytes(bytes: number, decimals = 2): string {
 
 const RealAPI: APIType = {
   loadConfig: async () => {
+    let config: MagicConfig = { ...DEFAULT_CONFIG };
     try {
       const { errno, stdout } = await ksuExec!(
         `[ -f "${PATHS.CONFIG}" ] && cat "${PATHS.CONFIG}" || echo ""`,
       );
       if (errno === 0 && stdout.trim()) {
-        return parseKvConfig(stdout);
+        config = parseKvConfig(stdout);
       }
     } catch (e) {}
 
-    return DEFAULT_CONFIG;
+    try {
+      const { errno, stdout } = await ksuExec!(
+        `[ -f "/data/adb/magic_mount/ignore.list" ] && cat "/data/adb/magic_mount/ignore.list" || echo ""`,
+      );
+      if (errno === 0 && stdout) {
+        config.ignoreList = stdout
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+    } catch (e) {}
+
+    return config;
   },
 
   saveConfig: async (config) => {
     const content = serializeKvConfig(config);
+    const ignoreContent = config.ignoreList.join("\n");
     const cmd = `
       mkdir -p "$(dirname "${PATHS.CONFIG}")"
       cat > "${PATHS.CONFIG}" << 'EOF_CONFIG'
 ${content}
 EOF_CONFIG
       chmod 644 "${PATHS.CONFIG}"
+      cat > "/data/adb/magic_mount/ignore.list" << 'EOF_IGNORE'
+${ignoreContent}
+EOF_IGNORE
+      chmod 644 "/data/adb/magic_mount/ignore.list"
     `;
     const { errno, stderr } = await ksuExec!(cmd);
     if (errno !== 0) {
@@ -152,19 +163,8 @@ EOF_CONFIG
 
   scanModules: async () => {
     const cmd = "/data/adb/modules/magic_mount_rs/meta-mm scan --json";
-    const ignoreListPath = "/data/adb/magic_mount/ignore.list";
     try {
       const { errno, stdout } = await ksuExec!(cmd);
-      const { stdout: ignoreOut } = await ksuExec!(
-        `cat "${ignoreListPath}" 2>/dev/null || echo ""`,
-      );
-      const ignoredSet = new Set(
-        ignoreOut
-          .split("\n")
-          .map((s: string) => s.trim())
-          .filter(Boolean),
-      );
-
       if (errno === 0 && stdout) {
         try {
           const rawModules = JSON.parse(stdout);
@@ -177,7 +177,6 @@ EOF_CONFIG
             description: m.description,
             is_mounted: !m.skip,
             mode: "magic",
-            is_ignored: ignoredSet.has(m.id),
             rules: { default_mode: "magic", paths: {} },
           }));
         } catch (parseError) {
@@ -289,22 +288,10 @@ EOF_CONFIG
     const cmd = "svc power reboot || reboot";
     await ksuExec!(cmd);
   },
-
-  toggleIgnore: async (id: string, ignore: boolean) => {
-    const path = "/data/adb/magic_mount/ignore.list";
-    const cmd = ignore
-      ? `echo "${id}" >> "${path}"`
-      : `sed -i '/^${id}$/d' "${path}"`;
-    await ksuExec!(cmd);
-  },
 };
 
 if (MockAPI && !MockAPI.reboot) {
   MockAPI.reboot = async () => {};
-}
-
-if (MockAPI && !MockAPI.toggleIgnore) {
-  MockAPI.toggleIgnore = async () => {};
 }
 
 export const API = shouldUseMock ? MockAPI : RealAPI;

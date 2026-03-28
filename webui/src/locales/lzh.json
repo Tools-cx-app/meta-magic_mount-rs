@@ -42,6 +42,8 @@
     "mountSourceDesc": "通載之源域（若樞權）",
     "partitions": "餘區",
     "partitionsDesc": "增需載之區",
+    "ignoreList": "弗載之錄",
+    "ignoreListDesc": "屏除幻載之目錄",
     "autoPlaceholder": "空則自擇",
     "reload": "重載定制",
     "save": "存定制",
@@ -71,12 +73,7 @@
     "authorLabel": "作者",
     "descriptionLabel": "釋義",
     "unknownLabel": "未詳",
-    "noDescriptionLabel": "無釋",
-    "ignoreAdd": "入 ignore.list",
-    "ignoreRemove": "出 ignore.list",
-    "ignoreAddSuccess": "已入 ignore.list",
-    "ignoreRemoveSuccess": "已出 ignore.list",
-    "ignoreFailed": "更 ignore.list 不成"
+    "noDescriptionLabel": "無釋"
   },
   "info": {
     "title": "識此工",

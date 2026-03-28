@@ -66,6 +66,10 @@ export default function ConfigTab() {
     store.setConfig({ ...store.config, partitions: values });
   }
 
+  function handleIgnoreListChange(values: string[]) {
+    store.setConfig({ ...store.config, ignoreList: values });
+  }
+
   return (
     <>
       <div class="config-container">
@@ -121,6 +125,36 @@ export default function ConfigTab() {
                 values={store.config.partitions}
                 placeholder="e.g. product, system_ext..."
                 onChange={handlePartitionsChange}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section class="config-group">
+          <div class="config-card">
+            <div class="card-header">
+              <div class="card-icon">
+                <md-icon>
+                  <svg viewBox="0 0 24 24">
+                    <path d={ICONS.delete} />
+                  </svg>
+                </md-icon>
+              </div>
+              <div class="card-text">
+                <span class="card-title">
+                  {(store.L.config as any).ignoreList || "Ignore List"}
+                </span>
+                <span class="card-desc">
+                  {(store.L.config as any).ignoreListDesc ||
+                    "Directories to exclude from mounting"}
+                </span>
+              </div>
+            </div>
+            <div class="p-input">
+              <ChipInput
+                values={store.config.ignoreList}
+                placeholder="/data/adb/modules/..."
+                onChange={handleIgnoreListChange}
               />
             </div>
           </div>
