@@ -27,11 +27,47 @@ export default function App() {
   let touchStartX = 0;
   let touchStartY = 0;
 
+  function isEditingTarget(event: TouchEvent) {
+    const activeElement = document.activeElement;
+    if (
+      activeElement instanceof HTMLElement &&
+      (activeElement.matches("input, textarea, select") ||
+        activeElement.isContentEditable ||
+        !!activeElement.closest("md-outlined-text-field"))
+    ) {
+      return true;
+    }
+
+    for (const node of event.composedPath()) {
+      if (!(node instanceof HTMLElement)) {
+        continue;
+      }
+      if (
+        node.matches("input, textarea, select, md-outlined-text-field") ||
+        node.isContentEditable ||
+        !!node.closest(
+          "input, textarea, select, [contenteditable='true'], md-outlined-text-field",
+        )
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   function switchTab(id: TabId) {
     setActiveTab(id);
   }
 
   function handleTouchStart(e: TouchEvent) {
+    if (isEditingTarget(e)) {
+      setIsDragging(false);
+      setDragOffset(0);
+
+      return;
+    }
+
     touchStartX = e.changedTouches[0].screenX;
     touchStartY = e.changedTouches[0].screenY;
     setIsDragging(true);

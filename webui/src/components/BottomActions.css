@@ -14,6 +14,9 @@
   gap: 16px;
   z-index: 90;
   pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 .bottom-actions-root > * {
   pointer-events: auto;
@@ -21,5 +24,11 @@
 }
 .bottom-actions-root > .spacer {
   flex: 1;
+  pointer-events: none;
+}
+
+.bottom-actions-root.is-keyboard-open {
+  opacity: 0;
+  transform: translateY(16px);
   pointer-events: none;
 }

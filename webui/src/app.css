@@ -29,7 +29,7 @@
   --md-sys-color-secondary: var(--secondary, #625b71);
   --md-sys-color-on-secondary: var(--onSecondary, #ffffff);
   --md-sys-color-secondary-container: var(--secondaryContainer, #e8def8);
-  --md-sys-color-on-secondary-container: var(--on-secondaryContainer, #4a4458);
+  --md-sys-color-on-secondary-container: var(--onSecondaryContainer, #4a4458);
   --md-sys-color-tertiary: var(--tertiary, #7d5260);
   --md-sys-color-on-tertiary: var(--onTertiary, #ffffff);
   --md-sys-color-tertiary-container: var(--tertiaryContainer, #ffd8e4);
