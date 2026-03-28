@@ -75,6 +75,12 @@ export default function ChipInput(props: ChipInputProps) {
         onInput={(e) => setInputValue(e.currentTarget.value)}
         onKeyDown={handleKeydown}
         onBlur={addChip}
+        onFocus={(e) => {
+          const target = e.currentTarget;
+          setTimeout(() => {
+            target.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 300);
+        }}
         placeholder={props.placeholder ?? "Add item..."}
         enterkeyhint="done"
       />
