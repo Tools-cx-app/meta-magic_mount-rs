@@ -1,17 +1,19 @@
 import { For, createEffect } from "solid-js";
+
 import { store } from "../lib/store";
 import type { TabId } from "../lib/tabs";
 import { TABS } from "../lib/tabs";
-import "./NavBar.css";
+
 import "@material/web/icon/icon.js";
 import "@material/web/ripple/ripple.js";
+import "./NavBar.css";
 
 interface NavBarProps {
   activeTab: TabId;
   onTabChange: (id: TabId) => void;
 }
 
-export default function NavBar(props: NavBarProps) {
+export default (props: NavBarProps) => {
   let navContainer: HTMLElement | undefined;
   const tabRefs: Record<string, HTMLElement | undefined> = {};
 
@@ -48,14 +50,11 @@ export default function NavBar(props: NavBarProps) {
             ref={(el) => (tabRefs[tab.id] = el)}
             type="button"
           >
-            <md-ripple></md-ripple>
+            <md-ripple />
             <div class="icon-container">
               <md-icon>
                 <svg viewBox="0 0 24 24">
-                  <path
-                    d={tab.icon}
-                    style={{ transition: "none" }}
-                  />
+                  <path d={tab.icon} style={{ transition: "none" }} />
                 </svg>
               </md-icon>
             </div>
@@ -65,4 +64,4 @@ export default function NavBar(props: NavBarProps) {
       </For>
     </nav>
   );
-}
+};

@@ -1,4 +1,5 @@
 import { For, Show, createSignal } from "solid-js";
+
 import "@material/web/chips/chip-set.js";
 import "@material/web/chips/input-chip.js";
 import "@material/web/icon/icon.js";
@@ -11,7 +12,7 @@ interface ChipInputProps {
   onChange?: (values: string[]) => void;
 }
 
-export default function ChipInput(props: ChipInputProps) {
+export default (props: ChipInputProps) => {
   const [inputValue, setInputValue] = createSignal("");
 
   function handleKeydown(e: KeyboardEvent) {
@@ -62,10 +63,10 @@ export default function ChipInput(props: ChipInputProps) {
         <For each={props.values}>
           {(val, i) => (
             <md-input-chip
-              label={val}
+              prop:label={val}
               remove-only
               on:remove={() => removeChip(i())}
-            ></md-input-chip>
+            />
           )}
         </For>
       </md-chip-set>
@@ -99,4 +100,4 @@ export default function ChipInput(props: ChipInputProps) {
       </div>
     </div>
   );
-}
+};
