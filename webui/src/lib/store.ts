@@ -204,11 +204,13 @@ function createStore() {
         prev.map((m) => (m.id === id ? { ...m, is_ignored: newStatus } : m)),
       );
       showToast(
-        newStatus ? "Added to ignore.list" : "Removed from ignore.list",
+        newStatus
+          ? L().modules.ignoreAddSuccess
+          : L().modules.ignoreRemoveSuccess,
         "success",
       );
     } catch (e) {
-      showToast("Failed to update ignore.list", "error");
+      showToast(L().modules.ignoreFailed, "error");
     }
   }
 

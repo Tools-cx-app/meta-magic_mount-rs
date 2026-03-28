@@ -145,8 +145,8 @@ export default function ModulesTab() {
                               onClick={() => store.toggleIgnoreModule(mod.id)}
                             >
                               {mod.is_ignored
-                                ? "Remove from ignore.list"
-                                : "Add to ignore.list"}
+                                ? store.L.modules.ignoreRemove
+                                : store.L.modules.ignoreAdd}
                             </md-filled-button>
                           </div>
                         </div>

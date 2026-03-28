@@ -71,7 +71,12 @@
     "authorLabel": "作者",
     "descriptionLabel": "釋義",
     "unknownLabel": "未詳",
-    "noDescriptionLabel": "無釋"
+    "noDescriptionLabel": "無釋",
+    "ignoreAdd": "入 ignore.list",
+    "ignoreRemove": "出 ignore.list",
+    "ignoreAddSuccess": "已入 ignore.list",
+    "ignoreRemoveSuccess": "已出 ignore.list",
+    "ignoreFailed": "更 ignore.list 不成"
   },
   "info": {
     "title": "識此工",

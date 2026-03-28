@@ -71,7 +71,12 @@
     "authorLabel": "Author",
     "descriptionLabel": "Description",
     "unknownLabel": "Unknown",
-    "noDescriptionLabel": "No description"
+    "noDescriptionLabel": "No description",
+    "ignoreAdd": "Add to ignore.list",
+    "ignoreRemove": "Remove from ignore.list",
+    "ignoreAddSuccess": "Added to ignore.list",
+    "ignoreRemoveSuccess": "Removed from ignore.list",
+    "ignoreFailed": "Failed to update ignore.list"
   },
   "info": {
     "title": "About",

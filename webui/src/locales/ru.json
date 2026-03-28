@@ -71,7 +71,12 @@
     "authorLabel": "Автор",
     "descriptionLabel": "Описание",
     "unknownLabel": "Неизвестно",
-    "noDescriptionLabel": "Нет описания"
+    "noDescriptionLabel": "Нет описания",
+    "ignoreAdd": "Добавить в ignore.list",
+    "ignoreRemove": "Удалить из ignore.list",
+    "ignoreAddSuccess": "Добавлено в ignore.list",
+    "ignoreRemoveSuccess": "Удалено из ignore.list",
+    "ignoreFailed": "Не удалось обновить ignore.list"
   },
   "info": {
     "title": "О нас",

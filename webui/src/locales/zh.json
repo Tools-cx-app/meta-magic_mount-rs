@@ -69,7 +69,12 @@
     "authorLabel": "作者",
     "descriptionLabel": "描述",
     "unknownLabel": "未知",
-    "noDescriptionLabel": "没有描述"
+    "noDescriptionLabel": "没有描述",
+    "ignoreAdd": "加入 ignore.list",
+    "ignoreRemove": "移出 ignore.list",
+    "ignoreAddSuccess": "已加入 ignore.list",
+    "ignoreRemoveSuccess": "已移出 ignore.list",
+    "ignoreFailed": "更新 ignore.list 失败"
   },
   "info": {
     "title": "关于项目",

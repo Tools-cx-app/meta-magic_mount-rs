@@ -69,7 +69,12 @@
     "authorLabel": "作者",
     "descriptionLabel": "説明",
     "unknownLabel": "不明",
-    "noDescriptionLabel": "説明なし"
+    "noDescriptionLabel": "説明なし",
+    "ignoreAdd": "ignore.list に追加",
+    "ignoreRemove": "ignore.list から削除",
+    "ignoreAddSuccess": "ignore.list に追加しました",
+    "ignoreRemoveSuccess": "ignore.list から削除しました",
+    "ignoreFailed": "ignore.list の更新に失敗しました"
   },
   "info": {
     "title": "について",
