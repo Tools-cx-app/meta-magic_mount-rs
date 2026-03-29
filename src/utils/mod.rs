@@ -90,22 +90,11 @@ where
     }
 }
 
-fn get_root_impl() -> String {
-    if ksucalls::KSU.load(std::sync::atomic::Ordering::Relaxed) {
-        format!("✅KernelSU ({})", ksu::version().unwrap())
-    } else if let Ok(ver) = fs::read_to_string(defs::AP_VERSION) {
-        format!("✅APatch ({ver})")
-    } else {
-        "❌ Unknown root implementation".to_string()
-    }
-}
-
 pub fn update_desc(
     #[cfg(any(target_os = "linux", target_os = "android"))] umount: bool,
 ) -> Result<()> {
     let text = format!(
-        "[Root {},{}]\\n An implementation of a metamodule using Magic Mount.",
-        get_root_impl(),
+        "[{}]\\n An implementation of a metamodule using Magic Mount.",
         if umount { "UM" } else { "" }
     );
 
