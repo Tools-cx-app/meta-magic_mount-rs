@@ -3,23 +3,24 @@ on:
   push:
     branches: ["master"]
     paths:
-      - 'src/**'
-      - 'Cargo.*'
-      - 'module/**'
-      - 'webui/**'
-      - 'xtask/**'
-      - 'build.rs'
-      - '.github/workflows/ci.yml'
+      - "src/**"
+      - "Cargo.*"
+      - "module/**"
+      - "webui/**"
+      - "xtask/**"
+      - "build.rs"
+      - ".github/workflows/ci.yml"
+      - ".github/test/**"
   pull_request:
     branches: ["master"]
     paths:
-      - 'src/**'
-      - 'Cargo.*'
-      - 'module/**'
-      - 'webui/**'
-      - 'xtask/**'
-      - 'build.rs'
-      - '.github/workflows/ci.yml'
+      - "src/**"
+      - "Cargo.*"
+      - "module/**"
+      - "webui/**"
+      - "xtask/**"
+      - "build.rs"
+      - ".github/workflows/ci.yml"
 env:
   CARGO_TERM_COLOR: always
 jobs:
@@ -90,12 +91,32 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
           COMMIT_MESSAGE: ${{ format('{0}', github.event.head_commit.message) }}
           COMMIT_URL: ${{ github.event.head_commit.url }}
           RUN_ID: ${{ github.run_number }}
         run: |
-          if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ] || [ -z "${BOT_CI_SESSION:-}" ]; then
+          if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ]; then
             exit 0
           fi
-          pip3 install telethon
+          pip3 install telethon requests cryptography
           python3 .github/bot.py
+          
+          # 使用GitHub CLI持久化bot_ci_session
+          if [ -f "./session_string.txt" ] && [ -n "${GH_TOKEN:-}" ]; then
+            echo "[+] Persisting bot_ci_session using GitHub CLI"
+            # 安装GitHub CLI
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update
+            sudo apt install -y gh
+            
+            # 设置secret
+            BOT_CI_SESSION=$(cat ./session_string.txt)
+            gh secret set BOT_CI_SESSION --body "${BOT_CI_SESSION}" --repo "${GITHUB_REPOSITORY}"
+            echo "[+] bot_ci_session persisted successfully"
+          fi
