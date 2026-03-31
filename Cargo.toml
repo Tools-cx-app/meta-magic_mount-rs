@@ -33,7 +33,7 @@ encoding_rs = "0.8.35"
 
 [build-dependencies]
 anyhow = "1.0.102"
-toml = "1.1.0"
+toml = "1.1.1"
 serde_json = "1.0.148"
 serde = { version = "1.0.228", features = ["derive"] }
 
