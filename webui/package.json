@@ -16,17 +16,17 @@
     "@material/material-color-utilities": "^0.4.0",
     "@material/web": "^2.4.1",
     "kernelsu": "^3.0.2",
-    "solid-js": "^1.9.11"
+    "solid-js": "^1.9.12"
   },
   "devDependencies": {
     "@rayxiom/eslint-config": "^4.5.1",
     "@rayxiom/prettier-config": "^4.5.1",
-    "@typescript/native-preview": "7.0.0-dev.20260324.1",
+    "@typescript/native-preview": "7.0.0-dev.20260331.1",
     "eslint": "^9.39.3",
     "prettier": "^3.8.1",
     "tslib": "^2.8.1",
     "typescript": "^6.0.2",
-    "vite": "^8.0.2",
+    "vite": "^8.0.3",
     "vite-plugin-solid": "^2.11.11"
   }
 }
