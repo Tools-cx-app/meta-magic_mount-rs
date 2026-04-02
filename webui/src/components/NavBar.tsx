@@ -1,11 +1,15 @@
+/**
+ * Copyright 2025 Magic Mount-rs Authors
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { For, createEffect } from "solid-js";
 
-import { store } from "../lib/store";
+import { uiStore } from "../lib/stores/uiStore";
 import type { TabId } from "../lib/tabs";
 import { TABS } from "../lib/tabs";
 
-import "@material/web/icon/icon.js";
-import "@material/web/ripple/ripple.js";
 import "./NavBar.css";
 
 interface NavBarProps {
@@ -13,7 +17,7 @@ interface NavBarProps {
   onTabChange: (id: TabId) => void;
 }
 
-export default (props: NavBarProps) => {
+export default function NavBar(props: NavBarProps) {
   let navContainer: HTMLElement | undefined;
   const tabRefs: Record<string, HTMLElement | undefined> = {};
 
@@ -33,15 +37,7 @@ export default (props: NavBarProps) => {
   });
 
   return (
-    <nav
-      class="bottom-nav"
-      ref={navContainer}
-      style={{
-        "padding-bottom": store.fixBottomNav
-          ? "48px"
-          : "max(16px, env(safe-area-inset-bottom, 0px))",
-      }}
-    >
+    <nav class="bottom-nav" ref={navContainer}>
       <For each={TABS}>
         {(tab) => (
           <button
@@ -50,18 +46,15 @@ export default (props: NavBarProps) => {
             ref={(el) => (tabRefs[tab.id] = el)}
             type="button"
           >
-            <md-ripple />
             <div class="icon-container">
-              <md-icon>
-                <svg viewBox="0 0 24 24">
-                  <path d={tab.icon} style={{ transition: "none" }} />
-                </svg>
-              </md-icon>
+              <svg viewBox="0 0 24 24">
+                <path d={tab.icon} />
+              </svg>
             </div>
-            <span class="label">{store.L.tabs[tab.id]}</span>
+            <span class="label">{uiStore.L.tabs[tab.id]}</span>
           </button>
         )}
       </For>
     </nav>
   );
-};
+}

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{BTreeMap, HashMap, HashSet},
     fs,
     io::Cursor,
     path::Path,
@@ -17,15 +17,37 @@ use crate::{
     utils::validate_module_id,
 };
 
-#[derive(Debug, Serialize)]
-pub struct ModuleInfo {
-    pub id: String,
+#[derive(Debug)]
+struct ModuleRecord {
+    id: String,
     name: String,
     version: String,
     author: String,
     description: String,
     disabled: bool,
-    skip: bool,
+    skip_mount: bool,
+    has_mount_files: bool,
+    source_path: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ModuleRules {
+    default_mode: String,
+    paths: BTreeMap<String, String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct AppModule {
+    pub id: String,
+    name: String,
+    version: String,
+    author: String,
+    description: String,
+    mode: String,
+    is_mounted: bool,
+    enabled: bool,
+    source_path: String,
+    rules: ModuleRules,
 }
 
 fn read_prop<P>(path: P) -> Result<HashMap<String, String>>
@@ -43,12 +65,7 @@ where
     Ok(map)
 }
 
-/// Scans for modules that will be actually mounted by `magic_mount`.
-/// Filters out modules that:
-/// 1. Do not have a `system` directory.
-/// 2. Are disabled or removed.
-/// 3. Have the `skip_mount` flag.
-pub fn scan_modules<P>(module_dir: P, extra: &[String]) -> Vec<ModuleInfo>
+fn collect_modules<P>(module_dir: P, extra: &[String]) -> Vec<ModuleRecord>
 where
     P: AsRef<Path>,
 {
@@ -71,23 +88,16 @@ where
             partitions.insert("system".to_string());
             partitions.extend(extra.iter().cloned());
 
-            for p in &partitions {
-                if entry.path().join(p).is_dir() {
+            for partition in &partitions {
+                if entry.path().join(partition).is_dir() {
                     modified = true;
                     break;
                 }
             }
 
-            if !modified {
-                continue;
-            }
-
             let disabled =
                 path.join(DISABLE_FILE_NAME).exists() || path.join(REMOVE_FILE_NAME).exists();
-            let skip = path.join(SKIP_MOUNT_FILE_NAME).exists();
-            if disabled || skip {
-                continue;
-            }
+            let skip_mount = path.join(SKIP_MOUNT_FILE_NAME).exists();
 
             let prop_path = path.join("module.prop");
 
@@ -116,14 +126,16 @@ where
             };
 
             if validate_module_id(id).is_ok() {
-                modules.push(ModuleInfo {
+                modules.push(ModuleRecord {
                     id: id.clone(),
                     name: name.clone(),
                     version: version.clone(),
                     author: author.clone(),
                     description: description.clone(),
                     disabled,
-                    skip,
+                    skip_mount,
+                    has_mount_files: modified,
+                    source_path: path.display().to_string(),
                 });
             }
         }
@@ -131,4 +143,34 @@ where
     modules.sort_by(|a, b| a.id.cmp(&b.id));
 
     modules
+}
+
+pub fn list_modules<P>(module_dir: P, extra: &[String]) -> Vec<AppModule>
+where
+    P: AsRef<Path>,
+{
+    collect_modules(module_dir, extra)
+        .into_iter()
+        .map(|module| {
+            let is_mounted = module.has_mount_files && !module.disabled && !module.skip_mount;
+            let mode = if is_mounted { "magic" } else { "ignore" }.to_string();
+            let default_mode = mode.clone();
+
+            AppModule {
+                id: module.id,
+                name: module.name,
+                version: module.version,
+                author: module.author,
+                description: module.description,
+                mode,
+                is_mounted,
+                enabled: !module.disabled,
+                source_path: module.source_path,
+                rules: ModuleRules {
+                    default_mode,
+                    paths: BTreeMap::new(),
+                },
+            }
+        })
+        .collect()
 }

@@ -29,6 +29,7 @@
     "androidLabel": "Android",
     "kernelLabel": "カーネル",
     "selinuxLabel": "SELinux",
+    "loadError": "システム状態の読み込みに失敗しました",
     "refresh": "更新"
   },
   "config": {
@@ -50,9 +51,7 @@
     "loadError": "設定の読み込みに失敗しました",
     "loadDefault": "デフォルト設定を読み込みました",
     "saveSuccess": "設定を保存しました",
-    "saveFailed": "設定の保存に失敗しました",
-    "fixBottomNav": "底部ナビゲーション修正",
-    "webuiLabel": "WebUI"
+    "saveFailed": "設定の保存に失敗しました"
   },
   "modules": {
     "title": "アクティブモジュール",

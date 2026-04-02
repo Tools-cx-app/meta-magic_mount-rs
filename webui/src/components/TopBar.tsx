@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { For, Show, createSignal } from "solid-js";
+import { For, Show, createSignal, onCleanup, onMount } from "solid-js";
 
 import { ICONS } from "../lib/constants";
-import { store } from "../lib/store";
+import { uiStore } from "../lib/stores/uiStore";
 
 import "./TopBar.css";
 
@@ -17,7 +17,7 @@ export default function TopBar() {
   let menuRef: HTMLDivElement | undefined;
 
   function setLang(code: string) {
-    store.setLang(code);
+    uiStore.setLang(code);
     setShowLangMenu(false);
   }
 
@@ -34,20 +34,21 @@ export default function TopBar() {
     }
   }
 
-  if (typeof window !== "undefined") {
+  onMount(() => {
     window.addEventListener("click", handleOutsideClick);
-  }
+    onCleanup(() => window.removeEventListener("click", handleOutsideClick));
+  });
 
   return (
     <header class="top-bar">
       <div class="top-bar-content">
-        <h1 class="screen-title">{store.L.common.appName}</h1>
+        <h1 class="screen-title">{uiStore.L.common.appName}</h1>
         <div class="top-actions">
           <button
             class="btn-icon"
             ref={langButtonRef}
             onClick={() => setShowLangMenu(!showLangMenu())}
-            title={store.L.common.language}
+            title={uiStore.L.common.language}
           >
             <svg viewBox="0 0 24 24">
               <path d={ICONS.translate} fill="currentColor" />
@@ -56,7 +57,7 @@ export default function TopBar() {
 
           <Show when={showLangMenu()}>
             <div class="menu-dropdown" ref={menuRef}>
-              <For each={store.availableLanguages}>
+              <For each={uiStore.availableLanguages}>
                 {(l) => (
                   <button class="menu-item" onClick={() => setLang(l.code)}>
                     {l.name}

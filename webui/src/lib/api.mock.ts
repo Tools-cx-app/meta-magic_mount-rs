@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { APIType } from "../types";
+import type { AppAPI } from "../types";
 import { DEFAULT_CONFIG } from "./constants";
 
 const MOCK_DELAY = 600;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const MockAPI: APIType = {
+export const MockAPI: AppAPI = {
   loadConfig: async () => {
     await delay(MOCK_DELAY);
     console.log("[MockAPI] loadConfig");

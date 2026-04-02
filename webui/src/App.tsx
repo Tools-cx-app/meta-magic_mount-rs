@@ -4,26 +4,48 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Show, createMemo, createSignal, onMount } from "solid-js";
+import {
+  For,
+  Show,
+  createEffect,
+  createMemo,
+  createSignal,
+  lazy,
+  onCleanup,
+  onMount,
+} from "solid-js";
 
 import NavBar from "./components/NavBar";
 import Spinner from "./components/Spinner";
 import Toast from "./components/Toast";
 import TopBar from "./components/TopBar";
-import { store } from "./lib/store";
+import { configStore } from "./lib/stores/configStore";
+import { moduleStore } from "./lib/stores/moduleStore";
+import { sysStore } from "./lib/stores/sysStore";
+import { uiStore } from "./lib/stores/uiStore";
 import type { TabId } from "./lib/tabs";
 import { TABS } from "./lib/tabs";
-import ConfigTab from "./routes/ConfigTab";
-import InfoTab from "./routes/InfoTab";
-import ModulesTab from "./routes/ModulesTab";
-import StatusTab from "./routes/StatusTab";
+
+const loadStatusTab = () => import("./routes/StatusTab");
+const loadConfigTab = () => import("./routes/ConfigTab");
+const loadModulesTab = () => import("./routes/ModulesTab");
+const loadInfoTab = () => import("./routes/InfoTab");
+
+const routes = [
+  { id: "status", load: loadStatusTab, component: lazy(loadStatusTab) },
+  { id: "config", load: loadConfigTab, component: lazy(loadConfigTab) },
+  { id: "modules", load: loadModulesTab, component: lazy(loadModulesTab) },
+  { id: "info", load: loadInfoTab, component: lazy(loadInfoTab) },
+] satisfies { id: TabId; load: () => Promise<unknown>; component: any }[];
 
 export default function App() {
   const [activeTab, setActiveTab] = createSignal<TabId>("status");
   const [dragOffset, setDragOffset] = createSignal(0);
   const [isDragging, setIsDragging] = createSignal(false);
   const [containerWidth, setContainerWidth] = createSignal(0);
-  const [isReady, setIsReady] = createSignal(false);
+  const [visitedTabs, setVisitedTabs] = createSignal(
+    new Set<TabId>(["status"]),
+  );
   const [dragAxisLocked, setDragAxisLocked] = createSignal<"x" | "y" | null>(
     null,
   );
@@ -64,6 +86,20 @@ export default function App() {
   function switchTab(id: TabId) {
     setActiveTab(id);
   }
+
+  createEffect(() => {
+    const currentTab = activeTab();
+    setVisitedTabs((prev) => {
+      if (prev.has(currentTab)) {
+        return prev;
+      }
+
+      const next = new Set(prev);
+      next.add(currentTab);
+
+      return next;
+    });
+  });
 
   function handleTouchStart(e: TouchEvent) {
     if (isEditingTarget(e)) {
@@ -138,21 +174,47 @@ export default function App() {
   }
 
   onMount(async () => {
-    try {
-      await store.init();
-    } finally {
-      setIsReady(true);
+    let preloadTimer = 0;
+
+    await uiStore.init();
+    await Promise.all([
+      configStore.loadConfig(),
+      sysStore.ensureStatusLoaded(),
+      moduleStore.ensureModulesLoaded(),
+    ]);
+
+    const pendingRoutes = routes.filter((route) => route.id !== activeTab());
+    let nextIndex = 0;
+
+    function preloadNextRoute() {
+      const nextRoute = pendingRoutes[nextIndex++];
+      if (!nextRoute) {
+        return;
+      }
+
+      void nextRoute.load();
+
+      if (nextIndex < pendingRoutes.length) {
+        preloadTimer = window.setTimeout(preloadNextRoute, 120);
+      }
     }
+
+    preloadTimer = window.setTimeout(preloadNextRoute, 250);
+
+    onCleanup(() => window.clearTimeout(preloadTimer));
   });
 
+  const visibleTabs = createMemo(() => routes.map((route) => route.id));
   const baseTranslateX = createMemo(
-    () => TABS.findIndex((t) => t.id === activeTab()) * -20,
+    () =>
+      visibleTabs().indexOf(activeTab()) *
+      -(100 / Math.max(visibleTabs().length, 1)),
   );
 
   return (
     <div class="app-root">
       <Show
-        when={isReady()}
+        when={uiStore.isReady}
         fallback={
           <div
             style={{
@@ -189,31 +251,31 @@ export default function App() {
             class="swipe-track"
             style={{
               transform: `translateX(calc(${baseTranslateX()}% + ${dragOffset()}px))`,
+              width: `${visibleTabs().length * 100}%`,
               transition: isDragging()
                 ? "none"
                 : "transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1)",
             }}
           >
-            <div class="swipe-page">
-              <div class="page-scroller">
-                <StatusTab />
-              </div>
-            </div>
-            <div class="swipe-page">
-              <div class="page-scroller">
-                <ConfigTab />
-              </div>
-            </div>
-            <div class="swipe-page">
-              <div class="page-scroller">
-                <ModulesTab />
-              </div>
-            </div>
-            <div class="swipe-page">
-              <div class="page-scroller">
-                <InfoTab />
-              </div>
-            </div>
+            <For each={routes}>
+              {(route) => (
+                <div
+                  class="swipe-page"
+                  style={{
+                    width: `${100 / Math.max(visibleTabs().length, 1)}%`,
+                  }}
+                >
+                  <Show
+                    when={visitedTabs().has(route.id)}
+                    fallback={<div class="page-scroller" aria-hidden="true" />}
+                  >
+                    <div class="page-scroller">
+                      <route.component />
+                    </div>
+                  </Show>
+                </div>
+              )}
+            </For>
           </div>
         </main>
         <NavBar activeTab={activeTab()} onTabChange={switchTab} />

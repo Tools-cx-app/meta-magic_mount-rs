@@ -31,6 +31,7 @@
     "androidLabel": "Android",
     "kernelLabel": "Ядро",
     "selinuxLabel": "SELinux",
+    "loadError": "Не удалось загрузить состояние системы",
     "refresh": "Обновить"
   },
   "config": {
@@ -52,9 +53,7 @@
     "loadError": "Не удалось загрузить настройки",
     "loadDefault": "Загружены настройки по умолчанию",
     "saveSuccess": "Настройки сохранены",
-    "saveFailed": "Не удалось сохранить настройки",
-    "fixBottomNav": "Испр. навбар",
-    "webuiLabel": "WebUI"
+    "saveFailed": "Не удалось сохранить настройки"
   },
   "modules": {
     "title": "Активные модули",

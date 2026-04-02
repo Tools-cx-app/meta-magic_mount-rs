@@ -3,12 +3,13 @@
  * GPL-3.0-or-later
  */
 
-import { For, Show, createMemo, createSignal, onMount } from "solid-js";
+import { For, Show, createMemo, createSignal } from "solid-js";
 
 import BottomActions from "../components/BottomActions";
 import Skeleton from "../components/Skeleton";
 import { ICONS } from "../lib/constants";
-import { store } from "../lib/store";
+import { moduleStore } from "../lib/stores/moduleStore";
+import { uiStore } from "../lib/stores/uiStore";
 
 import "./ModulesTab.css";
 import "@material/web/iconbutton/filled-tonal-icon-button.js";
@@ -19,12 +20,8 @@ export default function ModulesTab() {
   const [searchQuery, setSearchQuery] = createSignal("");
   const [expandedId, setExpandedId] = createSignal<string | null>(null);
 
-  onMount(() => {
-    store.loadModules();
-  });
-
   const filteredModules = createMemo(() =>
-    store.modules.filter((m) => {
+    moduleStore.modules.filter((m) => {
       const q = searchQuery().toLowerCase();
       const matchSearch =
         m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q);
@@ -54,7 +51,7 @@ export default function ModulesTab() {
             <input
               type="text"
               class="search-input"
-              placeholder={store.L.modules.searchPlaceholder}
+              placeholder={uiStore.L.modules.searchPlaceholder}
               value={searchQuery()}
               onInput={(e) => setSearchQuery(e.currentTarget.value)}
             />
@@ -63,7 +60,7 @@ export default function ModulesTab() {
 
         <div class="modules-list">
           <Show
-            when={!store.loading.modules}
+            when={!moduleStore.loading}
             fallback={
               <For each={Array.from({ length: 6 })}>
                 {() => <Skeleton height="64px" borderRadius="16px" />}
@@ -82,8 +79,8 @@ export default function ModulesTab() {
                     </md-icon>
                   </div>
                   <p>
-                    {store.modules.length === 0
-                      ? store.L.modules.empty
+                    {moduleStore.modules.length === 0
+                      ? uiStore.L.modules.empty
                       : "No matching modules"}
                   </p>
                 </div>
@@ -123,20 +120,20 @@ export default function ModulesTab() {
                         <div class="module-body-content">
                           <div class="body-section">
                             <div class="section-label">
-                              {store.L.modules.descriptionLabel}
+                              {uiStore.L.modules.descriptionLabel}
                             </div>
                             <p class="module-desc">
                               {mod.description ||
-                                store.L.modules.noDescriptionLabel}
+                                uiStore.L.modules.noDescriptionLabel}
                             </p>
                           </div>
 
                           <div class="body-section">
                             <div class="section-label">
-                              {store.L.modules.authorLabel}
+                              {uiStore.L.modules.authorLabel}
                             </div>
                             <div class="module-author">
-                              {mod.author || store.L.modules.unknownLabel}
+                              {mod.author || uiStore.L.modules.unknownLabel}
                             </div>
                           </div>
                         </div>
@@ -153,8 +150,8 @@ export default function ModulesTab() {
       <BottomActions>
         <div class="spacer" />
         <md-filled-tonal-icon-button
-          onClick={() => store.loadModules()}
-          title={store.L.modules.reload}
+          onClick={() => moduleStore.loadModules()}
+          title={uiStore.L.modules.reload}
         >
           <md-icon>
             <svg viewBox="0 0 24 24">

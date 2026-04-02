@@ -1,4 +1,13 @@
+/**
+ * Copyright 2025 Magic Mount-rs Authors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 .bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   background-color: var(--md-sys-color-surface-container);
   border-top: none;
@@ -10,12 +19,11 @@
   flex-shrink: 0;
   -ms-overflow-style: none;
   gap: 8px;
+  padding-bottom: max(
+    16px,
+    var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))
+  );
   z-index: 100;
-  transition: padding-bottom 0.3s cubic-bezier(0.2, 0, 0, 1);
-  will-change: padding-bottom;
-}
-.bottom-nav.fix-padding {
-  padding-bottom: calc(max(16px, var(--safe-area-inset-bottom, 0px)) + 48px);
 }
 .bottom-nav::-webkit-scrollbar {
   display: none;
@@ -51,16 +59,13 @@
     width 0.2s;
   pointer-events: none;
 }
-md-icon svg {
+.nav-tab svg {
   width: 24px;
   height: 24px;
   fill: currentColor;
   transition:
     fill 0.2s,
     transform 0.2s;
-}
-md-icon svg path {
-  transition: none !important;
 }
 .nav-tab.active .icon-container {
   background-color: var(--md-sys-color-secondary-container);
@@ -69,7 +74,7 @@ md-icon svg path {
 .nav-tab.active {
   color: var(--md-sys-color-on-surface);
 }
-.nav-tab.active md-icon svg {
+.nav-tab.active svg {
   fill: var(--md-sys-color-on-secondary-container);
 }
 .nav-tab.active .label {

@@ -4,12 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Show, createMemo, createSignal, onMount } from "solid-js";
+import { Show, createMemo, createSignal } from "solid-js";
 
 import BottomActions from "../components/BottomActions";
 import Skeleton from "../components/Skeleton";
 import { ICONS } from "../lib/constants";
-import { store } from "../lib/store";
+import { configStore } from "../lib/stores/configStore";
+import { moduleStore } from "../lib/stores/moduleStore";
+import { sysStore } from "../lib/stores/sysStore";
+import { uiStore } from "../lib/stores/uiStore";
 
 import "./StatusTab.css";
 import "@material/web/icon/icon.js";
@@ -20,17 +23,13 @@ import "@material/web/dialog/dialog.js";
 import "@material/web/button/text-button.js";
 
 export default function StatusTab() {
-  onMount(() => {
-    store.loadStatus();
-  });
-
   // function copyDebugInfo() {
   //   const info =
-  //     `Magic Mount v${store.version}\n` +
-  //     `Model: ${store.device.model}\n` +
-  //     `Android: ${store.device.android}\n` +
-  //     `Kernel: ${store.device.kernel}\n` +
-  //     `SELinux: ${store.device.selinux}`;
+  //     `Magic Mount v${sysStore.version}\n` +
+  //     `Model: ${sysStore.device.model}\n` +
+  //     `Android: ${sysStore.device.android}\n` +
+  //     `Kernel: ${sysStore.device.kernel}\n` +
+  //     `SELinux: ${sysStore.device.selinux}`;
   //   navigator.clipboard.writeText(info);
   // }
 
@@ -38,14 +37,14 @@ export default function StatusTab() {
 
   function handleReboot() {
     setShowRebootConfirm(false);
-    store.rebootDevice();
+    sysStore.rebootDevice();
   }
 
   const mountedCount = createMemo(
-    () => store.modules?.filter((m) => m.is_mounted).length ?? 0,
+    () => moduleStore.modules?.filter((m) => m.is_mounted).length ?? 0,
   );
   const isSelinuxEnforcing = createMemo(
-    () => store.device.selinux === "Enforcing",
+    () => sysStore.device.selinux === "Enforcing",
   );
 
   return (
@@ -58,14 +57,14 @@ export default function StatusTab() {
           "--md-sys-color-scrim": "transparent",
         }}
       >
-        <div slot="headline">{store.L.common.rebootTitle}</div>
-        <div slot="content">{store.L.common.rebootConfirm}</div>
+        <div slot="headline">{uiStore.L.common.rebootTitle}</div>
+        <div slot="content">{uiStore.L.common.rebootConfirm}</div>
         <div slot="actions">
           <md-text-button on:click={() => setShowRebootConfirm(false)}>
-            {store.L.common.cancel}
+            {uiStore.L.common.cancel}
           </md-text-button>
           <md-text-button on:click={handleReboot}>
-            {store.L.common.reboot}
+            {uiStore.L.common.reboot}
           </md-text-button>
         </div>
       </md-dialog>
@@ -87,11 +86,11 @@ export default function StatusTab() {
                   </svg>
                 </md-icon>
               </div>
-              <span class="hero-title">{store.L.status.deviceTitle}</span>
+              <span class="hero-title">{uiStore.L.status.deviceTitle}</span>
             </div>
             <div class="hero-main-info">
               <Show
-                when={!store.loading.status}
+                when={!sysStore.loading}
                 fallback={
                   <>
                     <Skeleton width="150px" height="32px" />
@@ -99,9 +98,9 @@ export default function StatusTab() {
                   </>
                 }
               >
-                <span class="device-model">{store.device.model}</span>
+                <span class="device-model">{sysStore.device.model}</span>
                 <div class="version-pill">
-                  <span>Magic Mount v{store.version}</span>
+                  <span>Magic Mount v{sysStore.version}</span>
                 </div>
               </Show>
             </div>
@@ -112,7 +111,7 @@ export default function StatusTab() {
         <div class="stats-row">
           <div class="stat-card">
             <Show
-              when={!store.loading.status}
+              when={!sysStore.loading}
               fallback={
                 <>
                   <Skeleton width="40px" height="32px" />
@@ -121,13 +120,13 @@ export default function StatusTab() {
               }
             >
               <div class="stat-value">{mountedCount()}</div>
-              <div class="stat-label">{store.L.status.moduleActive}</div>
+              <div class="stat-label">{uiStore.L.status.moduleActive}</div>
             </Show>
           </div>
 
           <div class="stat-card">
             <Show
-              when={!store.loading.status}
+              when={!sysStore.loading}
               fallback={
                 <>
                   <Skeleton width="40px" height="32px" />
@@ -135,44 +134,46 @@ export default function StatusTab() {
                 </>
               }
             >
-              <div class="stat-value">{store.config?.mountsource ?? "-"}</div>
-              <div class="stat-label">{store.L.config.mountSource}</div>
+              <div class="stat-value">
+                {configStore.config?.mountsource ?? "-"}
+              </div>
+              <div class="stat-label">{uiStore.L.config.mountSource}</div>
             </Show>
           </div>
         </div>
 
         <div class="details-card">
-          <div class="card-title">{store.L.status.sysInfoTitle}</div>
+          <div class="card-title">{uiStore.L.status.sysInfoTitle}</div>
           <div class="info-list">
             <div class="info-item">
-              <span class="info-label">{store.L.status.androidLabel}</span>
+              <span class="info-label">{uiStore.L.status.androidLabel}</span>
               <Show
-                when={!store.loading.status}
+                when={!sysStore.loading}
                 fallback={<Skeleton width="60px" height="16px" />}
               >
-                <span class="info-val">{store.device.android}</span>
+                <span class="info-val">{sysStore.device.android}</span>
               </Show>
             </div>
 
             <div class="info-item">
-              <span class="info-label">{store.L.status.selinuxLabel}</span>
+              <span class="info-label">{uiStore.L.status.selinuxLabel}</span>
               <Show
-                when={!store.loading.status}
+                when={!sysStore.loading}
                 fallback={<Skeleton width="80px" height="16px" />}
               >
                 <span class={`info-val ${isSelinuxEnforcing() ? "" : "warn"}`}>
-                  {store.device.selinux}
+                  {sysStore.device.selinux}
                 </span>
               </Show>
             </div>
 
             <div class="info-item full-width">
-              <span class="info-label">{store.L.status.kernelLabel}</span>
+              <span class="info-label">{uiStore.L.status.kernelLabel}</span>
               <Show
-                when={!store.loading.status}
+                when={!sysStore.loading}
                 fallback={<Skeleton width="100%" height="16px" />}
               >
-                <span class="info-val mono">{store.device.kernel}</span>
+                <span class="info-val mono">{sysStore.device.kernel}</span>
               </Show>
             </div>
           </div>
@@ -184,7 +185,7 @@ export default function StatusTab() {
         <md-filled-tonal-icon-button
           class="reboot-btn"
           on:click={() => setShowRebootConfirm(true)}
-          prop:title={store.L.common.reboot}
+          prop:title={uiStore.L.common.reboot}
         >
           <md-icon>
             <svg viewBox="0 0 24 24">
@@ -194,9 +195,9 @@ export default function StatusTab() {
         </md-filled-tonal-icon-button>
 
         <md-filled-tonal-icon-button
-          on:click={() => store.loadStatus()}
-          prop:disabled={store.loading.status}
-          prop:title={store.L.status.refresh}
+          on:click={() => sysStore.loadStatus()}
+          prop:disabled={sysStore.loading}
+          prop:title={uiStore.L.status.refresh}
         >
           <md-icon>
             <svg viewBox="0 0 24 24">

@@ -1,0 +1,47 @@
+/**
+ * Copyright 2025 Magic Mount-rs Authors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+.bottom-actions-root {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(
+    var(--bottom-nav-height, 88px) +
+      var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))
+  );
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 16px;
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity, transform;
+  transform: translate3d(
+    0,
+    calc(-1 * var(--bottom-actions-keyboard-inset, 0px)),
+    0
+  );
+  transition:
+    opacity 0.2s ease,
+    transform 0.24s cubic-bezier(0.2, 1, 0.2, 1);
+}
+.bottom-actions-root.is-active {
+  opacity: 1;
+}
+.bottom-actions-root > * {
+  pointer-events: auto;
+}
+.bottom-actions-root > .spacer {
+  flex: 1;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bottom-actions-root {
+    transition: opacity 0.01s linear;
+  }
+}

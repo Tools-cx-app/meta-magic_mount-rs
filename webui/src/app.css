@@ -21,6 +21,7 @@
 
   --top-inset: var(--window-inset-top, 0px);
   --bottom-inset: var(--window-inset-bottom, 0px);
+  --bottom-nav-height: 88px;
 
   --md-sys-color-primary: var(--primary, #6750a4);
   --md-sys-color-on-primary: var(--onPrimary, #ffffff);
@@ -282,27 +283,6 @@ button:active {
 .text-field input:focus ~ label,
 .text-field select:focus ~ label {
   color: var(--md-sys-color-primary);
-}
-.bottom-actions {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 16px 24px calc(16px + var(--safe-area-inset-bottom, 0px)) 24px;
-  background: linear-gradient(
-    to top,
-    var(--md-sys-color-surface) 85%,
-    transparent
-  );
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-  z-index: 50;
-  pointer-events: none;
-}
-.bottom-actions button {
-  pointer-events: auto;
 }
 code,
 pre {

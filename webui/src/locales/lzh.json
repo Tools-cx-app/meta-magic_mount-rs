@@ -31,6 +31,7 @@
     "androidLabel": "機人之版",
     "kernelLabel": "核之版",
     "selinuxLabel": "安界",
+    "loadError": "載系統狀不成",
     "refresh": "更觀"
   },
   "config": {
@@ -52,9 +53,7 @@
     "loadError": "載定制不成",
     "loadDefault": "初制定矣",
     "saveSuccess": "定制存成",
-    "saveFailed": "存定制不成",
-    "fixBottomNav": "正底導之蔽",
-    "webuiLabel": "網界"
+    "saveFailed": "存定制不成"
   },
   "modules": {
     "title": "載錄",

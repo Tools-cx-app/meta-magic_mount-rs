@@ -10,7 +10,8 @@ import MagicLogo from "../components/MagicLogo";
 import Skeleton from "../components/Skeleton";
 import { API } from "../lib/api";
 import { ICONS } from "../lib/constants";
-import { store } from "../lib/store";
+import { sysStore } from "../lib/stores/sysStore";
+import { uiStore } from "../lib/stores/uiStore";
 
 import "./InfoTab.css";
 import "@material/web/button/filled-tonal-button.js";
@@ -39,17 +40,8 @@ export default function InfoTab() {
   const [contributors, setContributors] = createSignal<Contributor[]>([]);
   const [loading, setLoading] = createSignal(true);
   const [error, setError] = createSignal(false);
-  const [version, setVersion] = createSignal(store.version);
 
   onMount(async () => {
-    try {
-      const v = await API.getVersion();
-      if (v) {
-        setVersion(v);
-      }
-    } catch (e) {
-      console.error("Failed to fetch version", e);
-    }
     await fetchContributors();
   });
 
@@ -132,8 +124,8 @@ export default function InfoTab() {
         <div class="app-logo">
           <MagicLogo />
         </div>
-        <span class="app-name">{store.L.common.appName}</span>
-        <span class="app-version">{version()}</span>
+        <span class="app-name">{uiStore.L.common.appName}</span>
+        <span class="app-version">{sysStore.version}</span>
       </div>
 
       <div class="action-buttons">
@@ -148,12 +140,12 @@ export default function InfoTab() {
               <path d={ICONS.github} />
             </svg>
           </md-icon>
-          {store.L.info.projectLink}
+          {uiStore.L.info.projectLink}
         </md-filled-tonal-button>
       </div>
 
       <div class="contributors-section">
-        <div class="section-title">{store.L.info.contributors}</div>
+        <div class="section-title">{uiStore.L.info.contributors}</div>
         <div class="list-wrapper">
           <Show
             when={!loading()}
@@ -174,7 +166,7 @@ export default function InfoTab() {
             <Show
               when={!error()}
               fallback={
-                <div class="error-message">{store.L.info.loadFail}</div>
+                <div class="error-message">{uiStore.L.info.loadFail}</div>
               }
             >
               <md-list class="contributors-list">
@@ -195,7 +187,7 @@ export default function InfoTab() {
                       />
                       <div slot="headline">{user.name ?? user.login}</div>
                       <div slot="supporting-text">
-                        {user.bio ?? store.L.info.noBio}
+                        {user.bio ?? uiStore.L.info.noBio}
                       </div>
                     </md-list-item>
                   )}

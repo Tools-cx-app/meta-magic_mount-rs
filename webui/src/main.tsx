@@ -9,6 +9,7 @@ import { render } from "solid-js/web";
 
 import App from "./App";
 
+import "./init";
 import "./app.css";
 import "./layout.css";
 

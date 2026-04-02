@@ -29,6 +29,7 @@
     "androidLabel": "Android版本",
     "kernelLabel": "內核版本",
     "selinuxLabel": "SELinux",
+    "loadError": "加載系統狀態失敗",
     "refresh": "刷新"
   },
   "config": {
@@ -50,9 +51,7 @@
     "loadError": "加載配置失敗",
     "loadDefault": "已加載默認配置",
     "saveSuccess": "配置保存成功",
-    "saveFailed": "保存配置失敗",
-    "fixBottomNav": "修復底部導航遮擋",
-    "webuiLabel": "WebUI"
+    "saveFailed": "保存配置失敗"
   },
   "modules": {
     "title": "掛載列表",

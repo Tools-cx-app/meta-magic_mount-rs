@@ -36,7 +36,10 @@
   height: 100%;
   overflow-y: auto;
   padding: 16px;
-  padding-bottom: calc(16px + var(--safe-area-inset-bottom, 0px));
+  padding-bottom: calc(
+    16px + var(--bottom-nav-height, 88px) +
+      var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px))
+  );
   box-sizing: border-box;
   width: 100%;
   max-width: 800px;
