@@ -12,9 +12,7 @@
     "reboot": "Перезапуск",
     "rebootTitle": "Перезапустить систему?",
     "rebootConfirm": "Вы уверены что хотите перезапустить телефон?",
-    "rebootFailed": "Ошибка перезапуска",
-    "resetSuccess": "Конфиг успешно сброшен",
-    "resetFailed": "Не удалось сбросить конфиг"
+    "rebootFailed": "Ошибка перезапуска"
   },
   "tabs": {
     "status": "Статус",
@@ -24,7 +22,6 @@
   },
   "status": {
     "storageTitle": "Стратегия бэкенда",
-    "modeStats": "Распределение режимов",
     "sysInfoTitle": "Информация о системе",
     "deviceTitle": "Устройство",
     "moduleTitle": "Модули",
@@ -35,7 +32,6 @@
     "kernel": "Ядро",
     "selinuxLabel": "SELinux",
     "selinux": "SELinux",
-    "activePartitions": "Разделы",
     "loadError": "Не удалось загрузить состояние системы",
     "refresh": "Обновить"
   },

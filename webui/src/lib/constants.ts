@@ -12,8 +12,6 @@ export const DEFAULT_CONFIG = {
 };
 export const PATHS = {
   BINARY: "/data/adb/modules/magic_mount_rs/meta-mm",
-  MODULE_ROOT: "/data/adb/modules",
-  DAEMON_STATE: "/data/adb/magic_mount/run/daemon_state.json",
 };
 export const BUILTIN_PARTITIONS = [
   "vendor",

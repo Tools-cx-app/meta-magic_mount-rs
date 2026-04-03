@@ -1,30 +1,18 @@
 import { createRoot, createSignal } from "solid-js";
 
-import type { DeviceInfo, StorageStatus, SystemInfo } from "../../types";
+import type { DeviceInfo, SystemInfo } from "../../types";
 import { API } from "../api";
 import { uiStore } from "./uiStore";
 
 function createSysStore() {
   const [device, setDevice] = createSignal<DeviceInfo>({
     model: "-",
-    android: "-",
-    kernel: "-",
-    selinux: "-",
   });
   const [version, setVersion] = createSignal("...");
-  const [storage, setStorage] = createSignal<StorageStatus>({
-    used: "-",
-    size: "-",
-    percent: "0%",
-    type: null,
-  });
   const [systemInfo, setSystemInfo] = createSignal<SystemInfo>({
     kernel: "-",
     selinux: "-",
-    mountBase: "-",
-    activeMounts: [],
   });
-  const [activePartitions, setActivePartitions] = createSignal<string[]>([]);
   const [loading, setLoading] = createSignal(false);
   let pendingLoad: Promise<void> | null = null;
   let hasLoaded = false;
@@ -37,22 +25,15 @@ function createSysStore() {
     setLoading(true);
     pendingLoad = (async () => {
       try {
-        const [baseDevice, nextVersion, nextStorage, info] = await Promise.all([
+        const [baseDevice, nextVersion, info] = await Promise.all([
           API.getDeviceStatus(),
           API.getVersion(),
-          API.getStorageUsage(),
           API.getSystemInfo(),
         ]);
 
-        setDevice({
-          ...baseDevice,
-          kernel: info.kernel,
-          selinux: info.selinux,
-        });
+        setDevice(baseDevice);
         setVersion(nextVersion);
-        setStorage(nextStorage);
         setSystemInfo(info);
-        setActivePartitions(info.activeMounts ?? []);
         hasLoaded = true;
       } catch {
         uiStore.showToast(
@@ -94,14 +75,8 @@ function createSysStore() {
     get version() {
       return version();
     },
-    get storage() {
-      return storage();
-    },
     get systemInfo() {
       return systemInfo();
-    },
-    get activePartitions() {
-      return activePartitions();
     },
     get loading() {
       return loading();

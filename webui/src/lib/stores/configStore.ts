@@ -45,24 +45,6 @@ function createConfigStore() {
     setSaving(false);
   }
 
-  async function resetConfig() {
-    setLoading(true);
-    try {
-      setConfigStore(reconcile(DEFAULT_CONFIG));
-      await API.saveConfig(DEFAULT_CONFIG);
-      uiStore.showToast(
-        uiStore.L.common.resetSuccess ?? "Config reset successfully",
-        "success",
-      );
-    } catch {
-      uiStore.showToast(
-        uiStore.L.common.resetFailed ?? "Failed to reset config",
-        "error",
-      );
-    }
-    setLoading(false);
-  }
-
   return {
     get config() {
       return config;
@@ -76,7 +58,6 @@ function createConfigStore() {
     },
     loadConfig,
     saveConfig,
-    resetConfig,
   };
 }
 

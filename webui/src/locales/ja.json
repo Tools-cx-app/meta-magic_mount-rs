@@ -12,9 +12,7 @@
     "reboot": "再起動",
     "rebootTitle": "システムを再起動しますか？",
     "rebootConfirm": "本当にデバイスを再起動しますか？",
-    "rebootFailed": "再起動に失敗しました",
-    "resetSuccess": "設定をリセットしました",
-    "resetFailed": "設定のリセットに失敗しました"
+    "rebootFailed": "再起動に失敗しました"
   },
   "tabs": {
     "status": "ステータス",
@@ -24,7 +22,6 @@
   },
   "status": {
     "storageTitle": "バックエンド戦略",
-    "modeStats": "モード分布",
     "sysInfoTitle": "システム詳細",
     "deviceTitle": "デバイス情報",
     "moduleTitle": "モジュール",
@@ -35,7 +32,6 @@
     "kernel": "カーネル",
     "selinuxLabel": "SELinux",
     "selinux": "SELinux",
-    "activePartitions": "パーティション",
     "loadError": "システム状態の読み込みに失敗しました",
     "refresh": "更新"
   },

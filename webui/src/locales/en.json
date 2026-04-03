@@ -12,9 +12,7 @@
     "reboot": "Reboot",
     "rebootTitle": "Reboot System?",
     "rebootConfirm": "Are you sure you want to reboot the device?",
-    "rebootFailed": "Reboot failed",
-    "resetSuccess": "Config reset successfully",
-    "resetFailed": "Failed to reset config"
+    "rebootFailed": "Reboot failed"
   },
   "tabs": {
     "status": "Status",
@@ -24,7 +22,6 @@
   },
   "status": {
     "storageTitle": "Backend Strategy",
-    "modeStats": "Mode Distribution",
     "sysInfoTitle": "System Details",
     "deviceTitle": "Device Info",
     "moduleTitle": "Modules",
@@ -35,7 +32,6 @@
     "kernel": "Kernel",
     "selinuxLabel": "SELinux",
     "selinux": "SELinux",
-    "activePartitions": "Partitions",
     "loadError": "Failed to load system status",
     "refresh": "Refresh"
   },

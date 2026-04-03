@@ -12,9 +12,7 @@
     "reboot": "再啟",
     "rebootTitle": "再啟天工乎？",
     "rebootConfirm": "確欲再啟此器耶？",
-    "rebootFailed": "再啟不成",
-    "resetSuccess": "制復如初",
-    "resetFailed": "復初不成"
+    "rebootFailed": "再啟不成"
   },
   "tabs": {
     "status": "狀",
@@ -24,7 +22,6 @@
   },
   "status": {
     "storageTitle": "後端之策",
-    "modeStats": "諸式之分",
     "sysInfoTitle": "天工詳錄",
     "deviceTitle": "器之形質",
     "moduleTitle": "模概覽",
@@ -35,7 +32,6 @@
     "kernel": "核",
     "selinuxLabel": "安界",
     "selinux": "安界",
-    "activePartitions": "諸區",
     "loadError": "載系統狀不成",
     "refresh": "更觀"
   },

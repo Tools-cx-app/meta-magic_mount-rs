@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { AppAPI, AppConfig, Module, StorageStatus } from "../types";
+import type { AppAPI, AppConfig, Module } from "../types";
 import { MockAPI } from "./api.mock";
 import { DEFAULT_CONFIG, PATHS } from "./constants";
 
@@ -86,24 +86,6 @@ function normalizeModule(module: Record<string, unknown>): Module {
       : typeof module.skip === "boolean"
         ? module.skip
         : false;
-  const mode =
-    typeof module.mode === "string"
-      ? module.mode
-      : skipMount
-        ? "ignore"
-        : "magic";
-  const rawRules =
-    module.rules &&
-    typeof module.rules === "object" &&
-    !Array.isArray(module.rules)
-      ? (module.rules as Record<string, unknown>)
-      : {};
-  const rawPaths =
-    rawRules.paths &&
-    typeof rawRules.paths === "object" &&
-    !Array.isArray(rawRules.paths)
-      ? (rawRules.paths as Record<string, unknown>)
-      : {};
 
   return {
     id: String(module.id ?? ""),
@@ -113,33 +95,7 @@ function normalizeModule(module: Record<string, unknown>): Module {
     description: String(module.description ?? ""),
     is_mounted:
       typeof module.is_mounted === "boolean" ? module.is_mounted : !skipMount,
-    mode,
-    disabledByFlag:
-      typeof module.disabledByFlag === "boolean"
-        ? module.disabledByFlag
-        : undefined,
-    skipMount,
-    rules: {
-      default_mode:
-        typeof rawRules.default_mode === "string"
-          ? rawRules.default_mode
-          : mode,
-      paths: rawPaths,
-    },
   };
-}
-
-function formatBytes(bytes: number, decimals = 2): string {
-  if (!+bytes) {
-    return "0 B";
-  }
-
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${Number.parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
 }
 
 const RealAPI: AppAPI = {
@@ -180,52 +136,6 @@ const RealAPI: AppAPI = {
     throw new Error(stderr || "modules failed");
   },
 
-  getStorageUsage: async () => {
-    let type: StorageStatus["type"] = null;
-
-    try {
-      const { errno, stdout } = await ksuExec!(`cat "${PATHS.DAEMON_STATE}"`);
-
-      if (errno === 0 && stdout) {
-        const state = JSON.parse(stdout);
-
-        if (typeof state.storage_mode === "string") {
-          type = state.storage_mode;
-        }
-      }
-    } catch {}
-
-    try {
-      const { stdout } = await ksuExec!(
-        `df -k "${PATHS.MODULE_ROOT}" | tail -n 1`,
-      );
-
-      if (stdout) {
-        const parts = stdout.split(/\s+/);
-
-        if (parts.length >= 6) {
-          const total = Number.parseInt(parts[1]) * 1024;
-          const used = Number.parseInt(parts[2]) * 1024;
-          const percent = parts[4];
-
-          return {
-            type: type ?? "ext4",
-            percent,
-            size: formatBytes(total),
-            used: formatBytes(used),
-          };
-        }
-      }
-    } catch {}
-
-    return {
-      size: "-",
-      used: "-",
-      percent: "0%",
-      type,
-    };
-  },
-
   getSystemInfo: async () => {
     try {
       const cmd = `
@@ -236,8 +146,6 @@ const RealAPI: AppAPI = {
       const info = {
         kernel: "-",
         selinux: "-",
-        mountBase: PATHS.MODULE_ROOT,
-        activeMounts: [] as string[],
       };
 
       if (errno === 0 && stdout) {
@@ -250,38 +158,9 @@ const RealAPI: AppAPI = {
         }
       }
 
-      try {
-        const { errno: stateErrno, stdout: stateStdout } = await ksuExec!(
-          `cat "${PATHS.DAEMON_STATE}"`,
-        );
-
-        if (stateErrno === 0 && stateStdout) {
-          const state = JSON.parse(stateStdout);
-
-          if (typeof state.mount_point === "string") {
-            info.mountBase = state.mount_point;
-          }
-          if (Array.isArray(state.active_mounts)) {
-            info.activeMounts = state.active_mounts.filter(
-              (value: unknown): value is string => typeof value === "string",
-            );
-          }
-        }
-      } catch {}
-
-      if (info.activeMounts.length === 0) {
-        const modulesResult = await ksuExec!(`ls -1 "${PATHS.MODULE_ROOT}"`);
-
-        if (modulesResult.errno === 0 && modulesResult.stdout) {
-          info.activeMounts = modulesResult.stdout
-            .split("\n")
-            .filter((s) => s.trim() && s !== "magic_mount_rs");
-        }
-      }
-
       return info;
     } catch {
-      return { kernel: "-", selinux: "-", mountBase: "-", activeMounts: [] };
+      return { kernel: "-", selinux: "-" };
     }
   },
 
@@ -293,16 +172,9 @@ const RealAPI: AppAPI = {
     `;
     const { stdout } = await ksuExec!(cmd);
     const lines = stdout ? stdout.split("\n") : [];
-    const androidVersion = lines[1]?.trim() || "Unknown";
-    const apiLevel = lines[2]?.trim();
 
     return {
       model: lines[0]?.trim() || "Unknown",
-      android: apiLevel
-        ? `${androidVersion} (API ${apiLevel})`
-        : androidVersion,
-      kernel: "See System Info",
-      selinux: "See System Info",
     };
   },
 

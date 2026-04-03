@@ -52,9 +52,6 @@ function createUiStore() {
     get L() {
       return L();
     },
-    get toast() {
-      return toast();
-    },
     get toasts() {
       return toasts();
     },

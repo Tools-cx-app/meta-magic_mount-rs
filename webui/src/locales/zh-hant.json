@@ -12,9 +12,7 @@
     "reboot": "重啓",
     "rebootTitle": "重啓系統？",
     "rebootConfirm": "確定要重啓設備嗎？",
-    "rebootFailed": "重啓失敗",
-    "resetSuccess": "配置已重置",
-    "resetFailed": "重置失敗"
+    "rebootFailed": "重啓失敗"
   },
   "tabs": {
     "status": "狀態",
@@ -24,7 +22,6 @@
   },
   "status": {
     "storageTitle": "後端策略",
-    "modeStats": "模式分佈",
     "sysInfoTitle": "系統詳情",
     "deviceTitle": "設備信息",
     "moduleTitle": "模塊概覽",
@@ -35,7 +32,6 @@
     "kernel": "內核",
     "selinuxLabel": "SELinux",
     "selinux": "SELinux",
-    "activePartitions": "分區",
     "loadError": "加載系統狀態失敗",
     "refresh": "刷新"
   },
