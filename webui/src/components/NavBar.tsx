@@ -1,8 +1,6 @@
-import { For, createEffect } from "solid-js";
-
-import { ICONS } from "../lib/constants";
+import { createEffect, For } from "solid-js";
 import { uiStore } from "../lib/stores/uiStore";
-
+import { ICONS } from "../lib/constants";
 import "./NavBar.css";
 import "@material/web/icon/icon.js";
 import "@material/web/ripple/ripple.js";
@@ -10,7 +8,7 @@ import "@material/web/ripple/ripple.js";
 interface Props {
   activeTab: string;
   onTabChange: (id: string) => void;
-  tabs: readonly { id: string }[];
+  tabs: { id: string }[];
 }
 
 export default function NavBar(props: Props) {
@@ -46,7 +44,7 @@ export default function NavBar(props: Props) {
             ref={(el) => (tabRefs[tab.id] = el)}
             type="button"
           >
-            <md-ripple />
+            <md-ripple></md-ripple>
             <div class="icon-container">
               <md-icon>
                 <svg viewBox="0 0 24 24">
