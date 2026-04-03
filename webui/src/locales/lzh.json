@@ -32,7 +32,7 @@
     "kernel": "核",
     "selinuxLabel": "安界",
     "selinux": "安界",
-    "loadError": "載系統狀不成",
+    "loadError": "載機人狀不成",
     "refresh": "更觀"
   },
   "config": {
@@ -45,7 +45,7 @@
     "partitions": "餘區",
     "partitionsDesc": "增需載之區",
     "ignoreList": "弗載之錄",
-    "ignoreListDesc": "屏除幻載之目錄",
+    "ignoreListDesc": "屏除靈乘之目錄",
     "autoPlaceholder": "空則自擇",
     "reload": "重載定制",
     "save": "存定制",
@@ -58,7 +58,7 @@
   },
   "modules": {
     "title": "載錄",
-    "desc": "下列諸模，皆為幻載所察而御者。",
+    "desc": "下列諸模，皆為靈乘所察而御者。",
     "scanning": "察模中…",
     "reload": "新覽模錄",
     "save": "存更易",
@@ -72,7 +72,7 @@
     "modes": {
       "overlay": "OverlayFS",
       "magic": "Magic Mount",
-      "umount": "卸載",
+      "umount": "卸",
       "short": {
         "overlay": "Overlay",
         "magic": "Magic",
