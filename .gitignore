@@ -2,3 +2,5 @@
 /output
 *.bak
 .idea/
+.venv/
+.vscode/

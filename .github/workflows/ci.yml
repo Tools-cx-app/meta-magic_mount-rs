@@ -3,23 +3,24 @@ on:
   push:
     branches: ["master"]
     paths:
-      - 'src/**'
-      - 'Cargo.*'
-      - 'module/**'
-      - 'webui/**'
-      - 'xtask/**'
-      - 'build.rs'
-      - '.github/workflows/ci.yml'
+      - "src/**"
+      - "Cargo.*"
+      - "module/**"
+      - "webui/**"
+      - "xtask/**"
+      - "build.rs"
+      - ".github/workflows/ci.yml"
+      - ".github/test/**"
   pull_request:
     branches: ["master"]
     paths:
-      - 'src/**'
-      - 'Cargo.*'
-      - 'module/**'
-      - 'webui/**'
-      - 'xtask/**'
-      - 'build.rs'
-      - '.github/workflows/ci.yml'
+      - "src/**"
+      - "Cargo.*"
+      - "module/**"
+      - "webui/**"
+      - "xtask/**"
+      - "build.rs"
+      - ".github/workflows/ci.yml"
 env:
   CARGO_TERM_COLOR: always
 jobs:
@@ -58,9 +59,14 @@ jobs:
         uses: actions/setup-node@v6.3.0
         with:
           node-version: "lts/*"
-          cache: pnpm
-          package-manager-cache: ${{ github.event_name == 'push' }}
-          cache-dependency-path: webui/pnpm-lock.yaml
+      - name: Restore pnpm cache
+        id: pnpm-cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('webui/pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-${{ runner.os }}-
       - uses: Swatinem/rust-cache@v2
         with:
           save-if: ${{ github.event_name == 'push' }}
@@ -73,6 +79,12 @@ jobs:
         run: |
           cd webui/
           pnpm install --frozen-lockfile
+      - name: Save pnpm cache
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ steps.pnpm-cache-restore.outputs.cache-primary-key }}
       - name: Build
         run: |
           export ANDROID_NDK_HOME=$(realpath ~/ndk_temp)
@@ -90,6 +102,9 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
           COMMIT_MESSAGE: ${{ format('{0}', github.event.head_commit.message) }}
           COMMIT_URL: ${{ github.event.head_commit.url }}
           RUN_ID: ${{ github.run_number }}
@@ -97,5 +112,5 @@ jobs:
           if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ] || [ -z "${BOT_CI_SESSION:-}" ]; then
             exit 0
           fi
-          pip3 install telethon
+          pip3 install telethon requests cryptography
           python3 .github/bot.py

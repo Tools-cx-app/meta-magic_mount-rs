@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 use std::{
-    collections::{HashMap, hash_map::Entry},
+    collections::{HashMap, HashSet, hash_map::Entry},
     fmt,
     fs::{DirEntry, FileType},
     os::unix::fs::{FileTypeExt, MetadataExt},
@@ -16,7 +16,7 @@ use rustix::path::Arg;
 
 use crate::defs::{REPLACE_DIR_FILE_NAME, REPLACE_DIR_XATTR};
 
-pub static IGNORE_LIST: OnceLock<Option<String>> = OnceLock::new();
+pub static IGNORE_LIST: OnceLock<Option<HashSet<String>>> = OnceLock::new();
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub enum NodeFileType {
@@ -137,7 +137,7 @@ impl Node {
     {
         let list = IGNORE_LIST.get().unwrap();
         if let Some(f) = list
-            && f.lines()
+            && f.iter()
                 .any(|s| s == path.as_ref().to_str().unwrap_or_default())
         {
             return true;

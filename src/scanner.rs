@@ -135,7 +135,7 @@ where
                     disabled,
                     skip_mount,
                     has_mount_files: modified,
-                    source_path: path.display().to_string(),
+                    source_path: path.to_str().unwrap_or_default().to_string(),
                 });
             }
         }

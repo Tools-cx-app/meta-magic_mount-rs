@@ -1,39 +1,39 @@
-## 3.0.0 - 2026-03-28
+## 3.1.0 - 2026-04-03
 
-**[View changes](https://github.com/Tools-cx-app/meta-magic_mount-rs/compare/68e01549a06b19bf9f82ed01b2f3503884bd5ce9...63832f16e60979434cf4b64a922f459840932d46)**(68e0154...63832f1)
+**[View changes](https://github.com/Tools-cx-app/meta-magic_mount-rs/compare/63832f16e60979434cf4b64a922f459840932d46...45d0761a6c725d9ff14ce7ed5056d2004963b735)**(63832f1...45d0761)
 
 ### <!-- 0 --> Features
 
-- Support ignore.list([ef96df8](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/ef96df8f4204cf6ce87efb8d084a756fe66ea5e4))
-- Implement ignore.list management in Modules tab([cb46fcd](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/cb46fcdcbe6177c2051fa6b917f3bc30cdeb476e))
-- Add multi-language support for ignore.list management([e034e61](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/e034e61aea1eebb25fc4de5a2776eec77d902971))
-- Implement ignore.list management in Config tab([c80f116](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/c80f11648d49ea705e4769b19e131450a4268f88))
-- Refine config bottom actions to sticky non-lifting layout (#37)([7651309](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/765130984ae5cd31660de30ba0e94bfe1aeb4084))
-- Sync MD3 components and styles from upstream([b0a1b57](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/b0a1b577f7a77bc38d25ec48ae94cd2a20102190))
+- Implement config, module, system, and UI stores([28a3eee](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/28a3eeecc0fc0d34c148500a7d40f582d7aeca2b)) @YuzakiKokuban
+- Update ESLint configuration and dependencies, improve code formatting and structure([1d5b13e](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/1d5b13ee92e4e4d913fb930dd5fb52a557929831)) @YuzakiKokuban
 
 ### <!-- 1 --> Bug Fixes
 
-- Prevent page lift and input obscuring on mobile([7c41c57](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/7c41c57abce7be97ebb19b8547d499996d392fa7))
-- Improve mobile config input behavior([df5a920](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/df5a920893e08426386886fcec39c22f65837a8c))
-- Resolve typescript and eslint errors in md3 components([7c11d67](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/7c11d67f92abe07d59a65e91005e3c4bdc0b6d4d))
-- Try fix typelint([663f96c](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/663f96c85aad7cca3afc4498a7f54b948be2430f))
+- Resolve compilation errors and address clippy warnings([0ff1e21](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/0ff1e21d51f685607346bde3cc1933ec2269a14e)) @YuzakiKokuban
+- Restore types and tune bottom actions([45c7f8f](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/45c7f8ff24434800de4e79cb61d39de3f445a488)) @YuzakiKokuban
+- Stop lifting bottom actions for keyboard([af477c4](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/af477c4f16fed15994a271684dde2e864be1d15e)) @YuzakiKokuban
+- Pin navbar to app viewport([d07eadc](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/d07eadcfbe98c4905d42a3f87d4e98a8fdfa472f)) @YuzakiKokuban
+- Fix some translation issues in Literary Chinese([6cc0d94](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/6cc0d944a7af010fa7be0211547e4e698480dcd6)) @VeryBaaad
 
 ### <!-- 11 --> Adjust
 
-- Adj magic mount return hanlder([b16abe3](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/b16abe3505de127f7d2c58dc73813fbfefb11151))
+- Adj module description([cec4d53](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/cec4d53069a93d754c95b4104e1faa30ae4c746c)) @Tools-app
+- Simplify description([1849965](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/18499657f76e1d88d682df01021ee6839c5991e9)) @Tools-app
+- Adj description([48848d5](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/48848d595a30fca998ee0f620b0862f075383e95)) @Tools-app
 
 ### <!-- 11 --> Other
 
-- Fix error url([f561448](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/f561448310a8e9a88714a58660671dda38e9d6e8))
+- Add author print([ba9fbcc](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/ba9fbccdc322a3986b4eb4669c6e552440490c5e)) @Tools-app
+- Sync webui with hybrid mount([58a52bb](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/58a52bb468c8bbcc02aa43e9a8033b316f1f82c5)) @YuzakiKokuban
 
-### <!-- 6 --> Styling
+### <!-- 3 --> Refactor
 
-- Fix linting errors across components and libs([439b44f](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/439b44ffa17ea8db4eb5a4decaafb9e02f3deff4))
-- Remove strange background of bottom-actions([60fae84](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/60fae84847c93cd70c0c6976a81f04cd8439186e))
+- Remove unused fields and legacy module mode([041a146](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/041a14678d16240625561522d7d34f71716be575)) @YuzakiKokuban
+- Clean up code and improve bottom actions behavior([c1ea1e0](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/c1ea1e08ba82c54e03539478e6de6fdcdae45266)) @YuzakiKokuban
+- Consolidate bottom actions styles and remove unused CSS([d9f2cc9](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/d9f2cc99aeb458c4312664ab1ba0ea411913cccf)) @YuzakiKokuban
 
-### <!-- 8 --> Miscellaneous Tasks
+### <!-- 5 --> Performance
 
-- Add typescript declarations for material web components([a5fb494](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/a5fb494e35ed3446799ab8dca6d22e4826409f78))
-- Fmt([0e4d128](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/0e4d1285aec1f9ed72b37d4b83232bb62ec1c90a))
+- Use caching to avoid performance waste.([4b4d509](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/4b4d509000e7a9137a02757bb1cb2b34ea905bda)) @Tools-app
 
 

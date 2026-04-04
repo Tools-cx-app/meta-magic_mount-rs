@@ -89,32 +89,29 @@ fn main() -> Result<()> {
 
     let args: Vec<_> = std::env::args().collect();
 
-    if args.len() > 1 {
-        match args[1].as_str() {
+    if let Some(arg) = args.get(1) {
+        match arg.as_str() {
             "show-config" => {
                 handle_show_config()?;
-                return Ok(());
             }
             "save-config" => {
                 handle_save_config(&args[2..])?;
-                return Ok(());
             }
             "gen-config" => {
                 handle_gen_config()?;
-                return Ok(());
             }
             "modules" => {
                 let config = Config::load_or_default();
                 let modules = scanner::list_modules(MODULE_PATH, &config.partitions);
                 println!("{}", serde_json::to_string(&modules)?);
-                return Ok(());
             }
             "version" => {
                 println!("{{ \"version\": \"{}\" }}", env!("CARGO_PKG_VERSION"));
-                return Ok(());
             }
             _ => {}
         }
+
+        return Ok(());
     }
 
     let config = Config::load()?;
