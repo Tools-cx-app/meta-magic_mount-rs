@@ -1,10 +1,11 @@
+/**
+ * Copyright 2026 Hybrid Mount Developers SPDX-License-Identifier:
+ * GPL-3.0-or-later
+ */
+
 import type { JSX } from "solid-js";
 
-type BaseProps = JSX.HTMLAttributes<HTMLElement> & {
-  [key: `prop:${string}`]: any;
-  [key: `attr:${string}`]: any;
-  [key: `on:${string}`]: any;
-};
+type BaseProps = JSX.HTMLAttributes<HTMLElement>;
 
 interface MdDialogProps extends BaseProps {
   open?: boolean;

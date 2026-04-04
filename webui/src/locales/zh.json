@@ -3,6 +3,8 @@
   "common": {
     "appName": "Magic Mount",
     "saving": "保存中...",
+    "theme": "切换主题",
+    "language": "语言",
     "themeAuto": "自动 (跟随系统)",
     "themeLight": "浅色模式",
     "themeDark": "深色模式",
@@ -10,9 +12,7 @@
     "reboot": "重启",
     "rebootTitle": "重启系统？",
     "rebootConfirm": "确定要重启设备吗？",
-    "rebootFailed": "重启失败",
-    "resetSuccess": "配置已重置",
-    "resetFailed": "重置失败"
+    "rebootFailed": "重启失败"
   },
   "tabs": {
     "status": "状态",
@@ -21,6 +21,7 @@
     "info": "关于"
   },
   "status": {
+    "storageTitle": "后端策略",
     "sysInfoTitle": "系统详情",
     "deviceTitle": "设备信息",
     "moduleTitle": "模块概览",
@@ -28,7 +29,10 @@
     "modelLabel": "机型",
     "androidLabel": "Android版本",
     "kernelLabel": "内核版本",
+    "kernel": "内核",
     "selinuxLabel": "SELinux",
+    "selinux": "SELinux",
+    "loadError": "加载系统状态失败",
     "refresh": "刷新"
   },
   "config": {
@@ -50,9 +54,7 @@
     "loadError": "加载配置失败",
     "loadDefault": "已加载默认配置",
     "saveSuccess": "配置保存成功",
-    "saveFailed": "保存配置失败",
-    "fixBottomNav": "修复底部导航遮挡",
-    "webuiLabel": "WebUI"
+    "saveFailed": "保存配置失败"
   },
   "modules": {
     "title": "挂载列表",
@@ -67,6 +69,18 @@
     "searchPlaceholder": "搜索模块...",
     "filterLabel": "筛选:",
     "filterAll": "全部",
+    "modes": {
+      "overlay": "OverlayFS",
+      "magic": "Magic Mount",
+      "umount": "Umount",
+      "short": {
+        "overlay": "Overlay",
+        "magic": "Magic",
+        "ignore": "忽略"
+      }
+    },
+    "emptyState": "未找到模块。",
+    "umountHiddenHint": "已卸载的模块已隐藏。",
     "toggleError": "操作失败",
     "authorLabel": "作者",
     "descriptionLabel": "描述",

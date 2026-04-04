@@ -1,25 +1,14 @@
 /**
- * Copyright 2025 Magic Mount-rs Authors
- *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * Copyright 2026 Hybrid Mount Developers SPDX-License-Identifier:
+ * GPL-3.0-or-later
  */
 
 import "./Skeleton.css";
 
-interface SkeletonProps {
-  width?: string;
-  height?: string;
-  borderRadius?: string;
-  style?: string;
+interface Props {
+  class?: string;
 }
 
-export default (props: SkeletonProps) => (
-  <div
-    class="skeleton"
-    style={{
-      "width": props.width ?? "100%",
-      "height": props.height ?? "20px",
-      "border-radius": props.borderRadius ?? "12px",
-    }}
-  />
+export default (props: Props) => (
+  <div class={`skeleton ${props.class ?? ""}`} />
 );

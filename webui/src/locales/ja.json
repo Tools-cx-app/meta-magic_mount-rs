@@ -3,6 +3,8 @@
   "common": {
     "appName": "Magic Mount",
     "saving": "保存中...",
+    "theme": "テーマを切り替え",
+    "language": "言語",
     "themeAuto": "自動 (システム)",
     "themeLight": "ライトモード",
     "themeDark": "ダークモード",
@@ -10,9 +12,7 @@
     "reboot": "再起動",
     "rebootTitle": "システムを再起動しますか？",
     "rebootConfirm": "本当にデバイスを再起動しますか？",
-    "rebootFailed": "再起動に失敗しました",
-    "resetSuccess": "設定をリセットしました",
-    "resetFailed": "設定のリセットに失敗しました"
+    "rebootFailed": "再起動に失敗しました"
   },
   "tabs": {
     "status": "ステータス",
@@ -21,6 +21,7 @@
     "info": "情報"
   },
   "status": {
+    "storageTitle": "バックエンド戦略",
     "sysInfoTitle": "システム詳細",
     "deviceTitle": "デバイス情報",
     "moduleTitle": "モジュール",
@@ -28,7 +29,10 @@
     "modelLabel": "モデル",
     "androidLabel": "Android",
     "kernelLabel": "カーネル",
+    "kernel": "カーネル",
     "selinuxLabel": "SELinux",
+    "selinux": "SELinux",
+    "loadError": "システム状態の読み込みに失敗しました",
     "refresh": "更新"
   },
   "config": {
@@ -50,9 +54,7 @@
     "loadError": "設定の読み込みに失敗しました",
     "loadDefault": "デフォルト設定を読み込みました",
     "saveSuccess": "設定を保存しました",
-    "saveFailed": "設定の保存に失敗しました",
-    "fixBottomNav": "底部ナビゲーション修正",
-    "webuiLabel": "WebUI"
+    "saveFailed": "設定の保存に失敗しました"
   },
   "modules": {
     "title": "アクティブモジュール",
@@ -67,6 +69,18 @@
     "searchPlaceholder": "モジュールを検索...",
     "filterLabel": "フィルター：",
     "filterAll": "すべて",
+    "modes": {
+      "overlay": "OverlayFS",
+      "magic": "Magic Mount",
+      "umount": "Umount",
+      "short": {
+        "overlay": "Overlay",
+        "magic": "Magic",
+        "ignore": "除外"
+      }
+    },
+    "emptyState": "モジュールが見つかりません。",
+    "umountHiddenHint": "アンマウントされたモジュールは非表示です。",
     "toggleError": "切り替えに失敗しました",
     "authorLabel": "作者",
     "descriptionLabel": "説明",

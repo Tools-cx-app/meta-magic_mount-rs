@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { APIType, MagicConfig } from "../types";
+import type { AppAPI, AppConfig, Module } from "../types";
 import { MockAPI } from "./api.mock";
 import { DEFAULT_CONFIG, PATHS } from "./constants";
 
@@ -13,6 +13,7 @@ interface KsuExecResult {
   stdout: string;
   stderr: string;
 }
+
 type KsuExec = (cmd: string) => Promise<KsuExecResult>;
 
 let ksuExec: KsuExec | null = null;
@@ -25,225 +26,114 @@ try {
 
 const shouldUseMock = import.meta.env.DEV || !ksuExec;
 
-function isTrueValue(v: any): boolean {
-  const s = String(v).trim().toLowerCase();
+const shellEscapeDoubleQuoted = (value: string): string =>
+  value.replace(/(["\\$`])/g, "\\$1");
 
-  return s === "1" || s === "true" || s === "yes" || s === "on";
-}
+function stringToHex(str: string): string {
+  const bytes = new TextEncoder().encode(str);
+  let hex = "";
 
-function stripQuotes(v: string): string {
-  if (v.startsWith('"') && v.endsWith('"')) {
-    return v.slice(1, -1);
+  for (const byte of bytes) {
+    hex += byte.toString(16).padStart(2, "0");
   }
 
-  return v;
+  return hex;
 }
 
-function parseKvConfig(text: string): MagicConfig {
-  try {
-    const result: MagicConfig = { ...DEFAULT_CONFIG };
-    const lines = text.split("\n");
+function normalizeConfigPayload(payload: Record<string, unknown>): AppConfig {
+  const ignoreListSource = Array.isArray(payload.ignoreList)
+    ? payload.ignoreList
+    : Array.isArray(payload.ignore_list)
+      ? payload.ignore_list
+      : [];
+  const disableUmount =
+    typeof payload.disable_umount === "boolean"
+      ? payload.disable_umount
+      : undefined;
 
-    for (let line of lines) {
-      line = line.trim();
+  return {
+    ...DEFAULT_CONFIG,
+    mountsource:
+      typeof payload.mountsource === "string"
+        ? payload.mountsource
+        : DEFAULT_CONFIG.mountsource,
+    partitions: Array.isArray(payload.partitions)
+      ? payload.partitions.filter((value): value is string => !!value)
+      : [],
+    ignoreList: ignoreListSource.filter(
+      (value): value is string => typeof value === "string" && value.length > 0,
+    ),
+    umount:
+      typeof payload.umount === "boolean"
+        ? payload.umount
+        : disableUmount === undefined
+          ? DEFAULT_CONFIG.umount
+          : !disableUmount,
+  };
+}
 
-      if (!line || line.startsWith("#")) {
-        continue;
-      }
+const createStandardConfigPayload = (config: AppConfig) => ({
+  mountsource: config.mountsource,
+  partitions: config.partitions,
+  ignoreList: config.ignoreList,
+  disable_umount: !config.umount,
+});
 
-      const eqIndex = line.indexOf("=");
+function normalizeModule(module: Record<string, unknown>): Module {
+  const skipMount =
+    typeof module.skipMount === "boolean"
+      ? module.skipMount
+      : typeof module.skip === "boolean"
+        ? module.skip
+        : false;
 
-      if (eqIndex === -1) {
-        continue;
-      }
+  return {
+    id: String(module.id ?? ""),
+    name: String(module.name ?? module.id ?? "Unknown"),
+    version: String(module.version ?? ""),
+    author: String(module.author ?? "Unknown"),
+    description: String(module.description ?? ""),
+    is_mounted:
+      typeof module.is_mounted === "boolean" ? module.is_mounted : !skipMount,
+  };
+}
 
-      const key = line.slice(0, eqIndex).trim();
-      let value = line.slice(eqIndex + 1).trim();
+const RealAPI: AppAPI = {
+  loadConfig: async () => {
+    const { errno, stdout, stderr } = await ksuExec!(
+      `${PATHS.BINARY} show-config`,
+    );
 
-      if (!key || !value) {
-        continue;
-      }
-
-      if (value.startsWith("[") && value.endsWith("]")) {
-        value = value.slice(1, -1);
-
-        if (!value.trim()) {
-          if (key === "partitions") {
-            result.partitions = [];
-          }
-
-          continue;
-        }
-
-        const parts = value.split(",").map((s) => stripQuotes(s.trim()));
-
-        if (key === "partitions") {
-          result.partitions = parts;
-        }
-
-        continue;
-      }
-
-      const rawValue = value;
-
-      value = stripQuotes(value);
-
-      switch (key) {
-        case "mountsource": {
-          result.mountsource = value;
-
-          break;
-        }
-        case "umount": {
-          result.umount = isTrueValue(rawValue);
-
-          break;
-        }
-      }
+    if (errno === 0 && stdout.trim()) {
+      return normalizeConfigPayload(JSON.parse(stdout));
     }
 
-    return result;
-  } catch {
-    return DEFAULT_CONFIG;
-  }
-}
-
-function serializeKvConfig(cfg: MagicConfig): string {
-  const q = (s: string) => `"${s}"`;
-  const lines = ["", ""];
-
-  lines.push(`mountsource = ${q(cfg.mountsource)}`);
-  lines.push(`umount = ${cfg.umount}`);
-
-  const parts = cfg.partitions.map((p) => q(p)).join(", ");
-
-  lines.push(`partitions = [${parts}]`);
-
-  return lines.join("\n");
-}
-
-function formatBytes(bytes: number, decimals = 2): string {
-  if (!+bytes) {
-    return "0 B";
-  }
-
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${Number.parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
-}
-
-const RealAPI: APIType = {
-  loadConfig: async () => {
-    let config: MagicConfig = { ...DEFAULT_CONFIG };
-
-    try {
-      const { errno, stdout } = await ksuExec!(
-        `[ -f "${PATHS.CONFIG}" ] && cat "${PATHS.CONFIG}" || echo ""`,
-      );
-
-      if (errno === 0 && stdout.trim()) {
-        config = parseKvConfig(stdout);
-      }
-    } catch {}
-
-    try {
-      const { errno, stdout } = await ksuExec!(
-        `[ -f "/data/adb/magic_mount/ignore.list" ] && cat "/data/adb/magic_mount/ignore.list" || echo ""`,
-      );
-
-      if (errno === 0 && stdout) {
-        config.ignoreList = stdout
-          .split("\n")
-          .map((s) => s.trim())
-          .filter(Boolean);
-      }
-    } catch {}
-
-    return config;
+    throw new Error(stderr || "show-config failed");
   },
 
-  saveConfig: async (config) => {
-    const content = serializeKvConfig(config);
-    const ignoreContent = config.ignoreList.join("\n");
-    const cmd = `
-      mkdir -p "$(dirname "${PATHS.CONFIG}")"
-      cat > "${PATHS.CONFIG}" << 'EOF_CONFIG'
-${content}
-EOF_CONFIG
-      chmod 644 "${PATHS.CONFIG}"
-      cat > "/data/adb/magic_mount/ignore.list" << 'EOF_IGNORE'
-${ignoreContent}
-EOF_IGNORE
-      chmod 644 "/data/adb/magic_mount/ignore.list"
-    `;
-
-    const { errno, stderr } = await ksuExec!(cmd);
+  saveConfig: async (config: AppConfig) => {
+    const payload = stringToHex(
+      JSON.stringify(createStandardConfigPayload(config)),
+    );
+    const { errno, stderr } = await ksuExec!(
+      `${PATHS.BINARY} save-config --payload ${payload}`,
+    );
 
     if (errno !== 0) {
-      throw new Error(stderr);
+      throw new Error(stderr || "save-config failed");
     }
   },
 
   scanModules: async () => {
-    const cmd = "/data/adb/modules/magic_mount_rs/meta-mm scan --json";
+    const { errno, stdout, stderr } = await ksuExec!(`${PATHS.BINARY} modules`);
 
-    try {
-      const { errno, stdout } = await ksuExec!(cmd);
+    if (errno === 0 && stdout) {
+      return JSON.parse(stdout).map((module: Record<string, unknown>) =>
+        normalizeModule(module),
+      );
+    }
 
-      if (errno === 0 && stdout) {
-        try {
-          const rawModules = JSON.parse(stdout);
-
-          return rawModules.map((m: any) => ({
-            id: m.id,
-            name: m.name,
-            version: m.version,
-            author: m.author ?? "Unknown",
-            description: m.description,
-            is_mounted: !m.skip,
-            mode: "magic",
-            rules: { default_mode: "magic", paths: {} },
-          }));
-        } catch {
-          return [];
-        }
-      }
-    } catch {}
-
-    return [];
-  },
-
-  getStorageUsage: async () => {
-    try {
-      const { stdout } = await ksuExec!("df -k /data/adb/modules | tail -n 1");
-
-      if (stdout) {
-        const parts = stdout.split(/\s+/);
-
-        if (parts.length >= 6) {
-          const total = Number.parseInt(parts[1]) * 1024;
-          const used = Number.parseInt(parts[2]) * 1024;
-          const percent = parts[4];
-
-          return {
-            type: "ext4",
-            percent,
-            size: formatBytes(total),
-            used: formatBytes(used),
-          };
-        }
-      }
-    } catch {}
-
-    return {
-      size: "-",
-      used: "-",
-      percent: "0%",
-      type: null,
-    };
+    throw new Error(stderr || "modules failed");
   },
 
   getSystemInfo: async () => {
@@ -256,8 +146,6 @@ EOF_IGNORE
       const info = {
         kernel: "-",
         selinux: "-",
-        mountBase: "/data/adb/modules",
-        activeMounts: [] as string[],
       };
 
       if (errno === 0 && stdout) {
@@ -270,51 +158,48 @@ EOF_IGNORE
         }
       }
 
-      const m = await ksuExec!("ls -1 /data/adb/modules");
-
-      if (m.errno === 0 && m.stdout) {
-        info.activeMounts = m.stdout
-          .split("\n")
-          .filter((s) => s.trim() && s !== "magic_mount_rs");
-      }
-
       return info;
     } catch {
-      return { kernel: "-", selinux: "-", mountBase: "-", activeMounts: [] };
+      return { kernel: "-", selinux: "-" };
     }
   },
 
   getDeviceStatus: async () => {
-    const cmd = "getprop ro.product.model; getprop ro.build.version.release";
+    const cmd = `
+      getprop ro.product.model
+      getprop ro.build.version.release
+      getprop ro.build.version.sdk
+    `;
     const { stdout } = await ksuExec!(cmd);
     const lines = stdout ? stdout.split("\n") : [];
 
     return {
-      model: lines[0] || "Unknown",
-      android: lines[1] || "Unknown",
-      kernel: "See System Info",
-      selinux: "See System Info",
+      model: lines[0]?.trim() || "Unknown",
     };
   },
 
   getVersion: async () => {
-    const cmd = "/data/adb/modules/magic_mount_rs/meta-mm version";
+    const cmd = `${PATHS.BINARY} version`;
 
     try {
       const { errno, stdout } = await ksuExec!(cmd);
 
       if (errno === 0 && stdout) {
-        const res = JSON.parse(stdout);
+        try {
+          const res = JSON.parse(stdout);
 
-        return res.version ?? "0.0.0";
+          return res.version ?? "0.0.0";
+        } catch {
+          return stdout.trim() || "0.0.0";
+        }
       }
     } catch {}
 
     return "Unknown";
   },
 
-  openLink: async (url) => {
-    const safeUrl = url.replace(/"/g, '\\"');
+  openLink: async (url: string) => {
+    const safeUrl = shellEscapeDoubleQuoted(url);
     const cmd = `am start -a android.intent.action.VIEW -d "${safeUrl}"`;
 
     await ksuExec!(cmd);
@@ -327,8 +212,4 @@ EOF_IGNORE
   },
 };
 
-if (MockAPI && !MockAPI.reboot) {
-  MockAPI.reboot = async () => {};
-}
-
-export const API = shouldUseMock ? MockAPI : RealAPI;
+export const API: AppAPI = shouldUseMock ? MockAPI : RealAPI;

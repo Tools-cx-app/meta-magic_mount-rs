@@ -94,7 +94,7 @@ pub fn update_desc(
     #[cfg(any(target_os = "linux", target_os = "android"))] umount: bool,
 ) -> Result<()> {
     let text = format!(
-        "[{}]\\n An implementation of a metamodule using Magic Mount.",
+        "[✅{}]\\nAn implementation of a metamodule using Magic Mount.",
         if umount { "UM" } else { "" }
     );
 

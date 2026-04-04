@@ -1,9 +1,18 @@
+/**
+ * Copyright 2025 Meta-Hybrid Mount Authors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 .chip-input-wrapper {
   display: flex;
   flex-direction: column;
   padding: 12px;
   border: 1px solid var(--md-sys-color-outline);
   border-radius: 8px;
+}
+
+md-chip-set.chip-set-has-values {
+  margin-bottom: 8px;
 }
 
 .input-row {

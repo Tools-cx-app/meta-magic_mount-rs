@@ -32,8 +32,12 @@ fn init_logger() {
 }
 
 fn init_list() {
-    super::magic_mount::node::IGNORE_LIST
-        .get_or_init(|| fs::read_to_string(defs::IGNORE_LIST_PATH).ok());
+    super::magic_mount::node::IGNORE_LIST.get_or_init(|| {
+        fs::read_to_string(defs::IGNORE_LIST_PATH).map_or_else(
+            |_| None,
+            |f| Some(f.lines().map(std::string::ToString::to_string).collect()),
+        )
+    });
 }
 
 pub fn pre_init() {

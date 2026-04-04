@@ -19,7 +19,6 @@
   overflow: visible;
 }
 
-/* 轨道环 */
 .ring-bg {
   fill: none;
   stroke: var(--md-sys-color-surface-variant);
@@ -40,7 +39,6 @@
   transform-origin: 50px 50px;
 }
 
-/* 能量环 */
 .energy-ring {
   fill: none;
   stroke: var(--md-sys-color-primary);
@@ -58,7 +56,6 @@
   transform-origin: 50px 50px;
 }
 
-/* 核心 */
 .core-shadow {
   fill: var(--md-sys-color-shadow);
   opacity: 0.2;
@@ -74,11 +71,11 @@
   transform-origin: 50px 50px;
 }
 
-/* 动画定义 */
 @keyframes spin-slow {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -88,6 +85,7 @@
   from {
     transform: rotate(360deg);
   }
+
   to {
     transform: rotate(0deg);
   }

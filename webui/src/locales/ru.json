@@ -12,9 +12,7 @@
     "reboot": "Перезапуск",
     "rebootTitle": "Перезапустить систему?",
     "rebootConfirm": "Вы уверены что хотите перезапустить телефон?",
-    "rebootFailed": "Ошибка перезапуска",
-    "resetSuccess": "Конфиг успешно сброшен",
-    "resetFailed": "Не удалось сбросить конфиг"
+    "rebootFailed": "Ошибка перезапуска"
   },
   "tabs": {
     "status": "Статус",
@@ -23,6 +21,7 @@
     "info": "Инфо"
   },
   "status": {
+    "storageTitle": "Стратегия бэкенда",
     "sysInfoTitle": "Информация о системе",
     "deviceTitle": "Устройство",
     "moduleTitle": "Модули",
@@ -30,7 +29,10 @@
     "modelLabel": "Модель",
     "androidLabel": "Android",
     "kernelLabel": "Ядро",
+    "kernel": "Ядро",
     "selinuxLabel": "SELinux",
+    "selinux": "SELinux",
+    "loadError": "Не удалось загрузить состояние системы",
     "refresh": "Обновить"
   },
   "config": {
@@ -52,9 +54,7 @@
     "loadError": "Не удалось загрузить настройки",
     "loadDefault": "Загружены настройки по умолчанию",
     "saveSuccess": "Настройки сохранены",
-    "saveFailed": "Не удалось сохранить настройки",
-    "fixBottomNav": "Испр. навбар",
-    "webuiLabel": "WebUI"
+    "saveFailed": "Не удалось сохранить настройки"
   },
   "modules": {
     "title": "Активные модули",
@@ -69,6 +69,18 @@
     "searchPlaceholder": "Поиск модулей...",
     "filterLabel": "Фильтр:",
     "filterAll": "Все",
+    "modes": {
+      "overlay": "OverlayFS",
+      "magic": "Magic Mount",
+      "umount": "Umount",
+      "short": {
+        "overlay": "Overlay",
+        "magic": "Magic",
+        "ignore": "Игнор"
+      }
+    },
+    "emptyState": "Модули не найдены.",
+    "umountHiddenHint": "Размонтированные модули скрыты.",
     "toggleError": "Не удалось переключить",
     "authorLabel": "Автор",
     "descriptionLabel": "Описание",

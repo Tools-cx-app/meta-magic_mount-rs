@@ -4,14 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import type { APIType } from "../types";
+import type { AppAPI, AppConfig } from "../types";
 import { DEFAULT_CONFIG } from "./constants";
 
 const MOCK_DELAY = 600;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const MockAPI: APIType = {
+export const MockAPI: AppAPI = {
   loadConfig: async () => {
     await delay(MOCK_DELAY);
     console.log("[MockAPI] loadConfig");
@@ -24,7 +24,7 @@ export const MockAPI: APIType = {
     };
   },
 
-  saveConfig: async (config) => {
+  saveConfig: async (config: AppConfig) => {
     await delay(MOCK_DELAY);
     console.log("[MockAPI] saveConfig:", config);
   },
@@ -41,8 +41,6 @@ export const MockAPI: APIType = {
         author: "ReVanced Team",
         description: "YouTube ReVanced Module",
         is_mounted: true,
-        mode: "magic",
-        rules: { default_mode: "magic", paths: {} },
       },
       {
         id: "pixelfy-gphotos",
@@ -51,8 +49,6 @@ export const MockAPI: APIType = {
         author: "PixelProps",
         description: "Unlimited Google Photos backup for Pixel devices.",
         is_mounted: true,
-        mode: "magic",
-        rules: { default_mode: "magic", paths: {} },
       },
       {
         id: "sound-enhancer",
@@ -61,21 +57,8 @@ export const MockAPI: APIType = {
         author: "AudioMod",
         description: "Improves system audio quality. Currently disabled.",
         is_mounted: false,
-        mode: "magic",
-        rules: { default_mode: "magic", paths: {} },
       },
     ];
-  },
-
-  getStorageUsage: async () => {
-    await delay(MOCK_DELAY);
-
-    return {
-      type: "ext4",
-      percent: "42%",
-      size: "118 GB",
-      used: "50 GB",
-    };
   },
 
   getSystemInfo: async () => {
@@ -84,8 +67,6 @@ export const MockAPI: APIType = {
     return {
       kernel: "5.10.101-android12-9-00001-g532145",
       selinux: "Enforcing",
-      mountBase: "/data/adb/modules",
-      activeMounts: ["youtube-revanced", "pixelfy-gphotos"],
     };
   },
 
@@ -94,9 +75,6 @@ export const MockAPI: APIType = {
 
     return {
       model: "Pixel 8 Pro (Mock)",
-      android: "14",
-      kernel: "5.10.101-mock",
-      selinux: "Enforcing",
     };
   },
 
@@ -112,7 +90,7 @@ export const MockAPI: APIType = {
     alert("Reboot requested (Mock)");
   },
 
-  openLink: async (url) => {
+  openLink: async (url: string) => {
     console.log("[MockAPI] Open link:", url);
     window.open(url, "_blank");
   },

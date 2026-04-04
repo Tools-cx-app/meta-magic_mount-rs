@@ -7,9 +7,18 @@
       "default",
       {
         "ignore": [
-          "backdrop-filter"
+          "backdrop-filter",
+          "scrollbar-width"
         ]
       }
     ]
-  }
+  },
+  "browserslist": [
+    "defaults",
+    "not ie 11",
+    "not chrome <= 112",
+    "not ios_saf <= 26",
+    "not safari <= 26.2",
+    "not samsung <= 29"
+  ]
 }

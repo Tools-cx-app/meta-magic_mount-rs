@@ -12,9 +12,7 @@
     "reboot": "Reboot",
     "rebootTitle": "Reboot System?",
     "rebootConfirm": "Are you sure you want to reboot the device?",
-    "rebootFailed": "Reboot failed",
-    "resetSuccess": "Config reset successfully",
-    "resetFailed": "Failed to reset config"
+    "rebootFailed": "Reboot failed"
   },
   "tabs": {
     "status": "Status",
@@ -23,6 +21,7 @@
     "info": "Info"
   },
   "status": {
+    "storageTitle": "Backend Strategy",
     "sysInfoTitle": "System Details",
     "deviceTitle": "Device Info",
     "moduleTitle": "Modules",
@@ -30,7 +29,10 @@
     "modelLabel": "Model",
     "androidLabel": "Android",
     "kernelLabel": "Kernel",
+    "kernel": "Kernel",
     "selinuxLabel": "SELinux",
+    "selinux": "SELinux",
+    "loadError": "Failed to load system status",
     "refresh": "Refresh"
   },
   "config": {
@@ -52,9 +54,7 @@
     "loadError": "Failed to load config",
     "loadDefault": "Loaded default config",
     "saveSuccess": "Configuration saved",
-    "saveFailed": "Failed to save configuration",
-    "fixBottomNav": "Fix Bottom Nav",
-    "webuiLabel": "WebUI"
+    "saveFailed": "Failed to save configuration"
   },
   "modules": {
     "title": "Active Modules",
@@ -69,6 +69,18 @@
     "searchPlaceholder": "Search modules...",
     "filterLabel": "Filter:",
     "filterAll": "All",
+    "modes": {
+      "overlay": "OverlayFS",
+      "magic": "Magic Mount",
+      "umount": "Umount",
+      "short": {
+        "overlay": "Overlay",
+        "magic": "Magic",
+        "ignore": "Ignore"
+      }
+    },
+    "emptyState": "No modules found.",
+    "umountHiddenHint": "Unmounted modules are hidden.",
     "toggleError": "Failed to toggle",
     "authorLabel": "Author",
     "descriptionLabel": "Description",

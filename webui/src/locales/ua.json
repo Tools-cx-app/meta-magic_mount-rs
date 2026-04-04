@@ -1,0 +1,99 @@
+{
+  "lang": { "display": "Українська" },
+  "common": {
+    "appName": "Magic Mount",
+    "saving": "Збереження...",
+    "theme": "Перемкнути тему",
+    "language": "Мова",
+    "themeAuto": "Авто (Система)",
+    "themeLight": "Світлий режим",
+    "themeDark": "Темний режим",
+    "cancel": "Скасувати",
+    "reboot": "Перезавантажити",
+    "rebootTitle": "Перезавантажити систему?",
+    "rebootConfirm": "Ви впевнені, що хочете перезавантажити телефон?",
+    "rebootFailed": "Помилка перезавантаження"
+  },
+  "tabs": {
+    "status": "Статус",
+    "config": "Налаштування",
+    "modules": "Модулі",
+    "info": "Інфо"
+  },
+  "status": {
+    "storageTitle": "Стратегія бекенду",
+    "sysInfoTitle": "Інформація про систему",
+    "deviceTitle": "Пристрій",
+    "moduleTitle": "Модулі",
+    "moduleActive": "Активні модулі",
+    "modelLabel": "Модель",
+    "androidLabel": "Android",
+    "kernelLabel": "Ядро",
+    "kernel": "Ядро",
+    "selinuxLabel": "SELinux",
+    "selinux": "SELinux",
+    "loadError": "Не вдалося завантажити стан системи",
+    "refresh": "Оновити"
+  },
+  "config": {
+    "title": "Налаштування",
+    "umountLabel": "Увімкнути umount",
+    "umountOff": "За замовчуванням",
+    "umountOn": "Увімкнено",
+    "mountSource": "Джерело монтування",
+    "mountSourceDesc": "Глобальний простір імен монтування (наприклад, KSU)",
+    "partitions": "Додаткові розділи",
+    "partitionsDesc": "Додати розділи для монтування",
+    "ignoreList": "Список винятків",
+    "ignoreListDesc": "Каталоги, які виключаються з монтування",
+    "autoPlaceholder": "Автоматичний вибір, якщо порожньо",
+    "reload": "Перезавантажити",
+    "save": "Зберегти",
+    "reset": "Скинути",
+    "loadSuccess": "Налаштування успішно завантажено",
+    "loadError": "Не вдалося завантажити налаштування",
+    "loadDefault": "Завантажено налаштування за замовчуванням",
+    "saveSuccess": "Налаштування збережено",
+    "saveFailed": "Не вдалося зберегти налаштування"
+  },
+  "modules": {
+    "title": "Активні модулі",
+    "desc": "Модулі в цьому списку виявлено та ними керує Magic Mount.",
+    "scanning": "Сканування...",
+    "reload": "Оновити",
+    "save": "Зберегти зміни",
+    "empty": "Активні модулі не виявлено",
+    "scanError": "Не вдалося просканувати модулі",
+    "saveSuccess": "Збережено",
+    "saveFailed": "Не вдалося зберегти",
+    "searchPlaceholder": "Пошук модулів...",
+    "filterLabel": "Фільтр:",
+    "filterAll": "Усі",
+    "modes": {
+      "overlay": "OverlayFS",
+      "magic": "Magic Mount",
+      "umount": "Umount",
+      "short": {
+        "overlay": "Overlay",
+        "magic": "Magic",
+        "ignore": "Ігнор"
+      }
+    },
+    "emptyState": "Модулі не знайдено.",
+    "umountHiddenHint": "Розмонтовані модулі приховано.",
+    "toggleError": "Не вдалося перемкнути",
+    "authorLabel": "Автор",
+    "descriptionLabel": "Опис",
+    "unknownLabel": "Невідомо",
+    "noDescriptionLabel": "Немає опису"
+  },
+  "info": {
+    "title": "Про нас",
+    "projectLink": "Репозиторій",
+    "donate": "Підтримка",
+    "contributors": "Контриб'ютори",
+    "loading": "Завантаження контриб'юторів...",
+    "loadFail": "Не вдалося завантажити (ліміт API)",
+    "noBio": "Біографія відсутня"
+  }
+}

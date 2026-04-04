@@ -1,51 +1,48 @@
-export interface MagicConfig {
+export interface AppConfig {
   mountsource: string;
   umount: boolean;
   partitions: string[];
   ignoreList: string[];
 }
 
-export interface MagicModule {
+export interface Module {
   id: string;
   name: string;
   version: string;
   author: string;
   description: string;
   is_mounted: boolean;
-  mode: string;
-  disabledByFlag?: boolean;
-  skipMount?: boolean;
-  rules: { default_mode: string; paths: Record<string, any> };
 }
 
 export interface SystemInfo {
   kernel: string;
   selinux: string;
-  mountBase: string;
-  activeMounts: string[];
 }
 
-export interface StorageUsage {
-  type: string | null;
-  percent: string;
-  size: string;
-  used: string;
-}
-
-export interface DeviceStatus {
+export interface DeviceInfo {
   model: string;
-  android: string;
-  kernel: string;
-  selinux: string;
 }
 
-export interface APIType {
-  loadConfig: () => Promise<MagicConfig>;
-  saveConfig: (config: MagicConfig) => Promise<void>;
-  scanModules: () => Promise<MagicModule[]>;
-  getStorageUsage: () => Promise<StorageUsage>;
+export type ToastType = "info" | "success" | "error";
+
+export interface ToastMessage {
+  id: string;
+  text: string;
+  type: ToastType;
+  visible: boolean;
+}
+
+export interface LanguageOption {
+  code: string;
+  name: string;
+}
+
+export interface AppAPI {
+  loadConfig: () => Promise<AppConfig>;
+  saveConfig: (config: AppConfig) => Promise<void>;
+  scanModules: () => Promise<Module[]>;
   getSystemInfo: () => Promise<SystemInfo>;
-  getDeviceStatus: () => Promise<DeviceStatus>;
+  getDeviceStatus: () => Promise<DeviceInfo>;
   getVersion: () => Promise<string>;
   openLink: (url: string) => Promise<void>;
   reboot: () => Promise<void>;

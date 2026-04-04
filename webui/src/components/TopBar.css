@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 Magic Mount-rs Authors
+ * Copyright 2026 Hybrid Mount Developers
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -31,6 +31,7 @@
   flex-grow: 1;
   margin: 0;
   font-size: 32px;
+  line-height: 40px;
   font-weight: 600;
   letter-spacing: 0;
   transform-origin: left bottom;
@@ -40,58 +41,37 @@
 .top-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   z-index: 50;
 }
-.btn-icon {
-  width: 48px;
-  height: 48px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  border-radius: 50%;
-  color: var(--md-sys-color-on-surface-variant);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.btn-icon:hover {
-  background-color: var(--md-sys-color-surface-variant);
-}
-.btn-icon svg {
+md-icon svg {
+  fill: currentColor;
   width: 24px;
   height: 24px;
 }
-.menu-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 4px;
-  background: var(--md-sys-color-surface-container-high);
-  border-radius: 16px;
-  padding: 8px 0;
-  z-index: 1000;
-  min-width: 200px;
-  max-height: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
+
+.lang-dialog {
+  --md-dialog-scrim-color: transparent;
+  --md-sys-color-scrim: transparent;
 }
-.menu-item {
-  width: 100%;
-  padding: 16px 24px;
-  text-align: left;
-  background: none;
-  border: none;
-  color: var(--md-sys-color-on-surface);
+
+.lang-list-container {
+  padding: 0 !important;
+  min-width: 280px;
+}
+md-list {
+  background: transparent;
+  --md-list-container-color: transparent;
+}
+md-list-item {
+  border-radius: 12px;
+  margin-bottom: 4px;
+}
+
+.lang-option {
   cursor: pointer;
-  font-weight: 500;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
 }
-.menu-item:hover {
-  background: var(--md-sys-color-surface-variant);
+
+md-list-item md-icon[slot="end"] {
+  color: var(--md-sys-color-primary);
 }

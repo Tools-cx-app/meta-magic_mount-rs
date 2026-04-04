@@ -12,9 +12,7 @@
     "reboot": "再啟",
     "rebootTitle": "再啟天工乎？",
     "rebootConfirm": "確欲再啟此器耶？",
-    "rebootFailed": "再啟不成",
-    "resetSuccess": "制復如初",
-    "resetFailed": "復初不成"
+    "rebootFailed": "再啟不成"
   },
   "tabs": {
     "status": "狀",
@@ -23,6 +21,7 @@
     "info": "識"
   },
   "status": {
+    "storageTitle": "後端之策",
     "sysInfoTitle": "天工詳錄",
     "deviceTitle": "器之形質",
     "moduleTitle": "模概覽",
@@ -30,7 +29,10 @@
     "modelLabel": "器型",
     "androidLabel": "機人之版",
     "kernelLabel": "核之版",
+    "kernel": "核",
     "selinuxLabel": "安界",
+    "selinux": "安界",
+    "loadError": "載機人狀不成",
     "refresh": "更觀"
   },
   "config": {
@@ -43,7 +45,7 @@
     "partitions": "餘區",
     "partitionsDesc": "增需載之區",
     "ignoreList": "弗載之錄",
-    "ignoreListDesc": "屏除幻載之目錄",
+    "ignoreListDesc": "屏除靈乘之目錄",
     "autoPlaceholder": "空則自擇",
     "reload": "重載定制",
     "save": "存定制",
@@ -52,13 +54,11 @@
     "loadError": "載定制不成",
     "loadDefault": "初制定矣",
     "saveSuccess": "定制存成",
-    "saveFailed": "存定制不成",
-    "fixBottomNav": "正底導之蔽",
-    "webuiLabel": "網界"
+    "saveFailed": "存定制不成"
   },
   "modules": {
     "title": "載錄",
-    "desc": "下列諸模，皆為幻載所察而御者。",
+    "desc": "下列諸模，皆為靈乘所察而御者。",
     "scanning": "察模中…",
     "reload": "新覽模錄",
     "save": "存更易",
@@ -69,6 +69,18 @@
     "searchPlaceholder": "索模…",
     "filterLabel": "揀：",
     "filterAll": "盡",
+    "modes": {
+      "overlay": "OverlayFS",
+      "magic": "Magic Mount",
+      "umount": "卸",
+      "short": {
+        "overlay": "Overlay",
+        "magic": "Magic",
+        "ignore": "略"
+      }
+    },
+    "emptyState": "未得模也。",
+    "umountHiddenHint": "已卸之模，今藏之。",
     "toggleError": "操持不成",
     "authorLabel": "作者",
     "descriptionLabel": "釋義",
