@@ -80,7 +80,7 @@ async def github_api(
         token: GitHub token
 
     Returns:
-        Tuple of (has_more, response_data)
+        Result of GitHub RESTful API
     """
     headers = {
         "Authorization": f"Bearer {token}",
@@ -105,7 +105,7 @@ async def list_workflow_runs(page: int = 1) -> dict:
         page: Page number for pagination
 
     Returns:
-        Tuple of (has_more, workflow_runs_data)
+        Result of GitHub RESTful API
     """
     logger.info(f"Listing workflow runs (page: {page})")
     return await github_api(
@@ -148,7 +148,7 @@ async def compare_commit(base: str, head: str, page: int = 1) -> dict:
         page: Page number for pagination
 
     Returns:
-        Tuple of (has_more, compare_data)
+        Result of GitHub Restful API
     """
     logger.info(f"Comparing commits: {base}...{head} (page: {page})")
     return await github_api(endpoint=f"/compare/{base}...{head}", params={"page": page})
@@ -208,7 +208,7 @@ async def generate_msg() -> str:
         return "No last success CI commit found???"
     commit_url, history_msg = await generate_history(base_hash, settings.github_sha)
     message = TG_MSG_TEMPLATE.format(
-        commit_message=history_msg,
+        commit_message=history_msg.strip(),
         commit_url=commit_url,
         run_id=settings.run_id,
     )
