@@ -182,13 +182,7 @@ async def send_telegram_message():
         except Exception as e:
             print(f"[-] Failed to send message: {e}")
             return
-
-        # 导出session
-        if not BOT_CI_SESSION:
-            session_string = client.session.save()
-            with open("./session_string.txt", "w") as f:
-                f.write(session_string)
-            print("[+] Session string written to session_string.txt")
+            
     finally:
         await client.disconnect()
 
