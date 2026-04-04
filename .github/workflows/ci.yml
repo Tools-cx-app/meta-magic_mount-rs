@@ -3,23 +3,24 @@ on:
   push:
     branches: ["master"]
     paths:
-      - 'src/**'
-      - 'Cargo.*'
-      - 'module/**'
-      - 'webui/**'
-      - 'xtask/**'
-      - 'build.rs'
-      - '.github/workflows/ci.yml'
+      - "src/**"
+      - "Cargo.*"
+      - "module/**"
+      - "webui/**"
+      - "xtask/**"
+      - "build.rs"
+      - ".github/workflows/ci.yml"
+      - ".github/test/**"
   pull_request:
     branches: ["master"]
     paths:
-      - 'src/**'
-      - 'Cargo.*'
-      - 'module/**'
-      - 'webui/**'
-      - 'xtask/**'
-      - 'build.rs'
-      - '.github/workflows/ci.yml'
+      - "src/**"
+      - "Cargo.*"
+      - "module/**"
+      - "webui/**"
+      - "xtask/**"
+      - "build.rs"
+      - ".github/workflows/ci.yml"
 env:
   CARGO_TERM_COLOR: always
 jobs:
@@ -101,6 +102,9 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ github.sha }}
           COMMIT_MESSAGE: ${{ format('{0}', github.event.head_commit.message) }}
           COMMIT_URL: ${{ github.event.head_commit.url }}
           RUN_ID: ${{ github.run_number }}
@@ -108,5 +112,5 @@ jobs:
           if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ] || [ -z "${BOT_CI_SESSION:-}" ]; then
             exit 0
           fi
-          pip3 install telethon
+          pip3 install telethon requests cryptography
           python3 .github/bot.py
