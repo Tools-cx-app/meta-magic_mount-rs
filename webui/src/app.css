@@ -299,11 +299,6 @@ button:active {
   opacity: 0;
   pointer-events: none;
   will-change: opacity, transform;
-  transform: translate3d(
-    0,
-    calc(-1 * var(--bottom-actions-keyboard-inset, 0px)),
-    0
-  );
   transition:
     opacity 0.2s ease,
     transform 0.24s cubic-bezier(0.2, 1, 0.2, 1);

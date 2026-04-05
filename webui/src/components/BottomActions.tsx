@@ -4,7 +4,7 @@ import { Portal } from "solid-js/web";
 
 export default function BottomActions(props: ParentProps) {
   const [isActivePage, setIsActivePage] = createSignal(true);
-  const [keyboardInset, setKeyboardInset] = createSignal(0);
+  const [_, setKeyboardInset] = createSignal(0);
   let anchorRef: HTMLDivElement | undefined;
   let rootRef: HTMLDivElement | undefined;
 
@@ -77,11 +77,6 @@ export default function BottomActions(props: ParentProps) {
     if (!rootRef) {
       return;
     }
-
-    rootRef.style.setProperty(
-      "--bottom-actions-keyboard-inset",
-      `${keyboardInset()}px`,
-    );
     rootRef.toggleAttribute("inert", !isActivePage());
   });
 
