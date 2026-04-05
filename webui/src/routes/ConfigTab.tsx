@@ -86,6 +86,7 @@ export default function ConfigTab() {
             <div class="input-stack">
               <md-outlined-text-field
                 label={uiStore.L.config.mountSource}
+                placeholder="KSU"
                 value={configStore.config.mountsource}
                 onInput={(event: InputEvent) =>
                   updateConfig(

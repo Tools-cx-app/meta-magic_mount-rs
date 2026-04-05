@@ -35,22 +35,23 @@ export default function StatusTab() {
 
   return (
     <>
-      <md-dialog
-        open={showRebootConfirm()}
-        onClose={() => setShowRebootConfirm(false)}
-        class="transparent-scrim"
-      >
-        <div slot="headline">{uiStore.L.common.rebootTitle}</div>
-        <div slot="content">{uiStore.L.common.rebootConfirm}</div>
-        <div slot="actions">
-          <md-text-button onClick={() => setShowRebootConfirm(false)}>
-            {uiStore.L.common.cancel}
-          </md-text-button>
-          <md-text-button onClick={reboot}>
-            {uiStore.L.common.reboot}
-          </md-text-button>
-        </div>
-      </md-dialog>
+      <div class="dialog-container">
+        <md-dialog
+          open={showRebootConfirm()}
+          onClose={() => setShowRebootConfirm(false)}
+        >
+          <div slot="headline">{uiStore.L.common.rebootTitle}</div>
+          <div slot="content">{uiStore.L.common.rebootConfirm}</div>
+          <div slot="actions">
+            <md-text-button onClick={() => setShowRebootConfirm(false)}>
+              {uiStore.L.common.cancel}
+            </md-text-button>
+            <md-text-button onClick={reboot}>
+              {uiStore.L.common.reboot}
+            </md-text-button>
+          </div>
+        </md-dialog>
+      </div>
 
       <div class="dashboard-grid">
         <div class="hero-card">

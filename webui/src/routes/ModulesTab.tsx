@@ -92,6 +92,7 @@ export default function ModulesTab() {
                   <div
                     class={`module-card ${expandedId() === module.id ? "expanded" : ""} ${module.is_mounted ? "" : "unmounted"}`}
                   >
+                    <md-ripple />
                     <div
                       class="module-header"
                       onClick={() => toggleExpand(module.id)}

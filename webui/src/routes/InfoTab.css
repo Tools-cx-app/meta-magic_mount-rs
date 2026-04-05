@@ -18,6 +18,7 @@
   background-color: var(--md-sys-color-surface-container);
   border-radius: 32px;
   box-shadow: none;
+  user-select: none;
 }
 .app-logo {
   width: 120px;
@@ -84,21 +85,12 @@
   gap: 8px;
 }
 .section-title {
-  font-size: 20px;
-  font-weight: 400;
-  margin: 0 0 8px 8px;
-  color: var(--md-sys-color-on-surface);
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 var(--md-sys-shape-corner-large);
+  color: var(--md-sys-color-primary);
+  user-select: none;
 }
-.list-wrapper {
-  background-color: var(--md-sys-color-surface-container-low);
-  border-radius: 24px;
-  overflow: hidden;
-}
-.contributors-list {
-  background: transparent;
-  padding: 8px 0;
-}
-
 .contributor-link {
   cursor: pointer;
 }

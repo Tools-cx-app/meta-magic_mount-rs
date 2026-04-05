@@ -14,6 +14,7 @@ interface MdDialogProps extends BaseProps {
 
 interface MdTextFieldProps extends BaseProps {
   "label"?: string;
+  "placeholder"?: string;
   "value"?: string;
   "error"?: boolean;
   "supporting-text"?: string;

@@ -266,7 +266,7 @@ button:active {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 16px 24px calc(16px + var(--safe-area-inset-bottom, 0px)) 24px;
+  padding: 16px 24px calc(16px + var(--bottom-inset)) 24px;
   background: linear-gradient(
     to top,
     var(--md-sys-color-surface) 85%,
@@ -289,7 +289,7 @@ button:active {
   left: 0;
   right: 0;
   bottom: calc(
-    var(--bottom-nav-height, 64px) + var(--bottom-inset, 0px)
+    var(--bottom-nav-height, 64px) + var(--bottom-inset, 0px) + 16px
   );
   display: flex;
   align-items: center;
@@ -332,11 +332,6 @@ button:active {
 code,
 pre {
   font-family: var(--md-ref-typeface-mono);
-}
-
-md-dialog {
-  --md-dialog-container-shape: 28px;
-  --md-dialog-transition-duration: 0.3s;
 }
 
 md-input-chip {

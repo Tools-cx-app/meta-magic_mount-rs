@@ -13,7 +13,7 @@ interface Props {
 
 export default function NavBar(props: Props) {
   let navContainer: HTMLElement | undefined;
-  const tabRefs: Record<string, HTMLButtonElement> = {};
+  const tabRefs: Record<string, HTMLDivElement> = {};
 
   const iconMap: Record<string, { regular: string; filled: string }> = {
     status: { regular: ICONS.home, filled: ICONS.home_filled },
@@ -38,11 +38,10 @@ export default function NavBar(props: Props) {
     <nav class="bottom-nav" ref={navContainer}>
       <For each={props.tabs}>
         {(tab) => (
-          <button
+          <div
             class={`nav-tab ${props.activeTab === tab.id ? "active" : ""}`}
             onClick={() => props.onTabChange(tab.id)}
             ref={(el) => (tabRefs[tab.id] = el)}
-            type="button"
           >
             <div class="icon-container">
               <md-icon>
@@ -61,7 +60,7 @@ export default function NavBar(props: Props) {
               {uiStore.L.tabs?.[tab.id as keyof typeof uiStore.L.tabs] ||
                 tab.id}
             </span>
-          </button>
+          </div>
         )}
       </For>
     </nav>

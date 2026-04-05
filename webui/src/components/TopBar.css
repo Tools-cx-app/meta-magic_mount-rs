@@ -5,13 +5,9 @@
 
 .top-bar {
   flex-shrink: 0;
-  background-color: var(--md-sys-color-surface-container);
   color: var(--md-sys-color-on-surface);
-  height: 120px;
-  padding-top: var(--safe-area-inset-top, 0px);
-  transition:
-    background-color 0.3s ease,
-    height 0.3s ease;
+  height: calc(64px + var(--top-inset));
+  padding-top: var(--top-inset);
   position: relative;
   z-index: 20;
   display: flex;
@@ -21,19 +17,17 @@
 .top-bar-content {
   height: 100%;
   width: 100%;
-  padding: 24px;
+  padding: 20px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   position: relative;
+  user-select: none;
 }
 .screen-title {
   flex-grow: 1;
   margin: 0;
-  font-size: 32px;
-  line-height: 40px;
-  font-weight: 600;
-  letter-spacing: 0;
+  font-size: 22px;
   transform-origin: left bottom;
   transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
   white-space: nowrap;
@@ -49,29 +43,21 @@ md-icon svg {
   width: 24px;
   height: 24px;
 }
-
-.lang-dialog {
-  --md-dialog-scrim-color: transparent;
-  --md-sys-color-scrim: transparent;
-}
-
-.lang-list-container {
-  padding: 0 !important;
-  min-width: 280px;
-}
 md-list {
-  background: transparent;
+  padding: 0;
   --md-list-container-color: transparent;
+  border-radius: var(--md-sys-shape-corner-large);
+  overflow: clip;
+  gap: 2px;
 }
 md-list-item {
-  border-radius: 12px;
-  margin-bottom: 4px;
+  background-color: var(--md-sys-color-surface-container);
+  border-radius: 4px;
+  transition: border-radius 0.3s ease;
 }
-
-.lang-option {
-  cursor: pointer;
+md-list-item:active {
+  border-radius: var(--md-sys-shape-corner-large);
 }
-
 md-list-item md-icon[slot="end"] {
   color: var(--md-sys-color-primary);
 }

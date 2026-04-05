@@ -22,6 +22,7 @@
   min-height: 200px;
   border: none;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  user-select: none;
 }
 
 .hero-card::after {
@@ -193,12 +194,6 @@
   flex-direction: column;
   gap: 8px;
 }
-
-.transparent-scrim {
-  --md-dialog-scrim-color: transparent;
-  --md-sys-color-scrim: transparent;
-}
-
 .action-row {
   display: flex;
   gap: 8px;

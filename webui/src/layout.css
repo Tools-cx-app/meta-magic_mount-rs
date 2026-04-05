@@ -35,7 +35,7 @@
 .page-scroller {
   height: 100%;
   overflow-y: auto;
-  padding: 16px;
+  padding: 8px 16px;
   padding-bottom: calc(
     16px + var(--bottom-nav-height, 64px) + var(--bottom-inset, 0px)
   );
