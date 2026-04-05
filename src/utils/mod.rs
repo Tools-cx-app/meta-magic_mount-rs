@@ -90,13 +90,8 @@ where
     }
 }
 
-pub fn update_desc(
-    #[cfg(any(target_os = "linux", target_os = "android"))] umount: bool,
-) -> Result<()> {
-    let text = format!(
-        "[✅{}]\\nAn implementation of a metamodule using Magic Mount.",
-        if umount { "UM" } else { "" }
-    );
+pub fn update_desc() -> Result<()> {
+    let text = format!("[😋 Mounted!!]\\nAn implementation of a metamodule using Magic Mount.",);
 
     let prop = fs::read_to_string(defs::MODULE_PROP)?;
     let mut temp = tempfile::Builder::new().tempfile()?;

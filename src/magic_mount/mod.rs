@@ -357,9 +357,6 @@ where
     log::info!(
         "mounted files: {mounted_files}, mounted symlinks: {mounted_symbols}, ignored files: {ignored_files}"
     );
-    crate::utils::update_desc(
-        #[cfg(any(target_os = "linux", target_os = "android"))]
-        umount,
-    )?;
+    crate::utils::update_desc()?;
     Ok(())
 }
