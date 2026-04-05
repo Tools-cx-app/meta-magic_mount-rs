@@ -338,3 +338,9 @@ md-dialog {
   --md-dialog-container-shape: 28px;
   --md-dialog-transition-duration: 0.3s;
 }
+
+md-input-chip {
+  max-width: 100%;
+  display: flow-root;
+  word-break: break-all;
+}
