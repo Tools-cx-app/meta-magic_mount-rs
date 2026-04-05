@@ -22,7 +22,7 @@
 
   --top-inset: var(--window-inset-top, 0px);
   --bottom-inset: var(--window-inset-bottom, 0px);
-  --bottom-nav-height: 88px;
+  --bottom-nav-height: 64px;
 
   --md-sys-color-primary: var(--primary, #6750a4);
   --md-sys-color-on-primary: var(--onPrimary, #ffffff);
@@ -289,7 +289,7 @@ button:active {
   left: 0;
   right: 0;
   bottom: calc(
-    var(--bottom-nav-height, 88px) + env(safe-area-inset-bottom, 0px)
+    var(--bottom-nav-height, 64px) + var(--bottom-inset, 0px)
   );
   display: flex;
   align-items: center;

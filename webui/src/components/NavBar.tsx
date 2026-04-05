@@ -15,11 +15,11 @@ export default function NavBar(props: Props) {
   let navContainer: HTMLElement | undefined;
   const tabRefs: Record<string, HTMLButtonElement> = {};
 
-  const iconMap: Record<string, string> = {
-    status: ICONS.home,
-    config: ICONS.settings,
-    modules: ICONS.modules,
-    info: ICONS.info,
+  const iconMap: Record<string, { regular: string; filled: string }> = {
+    status: { regular: ICONS.home, filled: ICONS.home_filled },
+    config: { regular: ICONS.settings, filled: ICONS.settings_filled },
+    modules: { regular: ICONS.modules, filled: ICONS.modules_filled },
+    info: { regular: ICONS.info, filled: ICONS.info_filled },
   };
 
   createEffect(() => {
@@ -44,11 +44,16 @@ export default function NavBar(props: Props) {
             ref={(el) => (tabRefs[tab.id] = el)}
             type="button"
           >
-            <md-ripple />
             <div class="icon-container">
               <md-icon>
                 <svg viewBox="0 0 24 24">
-                  <path d={iconMap[tab.id] || ICONS.description} />
+                  <path
+                    d={
+                      props.activeTab === tab.id
+                        ? iconMap[tab.id]?.filled
+                        : iconMap[tab.id]?.regular || ICONS.description
+                    }
+                  />
                 </svg>
               </md-icon>
             </div>
