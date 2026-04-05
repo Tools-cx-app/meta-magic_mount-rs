@@ -19,7 +19,7 @@
 [download-badge]: https://img.shields.io/github/downloads/Tools-cx-app/meta-magic_mount-rs/total?logo=github&logoColor=green
 [download-url]: https://github.com/Tools-cx-app/meta-magic_mount-rs/releases/
 
-为 KernelSU 提供 Systemless 修改功能。
+为 KernelSU/APatch 提供 Systemless 修改功能。
 
 作者由于学业原因，更新会放缓
 
