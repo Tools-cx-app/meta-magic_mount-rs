@@ -26,14 +26,14 @@ serde_json = "1.0"
 toml = "1.1"
 mimalloc = { version = "0.1.48", features = ["no_thp", "override"] }
 regex-lite = "0.1.9"
-fastrand = "2.3.0"
+fastrand = "2.4.1"
 tempfile = "3.27.0"
 java-properties = "2.0.0"
 encoding_rs = "0.8.35"
 
 [build-dependencies]
 anyhow = "1.0.102"
-toml = "1.1.1"
+toml = "1.1.2"
 serde_json = "1.0.148"
 serde = { version = "1.0.228", features = ["derive"] }
 
