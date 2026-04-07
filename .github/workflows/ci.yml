@@ -62,7 +62,7 @@ jobs:
           node-version: "lts/*"
       - name: Restore pnpm cache
         id: pnpm-cache-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ~/.pnpm-store
           key: pnpm-${{ runner.os }}-${{ hashFiles('webui/pnpm-lock.yaml') }}
@@ -82,7 +82,7 @@ jobs:
           pnpm install --frozen-lockfile
       - name: Save pnpm cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: ~/.pnpm-store
           key: ${{ steps.pnpm-cache-restore.outputs.cache-primary-key }}
