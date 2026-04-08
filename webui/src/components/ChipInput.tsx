@@ -19,6 +19,7 @@ interface Props {
 
 export default function ChipInput(props: Props) {
   const [inputValue, setInputValue] = createSignal("");
+  let inputRef: any = null;
 
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === "Enter" || e.key === "," || e.key === " ") {
@@ -67,12 +68,18 @@ export default function ChipInput(props: Props) {
 
       <div class="input-row">
         <input
+          ref={(el) => (inputRef = el)}
           type="text"
           class="chip-input-field"
           value={inputValue()}
           onInput={(e) => setInputValue(e.currentTarget.value)}
           onKeyDown={handleKeyDown}
           onBlur={addChip}
+          onFocus={() => {
+            setTimeout(() => {
+              inputRef?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 300);
+          }}
           placeholder={props.placeholder ?? "Add item..."}
           enterkeyhint="done"
         />

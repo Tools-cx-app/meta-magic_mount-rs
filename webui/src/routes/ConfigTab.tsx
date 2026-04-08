@@ -16,6 +16,7 @@ import "./ConfigTab.css";
 
 export default function ConfigTab() {
   const [initialConfigStr, setInitialConfigStr] = createSignal("");
+  let mountSourceInputRef: any = null;
 
   const isDirty = createMemo(() => {
     if (!initialConfigStr()) {
@@ -85,6 +86,7 @@ export default function ConfigTab() {
 
             <div class="input-stack">
               <md-outlined-text-field
+                ref={(el) => (mountSourceInputRef = el)}
                 label={uiStore.L.config.mountSource}
                 placeholder="KSU"
                 value={configStore.config.mountsource}
@@ -94,6 +96,14 @@ export default function ConfigTab() {
                     (event.currentTarget as HTMLInputElement).value,
                   )
                 }
+                onFocus={() => {
+                  setTimeout(() => {
+                    mountSourceInputRef?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                  }, 300);
+                }}
                 class="full-width-field"
               />
             </div>
