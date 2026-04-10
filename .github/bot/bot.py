@@ -11,7 +11,7 @@ New push to Github
 {commit_message}
 ```
 See commit detail [here]({commit_url})
-[ci_{run_no}](https://github.com/{github_repository}/actions/runs/{run_id})
+[#ci_{run_no}](https://github.com/{github_repository}/actions/runs/{run_id})
 """.strip()
 GH_BASE_URL = "https://api.github.com/repos/"
 GH_CI_WORKFLOW_NAME = "ci-build"
