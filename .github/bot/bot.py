@@ -11,7 +11,7 @@ New push to Github
 {commit_message}
 ```
 See commit detail [here]({commit_url})
-#ci_{run_id}
+[ci_{run_no}](https://github.com/{github_repository}/actions/runs/{run_id})
 """.strip()
 GH_BASE_URL = "https://api.github.com/repos/"
 GH_CI_WORKFLOW_NAME = "ci-build"
@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=Path(__file__).parent / ".env")
     bot_token: str
     chat_id: int
+    run_no: int
     run_id: int
     bot_ci_session: str | None = None
     github_repository: str
@@ -164,11 +165,14 @@ def parse_commit_message(msg: str) -> str:
     Returns:
         Parsed commit message
     """
+    msg = msg + "\n\n"
     title, body = map(str.strip, msg.split("\n\n", 1))
     if len(title) > 18:
         title = title[:18] + "..."
     if len(body) > 50:
         body = body[:50] + "..."
+    if not body:
+        return title
     return f"{title}\n\n{body}"
 
 
@@ -228,7 +232,9 @@ async def generate_msg() -> str:
     message = TG_MSG_TEMPLATE.format(
         commit_message=history_msg.strip(),
         commit_url=commit_url,
+        run_no=settings.run_no,
         run_id=settings.run_id,
+        github_repository=settings.github_repository,
     )
     logger.info("Generated Telegram message")
     return message

@@ -107,7 +107,8 @@ jobs:
           PERSIST_TOKEN: ${{ secrets.PERSIST_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha }}
-          RUN_ID: ${{ github.run_number }}
+          RUN_NO: ${{ github.run_number }}
+          RUN_ID: ${{ github.run_id }}
         run: |
           if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ] || [ -z "${BOT_CI_SESSION:-}" ]; then
             exit 0
