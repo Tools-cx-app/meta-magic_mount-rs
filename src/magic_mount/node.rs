@@ -164,7 +164,7 @@ impl Node {
     where
         S: ToString,
     {
-        if let Ok(metadata) = entry.path().symlink_metadata() {
+        if let Ok(metadata) = entry.metadata() {
             let path = entry.path();
             let file_type = if metadata.file_type().is_char_device() && metadata.rdev() == 0 {
                 NodeFileType::Whiteout
