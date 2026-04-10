@@ -22,6 +22,7 @@ on:
       - "xtask/**"
       - "build.rs"
       - ".github/workflows/ci.yml"
+      - ".github/bot/**"
 env:
   CARGO_TERM_COLOR: always
 jobs:
