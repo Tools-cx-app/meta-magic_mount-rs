@@ -16,6 +16,8 @@ See commit detail [here]({commit_url})
 GH_BASE_URL = "https://api.github.com/repos/"
 GH_CI_WORKFLOW_NAME = "ci-build"
 GH_CI_DIST_PATTERN = "./output/*.zip"
+COMMIT_TITLE_MAX_LEN: int = 64
+COMMIT_BODY_MAX_LEN: int = 128
 
 
 # Standard imports
@@ -25,6 +27,7 @@ from glob import glob
 from logging import basicConfig, getLogger
 from pathlib import Path
 from typing import cast
+from textwrap import shorten
 
 # Third-party imports
 from telethon import TelegramClient
@@ -166,11 +169,9 @@ def parse_commit_message(msg: str) -> str:
         Parsed commit message
     """
     msg = msg + "\n\n"
-    title, body = map(str.strip, msg.split("\n\n", 1))
-    if len(title) > 18:
-        title = title[:18] + "..."
-    if len(body) > 50:
-        body = body[:50] + "..."
+    title, body = msg.split("\n\n", 1)
+    title = shorten(title, COMMIT_TITLE_MAX_LEN, placeholder="...")
+    body = shorten(body, COMMIT_BODY_MAX_LEN, placeholder="...")
     if not body:
         return title
     return f"{title}\n\n{body}"
