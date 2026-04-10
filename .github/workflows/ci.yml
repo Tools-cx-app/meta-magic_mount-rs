@@ -91,7 +91,7 @@ jobs:
         run: |
           export ANDROID_NDK_HOME=$(realpath ~/ndk_temp)
           export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
-          cargo xtask b
+          cargo xtask build
       - name: Upload release version
         uses: actions/upload-artifact@v7
         with:
