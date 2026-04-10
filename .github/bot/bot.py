@@ -154,6 +154,24 @@ async def compare_commit(base: str, head: str, page: int = 1) -> dict:
     return await github_api(endpoint=f"/compare/{base}...{head}", params={"page": page})
 
 
+def parse_commit_message(msg: str) -> str:
+    """
+    Parse commit message to avoid too long message.
+
+    Args:
+        msg: Commit message
+
+    Returns:
+        Parsed commit message
+    """
+    title, body = map(str.strip, msg.split("\n\n", 1))
+    if len(title) > 18:
+        title = title[:18] + "..."
+    if len(body) > 50:
+        body = body[:50] + "..."
+    return f"{title}\n\n{body}"
+
+
 async def generate_history(base: str, head: str) -> tuple[str, str]:
     """
     Generate commit history between two commits.
@@ -176,7 +194,7 @@ async def generate_history(base: str, head: str) -> tuple[str, str]:
         for commit in data["commits"]:
             len_msgs = len(msg)
             proceed_commits += 1
-            msg += f"{commit['commit']['message']}\n\n"
+            msg += f"{parse_commit_message(commit['commit']['message'])}\n\n"
             if len(msg) >= 512:
                 msg = msg[:len_msgs]
                 proceed_commits -= 1
