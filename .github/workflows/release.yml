@@ -14,20 +14,12 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Cache NDK
-        id: cache-ndk
-        uses: actions/cache@v5
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
         with:
-          path: ~/ndk_temp
-          key: ndk-${{ runner.os }}-ndk_temp
-      - name: Setup ndk
-        if: steps.cache-ndk.outputs.cache-hit != 'true'
-        run: |
-          ndk_url=$(wget -qO- https://github.com/android/ndk/releases/latest | grep -e 'https://dl.google.com/android/repository/android-ndk-.*-linux.zip' | sed -n 's/.*<a href="\([^"]*\)".*/\1/p')
-          wget -O ndk.zip $ndk_url -nv
-          mkdir -p ~/ndk_temp
-          unzip ndk.zip -d ~/ndk_temp 2>&1 > /dev/null
-          mv ~/ndk_temp/*/* ~/ndk_temp
+          ndk-version: r29
+          add-to-path: true
+          local-cache: true
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
