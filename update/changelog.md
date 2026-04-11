@@ -1,39 +1,59 @@
-## 3.1.0 - 2026-04-03
+## 3.1.1 - 2026-04-11
 
-**[View changes](https://github.com/Tools-cx-app/meta-magic_mount-rs/compare/63832f16e60979434cf4b64a922f459840932d46...45d0761a6c725d9ff14ce7ed5056d2004963b735)**(63832f1...45d0761)
+**[View changes](https://github.com/Tools-cx-app/meta-magic_mount-rs/compare/45d0761a6c725d9ff14ce7ed5056d2004963b735...788fa85fb9e3a66e675164030f3c6a78a8e045a9)**(45d0761...788fa85)
 
 ### <!-- 0 --> Features
 
-- Implement config, module, system, and UI stores([28a3eee](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/28a3eeecc0fc0d34c148500a7d40f582d7aeca2b)) @YuzakiKokuban
-- Update ESLint configuration and dependencies, improve code formatting and structure([1d5b13e](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/1d5b13ee92e4e4d913fb930dd5fb52a557929831)) @YuzakiKokuban
+- Multiple commits in single push (#39)([27e34a6](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/27e34a6fb1398ba64baa79c9316517eaa995f9f5)) @喵喵机
+- Add scroll into view on input focus (#49)([0408acb](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/0408acbb8fa1ee74f1435616cf5418cb72b9b409)) @KOWX712
+- Dropped x86_64 support([03b8e8e](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/03b8e8e1795bd5e31dd90d8d77e60216d362ce4a)) @Tools-app
 
 ### <!-- 1 --> Bug Fixes
 
-- Resolve compilation errors and address clippy warnings([0ff1e21](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/0ff1e21d51f685607346bde3cc1933ec2269a14e)) @YuzakiKokuban
-- Restore types and tune bottom actions([45c7f8f](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/45c7f8ff24434800de4e79cb61d39de3f445a488)) @YuzakiKokuban
-- Stop lifting bottom actions for keyboard([af477c4](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/af477c4f16fed15994a271684dde2e864be1d15e)) @YuzakiKokuban
-- Pin navbar to app viewport([d07eadc](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/d07eadcfbe98c4905d42a3f87d4e98a8fdfa472f)) @YuzakiKokuban
-- Fix some translation issues in Literary Chinese([6cc0d94](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/6cc0d944a7af010fa7be0211547e4e698480dcd6)) @VeryBaaad
+- Fix late mode check && fix apatch support([e25abe3](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/e25abe30c3a9d4972c1317db04fac869e282216b)) @Tools-app
+- Fix error if([72a8ed5](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/72a8ed51707d4d7709342c166ad9fd48d428305e)) @Tools-app
 
 ### <!-- 11 --> Adjust
 
-- Adj module description([cec4d53](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/cec4d53069a93d754c95b4104e1faa30ae4c746c)) @Tools-app
-- Simplify description([1849965](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/18499657f76e1d88d682df01021ee6839c5991e9)) @Tools-app
-- Adj description([48848d5](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/48848d595a30fca998ee0f620b0862f075383e95)) @Tools-app
+- Adj args pasrer([6023584](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/6023584e8b4cd3e7df3e63be8b2b5d469254a579)) @Tools-app
+- Simply code([1e3a5f0](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/1e3a5f0a15cb606244d9e5872b21a64ac95edcbc)) @Tools-app
+- Adj description([638ddb5](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/638ddb577d25a4b032ac97da3136a9c2972ad8c6)) @Tools-app
+- Adj structure([478769f](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/478769fbafc67ee7cab22d1d88fd64d6373ad89d)) @Tools-app
 
-### <!-- 11 --> Other
+### <!-- 12 --> i18n
 
-- Add author print([ba9fbcc](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/ba9fbccdc322a3986b4eb4669c6e552440490c5e)) @Tools-app
-- Sync webui with hybrid mount([58a52bb](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/58a52bb468c8bbcc02aa43e9a8033b316f1f82c5)) @YuzakiKokuban
+- Add ua lang([8c85c4a](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/8c85c4aa86a74b8f7852742dbbaa02fc85ff6fea)) @Tools-app
+
+### <!-- 13 --> Other
+
+- Adj msg markdown title([003a712](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/003a7129f7898794b0ff0c1c23e61e99baaad907)) @Tools-app
+- Add i18n([6661440](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/6661440abaaaade6fcd70a3c31f215e41b49aa6a)) @Tools-app
+- Impl more and more command([a3b8ebf](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/a3b8ebf09127996f8cdac048ef19cda0e21c10ce)) @Tools-app
+- Revert test changes([f34b7eb](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/f34b7ebf4ee027d1e110b1d8fbd8d175e6fbaea2)) @Tools-app
 
 ### <!-- 3 --> Refactor
 
-- Remove unused fields and legacy module mode([041a146](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/041a14678d16240625561522d7d34f71716be575)) @YuzakiKokuban
-- Clean up code and improve bottom actions behavior([c1ea1e0](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/c1ea1e08ba82c54e03539478e6de6fdcdae45266)) @YuzakiKokuban
-- Consolidate bottom actions styles and remove unused CSS([d9f2cc9](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/d9f2cc99aeb458c4312664ab1ba0ea411913cccf)) @YuzakiKokuban
+- Refactored CI telegram bot. (#43)([e58cd1a](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/e58cd1a9a774e7f4cb3bc2a418b744b21959644a)) @喵喵机
+- Webui optimisations (#45)([a0b4f9b](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/a0b4f9b2abdd3d16cd09655badff7bc96e4582b6)) @KOWX712
+
+### <!-- 4 --> Documentation
+
+- Add more info([882a1fd](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/882a1fd2df6b1742fd4664a2279db50d2e2dc069)) @Tools-app
+- Fix error describe([6fe283f](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/6fe283f51bf2a719ed9f416e06e03abec06edd58)) @Tools-app
 
 ### <!-- 5 --> Performance
 
-- Use caching to avoid performance waste.([4b4d509](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/4b4d509000e7a9137a02757bb1cb2b34ea905bda)) @Tools-app
+- Using HashSet, avoid multiple lines([85e2ebe](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/85e2ebebc4c5cd8339862e446eb1f06330af44c8)) @Tools-app
+
+### <!-- 8 --> Miscellaneous Tasks
+
+- Fix prompt([e121c04](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/e121c046aa1332f3ce5fada2cf4f5229a0a8b94f)) @Tools-app
+- Ci-bot code aesthetics modification (#44)([d27665d](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/d27665dae04c3b9d5c761b1b3fffeae1fe80f95e)) @喵喵机
+- Make cargo clippy([5ea76f2](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/5ea76f2fd9013107715f0fea4c8c9c382c4f5fea)) @Tools-app
+- Rename LAST to FLAG([cd359c5](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/cd359c5d07cc03775abf2e205969f354a71d4f84)) @Tools-app
+- Simplify code([2d14707](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/2d147072472e41679316cd32a3c205303ca511ee)) @Tools-app
+- Optimize view (#50)([3495a02](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/3495a02c5310e36d6403ff383d9149e632b5f0e1)) @喵喵机
+- Fmt([5406df4](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/5406df4a73527589c250cce6d797ede047957a59)) @Tools-app
+- Fix build([6a8dd87](https://github.com/Tools-cx-app/meta-magic_mount-rs/commit/6a8dd8750969426fc39656e370de122d80a056ba)) @Tools-app
 
 
