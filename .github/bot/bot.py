@@ -114,7 +114,7 @@ async def list_workflow_runs(page: int = 1) -> dict:
     logger.info(f"Listing workflow runs (page: {page})")
     return await github_api(
         endpoint="/actions/runs",
-        params={"exclude_pull_requests": True, "page": page, "status": "success"},
+        params={"event": "push", "page": page, "status": "success"},
     )
 
 
