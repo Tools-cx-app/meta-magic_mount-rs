@@ -19,6 +19,7 @@ jobs:
         with:
           ndk-version: r29
           add-to-path: true
+          local-cache: true
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
