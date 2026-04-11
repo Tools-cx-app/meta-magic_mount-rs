@@ -42,7 +42,6 @@ partitions = []
 | mountsource | Systemless 挂载来源标识。默认值 "KSU" 与 KernelSU 行为保持一致。 |
 | umount | 是否尝试卸载（依赖 KernelSU umount ）。 |
 | partitions | 指定需要进行 Systemless 操作的特定分区列表，例如 "mi_ext","my_stock" 等。 |
-| tmpfsdir | 临时目录，默认 "/debug_ramdisk"，此选项可选。 |
 
 也可通过 WEBUI 进行配置（推荐）。
 
@@ -71,12 +70,12 @@ export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
 
 构建：
 ```shell
-cargo xtask b
+cargo xtask build
 ```
 
 构建产物将位于：
 
-* output/magic_mount_rs.zip
+* output/magic_mount_rs-*.zip
 
 ## 致谢
 
