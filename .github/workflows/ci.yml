@@ -45,7 +45,7 @@ jobs:
           targets: aarch64-linux-android
           components: rust-src
       - name: Install pnpm
-        uses: pnpm/action-setup@v5.0.0
+        uses: pnpm/action-setup@v6.0.0
         with:
           cache: ${{ github.event_name == 'push' }}
           cache_dependency_path: webui/pnpm-lock.yaml
