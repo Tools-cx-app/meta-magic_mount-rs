@@ -122,9 +122,7 @@ impl Node {
     where
         P: AsRef<Path>,
     {
-        if let Ok(v) = lgetxattr(&path, REPLACE_DIR_XATTR)
-            && String::from_utf8_lossy(&v) == "y"
-        {
+        if lgetxattr(&path, REPLACE_DIR_XATTR).is_ok_and(|s| String::from_utf8_lossy(&s) == "y") {
             return true;
         }
 
@@ -138,10 +136,8 @@ impl Node {
         let list = IGNORE_LIST.get().unwrap();
         let path = path.as_ref().to_string_lossy();
         if let Some(f) = list
-            && f.iter().any(|s| {
-                glob::Pattern::new(s)
-                    .is_ok_and(|s| s.matches(&path))
-            })
+            && f.iter()
+                .any(|s| glob::Pattern::new(s).is_ok_and(|s| s.matches(&path)))
         {
             return true;
         }
