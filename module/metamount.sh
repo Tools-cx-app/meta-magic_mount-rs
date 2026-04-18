@@ -18,9 +18,6 @@ EXIT_CODE=$?
 
 if [ "$EXIT_CODE" = 0 ]; then
   /data/adb/ksud kernel notify-module-mounted
-  log "Mount completed successfully"
-else
-  log "Mount failed with exit code $EXIT_CODE"
 fi
 
 exit 0
