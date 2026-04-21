@@ -41,12 +41,12 @@ jobs:
           targets: aarch64-linux-android
           components: rust-src
       - name: Install pnpm
-        uses: pnpm/action-setup@v5.0.0
+        uses: pnpm/action-setup@v6.0.3
         with:
           run_install: false
           package_json_file: webui/package.json
       - name: Setup node
-        uses: actions/setup-node@v6.3.0
+        uses: actions/setup-node@v6.4.0
         with:
           node-version: "lts/*"
           cache: pnpm
