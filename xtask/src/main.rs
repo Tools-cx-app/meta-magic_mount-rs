@@ -326,6 +326,12 @@ fn cargo_ndk() -> Command {
             "arm64-v8a",
             "-t",
             "armeabi-v7a",
+            "-Z",
+            "build-std=std,core,panic_abort",
+            "-Z",
+            "build-std-features=\"optimize_for_size\"",
+            "-Z",
+            "trim-paths",
         ])
         .env("RUSTFLAGS", "-C default-linker-libraries");
     command
