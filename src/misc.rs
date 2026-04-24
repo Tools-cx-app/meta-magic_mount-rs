@@ -54,7 +54,7 @@ fn init_list() {
             |f| {
                 Some(
                     f.lines()
-                        .filter(|s| !s.starts_with("#"))
+                        .filter(|s| !s.starts_with('#'))
                         .map(std::string::ToString::to_string)
                         .collect(),
                 )
