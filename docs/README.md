@@ -1,5 +1,7 @@
 <div align="center">
 
+![An implementation of a metamodule](./mmrs.svg)
+
 # Magic Mount Metamodule
 
 [![Telegram][telegram-badge]][telegram-url]

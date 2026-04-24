@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 210" width="160" height="210">
+    <g fill="#0853D3" stroke="#0853D3" stroke-linecap="round" stroke-linejoin="round">
+        <!-- connectors -->
+        <path d="M80 82 L56 34" fill="none" stroke-width="13"/>
+        <path d="M80 82 L35 118" fill="none" stroke-width="13"/>
+        <path d="M80 82 L134 92" fill="none" stroke-width="13"/>
+
+        <!-- nodes -->
+        <circle cx="80" cy="82" r="26" stroke="none"/>
+        <circle cx="56" cy="34" r="16" stroke="none"/>
+        <circle cx="35" cy="118" r="16" stroke="none"/>
+        <circle cx="134" cy="92" r="16" stroke="none"/>
+
+        <!-- stem -->
+        <rect x="75" y="120" width="10" height="52" stroke="none"/>
+
+        <!-- base: left/right are two quarter-circles -->
+        <path
+            d="M54 172
+            H106
+            A16 16 0 0 1 122 188
+            H38
+            A16 16 0 0 1 54 172
+            Z"
+            stroke="none"/>
+    </g>
+</svg>
