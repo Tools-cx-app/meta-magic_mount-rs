@@ -240,7 +240,16 @@ fn build(verbose: bool) -> Result<()> {
     build_webui()?;
 
     let mut cargo = cargo_ndk();
-    let args = vec!["build", "-Z", "build-std", "-r"];
+    let args = vec![
+        "build",
+        "-Z",
+        "build-std=std,core,panic_abort",
+        "-Z",
+        "build-std-features=optimize_for_size",
+        "-Z",
+        "trim-paths",
+        "-r",
+    ];
 
     if verbose {
         cargo.arg("--verbose");
