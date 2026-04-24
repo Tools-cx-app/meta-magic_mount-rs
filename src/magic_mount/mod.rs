@@ -363,6 +363,6 @@ where
     log::info!(
         "mounted files: {mounted_files}, mounted symlinks: {mounted_symbols}, ignored files: {ignored_files}"
     );
-    crate::utils::update_desc()?;
+    crate::utils::update_desc(mounted_files, mounted_symbols, ignored_files)?;
     Ok(())
 }
