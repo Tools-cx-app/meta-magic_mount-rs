@@ -90,7 +90,7 @@ where
 
 pub fn update_desc(file: u32, symbol: u32, ignore: u32) -> Result<()> {
     let text = format!(
-        "[😋 {file},{symbol},{ignore}]\\nAn implementation of a metamodule using Magic Mount."
+        "[😋 {file},{symbol},{ignore}] An implementation of a metamodule using Magic Mount."
     );
 
     let prop = fs::read_to_string(defs::MODULE_PROP)?;
