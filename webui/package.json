@@ -22,13 +22,13 @@
     "@eslint/js": "^10.0.1",
     "@rayxiom/eslint-config": "^4.5.1",
     "@rayxiom/prettier-config": "^4.5.1",
-    "@typescript/native-preview": "7.0.0-dev.20260421.2",
+    "@typescript/native-preview": "7.0.0-dev.20260428.1",
     "eslint": "^10.2.0",
     "globals": "^17.5.0",
     "prettier": "^3.8.3",
     "tslib": "^2.8.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.9",
+    "vite": "^8.0.10",
     "vite-plugin-solid": "^2.11.12"
   }
 }
