@@ -21,7 +21,7 @@ use nom::{
     sequence::delimited,
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Command {
     Mount { source: String, target: String },
     Ignore { source: String },
@@ -147,4 +147,3 @@ mod tests {
         assert!(result.is_none());
     }
 }
-
