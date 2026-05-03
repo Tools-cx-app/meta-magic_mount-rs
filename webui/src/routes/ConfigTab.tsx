@@ -14,25 +14,40 @@
  * limitations under the License.
  */
 
-import { createEffect, createMemo, createSignal } from "solid-js";
+import { For, Show, createEffect, createMemo, createSignal } from "solid-js";
 
 import BottomActions from "../components/BottomActions";
 import ChipInput from "../components/ChipInput";
 import { ICONS } from "../lib/constants";
 import { configStore } from "../lib/stores/configStore";
 import { uiStore } from "../lib/stores/uiStore";
-import type { AppConfig } from "../types";
+import type { AppConfig, CustomMount } from "../types";
 
 import "@material/web/button/filled-button.js";
+import "@material/web/button/text-button.js";
+import "@material/web/dialog/dialog.js";
 import "@material/web/icon/icon.js";
 import "@material/web/iconbutton/filled-tonal-icon-button.js";
 import "@material/web/ripple/ripple.js";
 import "@material/web/textfield/outlined-text-field.js";
 import "./ConfigTab.css";
 
+interface MdDialogElement extends HTMLElement {
+  show: () => void;
+  close: () => void;
+}
+
 export default function ConfigTab() {
   const [initialConfigStr, setInitialConfigStr] = createSignal("");
+  const [customMountDraft, setCustomMountDraft] = createSignal<CustomMount>({
+    source: "",
+    target: "",
+  });
+  const [editingCustomMountIndex, setEditingCustomMountIndex] = createSignal<
+    number | null
+  >(null);
   let mountSourceInputRef: any = null;
+  let customMountDialogRef: MdDialogElement | undefined;
 
   const isDirty = createMemo(() => {
     if (!initialConfigStr()) {
@@ -79,8 +94,125 @@ export default function ConfigTab() {
     }
   }
 
+  function updateCustomMountDraft(key: keyof CustomMount, value: string) {
+    setCustomMountDraft((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function openAddCustomMountDialog() {
+    setEditingCustomMountIndex(null);
+    setCustomMountDraft({ source: "", target: "" });
+    customMountDialogRef?.show();
+  }
+
+  function openEditCustomMountDialog(index: number) {
+    setEditingCustomMountIndex(index);
+    setCustomMountDraft({ ...configStore.config.customMounts[index] });
+    customMountDialogRef?.show();
+  }
+
+  function closeCustomMountDialog() {
+    customMountDialogRef?.close();
+  }
+
+  function saveCustomMountDialog() {
+    const draft = {
+      source: customMountDraft().source.trim(),
+      target: customMountDraft().target.trim(),
+    };
+
+    if (!draft.source || !draft.target) {
+      return;
+    }
+
+    if (editingCustomMountIndex() === null) {
+      updateConfig("customMounts", [...configStore.config.customMounts, draft]);
+    } else {
+      updateConfig(
+        "customMounts",
+        configStore.config.customMounts.map((mount, index) =>
+          index === editingCustomMountIndex() ? draft : mount,
+        ),
+      );
+    }
+
+    closeCustomMountDialog();
+  }
+
+  function deleteCustomMountDialog() {
+    const index = editingCustomMountIndex();
+
+    if (index === null) {
+      return;
+    }
+
+    updateConfig(
+      "customMounts",
+      configStore.config.customMounts.filter((_, mountIndex) => mountIndex !== index),
+    );
+    closeCustomMountDialog();
+  }
+
   return (
     <>
+      <div class="dialog-container">
+        <md-dialog ref={customMountDialogRef}>
+          <div slot="headline">
+            {editingCustomMountIndex() === null
+              ? uiStore.L.config.customMountDialogAdd
+              : uiStore.L.config.customMountDialogEdit}
+          </div>
+          <div slot="content" class="custom-mount-dialog-content">
+            <div class="custom-mount-dialog-fields">
+              <md-outlined-text-field
+                label={uiStore.L.config.customMountSource}
+                placeholder="/data/adb/modules/test/bin/unit"
+                value={customMountDraft().source}
+                onInput={(event: InputEvent) =>
+                  updateCustomMountDraft(
+                    "source",
+                    (event.currentTarget as HTMLInputElement).value,
+                  )
+                }
+                class="full-width-field"
+              />
+              <md-outlined-text-field
+                label={uiStore.L.config.customMountTarget}
+                placeholder="/product/bin/unit"
+                value={customMountDraft().target}
+                onInput={(event: InputEvent) =>
+                  updateCustomMountDraft(
+                    "target",
+                    (event.currentTarget as HTMLInputElement).value,
+                  )
+                }
+                class="full-width-field"
+              />
+            </div>
+          </div>
+          <div slot="actions">
+            <Show when={editingCustomMountIndex() !== null}>
+              <md-filled-tonal-icon-button
+                onClick={deleteCustomMountDialog}
+                title={uiStore.L.config.removeCustomMount}
+              >
+                <md-icon>
+                  <svg viewBox="0 0 24 24">
+                    <path d={ICONS.delete} />
+                  </svg>
+                </md-icon>
+              </md-filled-tonal-icon-button>
+              <div class="spacer"></div>
+            </Show>
+            <md-text-button onClick={closeCustomMountDialog}>
+              {uiStore.L.common.cancel}
+            </md-text-button>
+            <md-text-button onClick={saveCustomMountDialog}>
+              {uiStore.L.config.customMountDialogSave}
+            </md-text-button>
+          </div>
+        </md-dialog>
+      </div>
+
       <div class="config-container">
         <section class="config-group">
           <div class="config-card">
@@ -171,6 +303,74 @@ export default function ConfigTab() {
               placeholder="/data/adb/modules/..."
               onValuesChange={(values) => updateConfig("ignoreList", values)}
             />
+          </div>
+        </section>
+
+        <section class="config-group">
+          <div class="config-card">
+            <div class="card-header">
+              <div class="card-icon">
+                <md-icon>
+                  <svg viewBox="0 -960 960 960">
+                    <path d={ICONS.mount_path} />
+                  </svg>
+                </md-icon>
+              </div>
+              <div class="card-text">
+                <span class="card-title">{uiStore.L.config.customMounts}</span>
+                <span class="card-desc">
+                  {uiStore.L.config.customMountsDesc}
+                </span>
+              </div>
+            </div>
+
+            <div class="custom-mount-list">
+              <For each={configStore.config.customMounts}>
+                {(mount, index) => (
+                  <div class="custom-mount-row">
+                    <div class="custom-mount-row-content">
+                      <div class="custom-mount-meta">
+                        <span class="custom-mount-label">
+                          {uiStore.L.config.customMountSource}
+                        </span>
+                        <span class="custom-mount-value">{mount.source}</span>
+                      </div>
+                      <div class="custom-mount-meta">
+                        <span class="custom-mount-label">
+                          {uiStore.L.config.customMountTarget}
+                        </span>
+                        <span class="custom-mount-value">{mount.target}</span>
+                      </div>
+                    </div>
+                    <md-filled-tonal-icon-button
+                      onClick={() => openEditCustomMountDialog(index())}
+                      title={uiStore.L.config.editCustomMount}
+                    >
+                      <md-icon>
+                        <svg viewBox="0 0 24 24">
+                          <path d={ICONS.settings} />
+                        </svg>
+                      </md-icon>
+                    </md-filled-tonal-icon-button>
+                  </div>
+                )}
+              </For>
+
+            </div>
+
+            <button
+                class="add-custom-mount"
+                onClick={openAddCustomMountDialog}
+                title={uiStore.L.config.addCustomMount}
+                type="button"
+              >
+                <md-ripple />
+                <md-icon>
+                  <svg viewBox="0 0 24 24">
+                    <path d={ICONS.add} />
+                  </svg>
+                </md-icon>
+              </button>
           </div>
         </section>
 

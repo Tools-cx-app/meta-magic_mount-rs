@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
+export interface CustomMount {
+  source: string;
+  target: string;
+}
+
 export interface AppConfig {
   mountsource: string;
   umount: boolean;
   partitions: string[];
   ignoreList: string[];
+  customMounts: CustomMount[];
 }
 
 export interface Module {
