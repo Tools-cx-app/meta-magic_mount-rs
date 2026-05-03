@@ -147,7 +147,9 @@ export default function ConfigTab() {
 
     updateConfig(
       "customMounts",
-      configStore.config.customMounts.filter((_, mountIndex) => mountIndex !== index),
+      configStore.config.customMounts.filter(
+        (_, mountIndex) => mountIndex !== index,
+      ),
     );
     closeCustomMountDialog();
   }
@@ -355,22 +357,21 @@ export default function ConfigTab() {
                   </div>
                 )}
               </For>
-
             </div>
 
             <button
-                class="add-custom-mount"
-                onClick={openAddCustomMountDialog}
-                title={uiStore.L.config.addCustomMount}
-                type="button"
-              >
-                <md-ripple />
-                <md-icon>
-                  <svg viewBox="0 0 24 24">
-                    <path d={ICONS.add} />
-                  </svg>
-                </md-icon>
-              </button>
+              class="add-custom-mount"
+              onClick={openAddCustomMountDialog}
+              title={uiStore.L.config.addCustomMount}
+              type="button"
+            >
+              <md-ripple />
+              <md-icon>
+                <svg viewBox="0 0 24 24">
+                  <path d={ICONS.add} />
+                </svg>
+              </md-icon>
+            </button>
           </div>
         </section>
 
