@@ -15,11 +15,13 @@
 #![deny(clippy::all, clippy::pedantic)]
 #![warn(clippy::nursery)]
 
+mod bind_mount;
 mod config;
 mod defs;
 mod errors;
 mod magic_mount;
 mod misc;
+mod parser;
 mod scanner;
 mod utils;
 
@@ -28,6 +30,7 @@ use std::path::Path;
 use rustix::mount::{MountFlags, mount};
 
 use crate::{
+    bind_mount::bind_mount,
     config::{Config, handle_gen_config, handle_save_config, handle_show_config},
     defs::MODULE_PATH,
     errors::Result,
@@ -105,10 +108,27 @@ fn main() -> Result<()> {
     match result {
         Ok(()) => {
             log::info!("Magic Mount Completed Successfully");
-            Ok(())
+            let result = bind_mount();
+
+            match result {
+                Ok(()) => {
+                    log::info!("Bind mount Completed Successfully");
+                    Ok(())
+                }
+                Err(e) => {
+                    log::error!("Bind mount Failed");
+                    let e = anyhow::Error::from(e);
+                    for cause in e.chain() {
+                        log::error!("{cause:#?}");
+                    }
+                    log::error!("{:#?}", e.backtrace());
+                    Err(e.into())
+                }
+            }
         }
         Err(e) => {
             log::error!("Magic Mount Failed");
+            log::error!("Dont run bind mount stage!!");
             let e = anyhow::Error::from(e);
             for cause in e.chain() {
                 log::error!("{cause:#?}");

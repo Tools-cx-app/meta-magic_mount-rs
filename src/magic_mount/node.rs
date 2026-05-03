@@ -18,16 +18,13 @@ use std::{
     fs::{DirEntry, FileType},
     os::unix::fs::{FileTypeExt, MetadataExt},
     path::{Path, PathBuf},
-    sync::OnceLock,
 };
 
 use extattr::lgetxattr;
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashMap;
 use rustix::path::Arg;
 
-use crate::{defs, errors::Result};
-
-pub static IGNORE_LIST: OnceLock<Option<FxHashSet<String>>> = OnceLock::new();
+use crate::{defs, errors::Result, parser::COMMAND_LIST};
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub enum NodeFileType {
@@ -146,11 +143,11 @@ impl Node {
     where
         P: AsRef<Path>,
     {
-        let list = IGNORE_LIST.get().unwrap();
+        let list = COMMAND_LIST.get().unwrap();
         let path = path.as_ref().to_string_lossy();
-        if let Some(f) = list
-            && f.iter()
-                .any(|s| glob::Pattern::new(s).is_ok_and(|s| s.matches(&path)))
+        if list
+            .iter()
+            .any(|s| matches!(s, crate::parser::Command::Ignore { source } if source == &path))
         {
             return true;
         }

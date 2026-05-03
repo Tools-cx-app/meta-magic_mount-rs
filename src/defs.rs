@@ -14,6 +14,7 @@
 
 pub const MODULE_PATH: &str = "/data/adb/modules/";
 pub const IGNORE_LIST_PATH: &str = "/data/adb/magic_mount/ignore.list";
+pub const CUSTOM_LIST_PATH: &str = "/data/adb/magic_mount/custom";
 pub const SELINUX_XATTR: &str = "security.selinux";
 pub const DISABLE_FILE_NAME: &str = "disable";
 pub const REMOVE_FILE_NAME: &str = "remove";

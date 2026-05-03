@@ -21,7 +21,7 @@ use serde_json::json;
 use crate::{
     defs,
     errors::{Error, Result},
-    magic_mount::node::IGNORE_LIST,
+    parser::COMMAND_LIST,
 };
 
 #[derive(Debug, Serialize)]
@@ -189,14 +189,19 @@ pub fn parse_payload_arg(args: &[String]) -> Result<&str> {
 
 pub fn handle_show_config() -> Result<()> {
     let config = Config::load_or_default();
-    let ignore_list: Vec<_> = IGNORE_LIST
+    let ignore_list: Vec<_> = COMMAND_LIST
         .get()
         .unwrap()
-        .clone()
-        .unwrap_or_default()
         .iter()
-        .cloned()
+        .filter_map(|s| {
+            if let crate::parser::Command::Ignore { source } = s {
+                Some(source.clone())
+            } else {
+                None
+            }
+        })
         .collect();
+
     println!("{}", serde_json::to_string(&config.into_api(ignore_list))?);
     Ok(())
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, path::Path};
+use std::path::Path;
 
 use rustix::mount::{UnmountFlags, unmount};
 
@@ -48,7 +48,7 @@ fn init_logger() {
 }
 
 fn init_list() {
-    super::magic_mount::node::IGNORE_LIST.get_or_init(|| {
+    /*super::magic_mount::node::IGNORE_LIST.get_or_init(|| {
         fs::read_to_string(defs::IGNORE_LIST_PATH).map_or_else(
             |_| None,
             |f| {
@@ -60,7 +60,9 @@ fn init_list() {
                 )
             },
         )
-    });
+    });*/
+    super::parser::COMMAND_LIST
+        .get_or_init(|| super::parser::parser_custom(defs::CUSTOM_LIST_PATH));
 }
 
 pub fn cleanup<P>(tempdir: P)
