@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { AppAPI, AppConfig, Module } from "../types";
+import type { AppAPI, AppConfig, CustomMount, Module } from "../types";
 import { MockAPI } from "./api.mock";
 import { DEFAULT_CONFIG, PATHS } from "./constants";
 
@@ -61,6 +61,12 @@ function normalizeConfigPayload(payload: Record<string, unknown>): AppConfig {
       ? payload.disable_umount
       : undefined;
 
+  const customMountsSource = Array.isArray(payload.customMounts)
+    ? payload.customMounts
+    : Array.isArray(payload.custom_mounts)
+      ? payload.custom_mounts
+      : [];
+
   return {
     ...DEFAULT_CONFIG,
     mountsource:
@@ -72,6 +78,15 @@ function normalizeConfigPayload(payload: Record<string, unknown>): AppConfig {
       : [],
     ignoreList: ignoreListSource.filter(
       (value): value is string => typeof value === "string" && value.length > 0,
+    ),
+    customMounts: customMountsSource.filter(
+      (value): value is CustomMount =>
+        typeof value === "object" &&
+        value !== null &&
+        typeof value.source === "string" &&
+        value.source.length > 0 &&
+        typeof value.target === "string" &&
+        value.target.length > 0,
     ),
     umount:
       typeof payload.umount === "boolean"
@@ -86,6 +101,12 @@ const createStandardConfigPayload = (config: AppConfig) => ({
   mountsource: config.mountsource,
   partitions: config.partitions,
   ignoreList: config.ignoreList,
+  customMounts: config.customMounts
+    .map((mount) => ({
+      source: mount.source.trim(),
+      target: mount.target.trim(),
+    }))
+    .filter((mount) => mount.source.length > 0 && mount.target.length > 0),
   disable_umount: !config.umount,
 });
 
