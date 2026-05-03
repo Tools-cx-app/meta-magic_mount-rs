@@ -1,0 +1,99 @@
+{
+  "lang": { "display": "喵体中文" },
+  "common": {
+    "appName": "魔法爬架",
+    "saving": "正在用小爪爪记下来喵...",
+    "theme": "换个窝窝风格",
+    "language": "选个喵喵语言",
+    "themeAuto": "跟着光线自动变",
+    "themeLight": "阳光暖暖模式",
+    "themeDark": "月光柔柔模式",
+    "cancel": "不要啦",
+    "reboot": "睡个觉觉再醒来",
+    "rebootTitle": "要让小窝窝休息一下吗？",
+    "rebootConfirm": "主人确定要让喵喵小盒子重启嘛喵？",
+    "rebootFailed": "醒来失败了喵呜"
+  },
+  "tabs": {
+    "status": "小状况",
+    "config": "配置们",
+    "modules": "玩具们",
+    "info": "关于喵喵"
+  },
+  "status": {
+    "storageTitle": "小爪爪策略",
+    "sysInfoTitle": "窝窝详情",
+    "deviceTitle": "小盒子信息",
+    "moduleTitle": "小玩具一览",
+    "moduleActive": "正在爬爬架上的小玩具",
+    "modelLabel": "小盒子型号",
+    "androidLabel": "喵喵系统版本",
+    "kernelLabel": "毛茸茸核心版本",
+    "kernel": "窝窝小心脏",
+    "selinuxLabel": "小保镖状态",
+    "selinux": "守护喵",
+    "loadError": "查看小状况时摔了一跤喵呜",
+    "refresh": "摇摇尾巴刷新"
+  },
+  "config": {
+    "title": "小设定打理",
+    "umountLabel": "开启收起来功能",
+    "umountOff": "轻轻松松模式",
+    "umountOn": "认真收好模式",
+    "mountSource": "爬架来源",
+    "mountSourceDesc": "全局小爪爪挂住的小空间（比如魔法小精灵）",
+    "partitions": "额外小抽屉",
+    "partitionsDesc": "添加想要挂上去的小格子",
+    "ignoreList": "跳过清单",
+    "ignoreListDesc": "假装没看见的小路线",
+    "autoPlaceholder": "留空的话人家会用小鼻子选好喵",
+    "reload": "重新闻闻配置",
+    "save": "用小爪爪按住",
+    "reset": "重新开始玩",
+    "loadSuccess": "小设定已经记在小本本上啦",
+    "loadError": "记小设定时爪爪滑了一下喵呜",
+    "loadDefault": "已用最舒服默认设定",
+    "saveSuccess": "藏好小设定啦，尾巴开心摇喵",
+    "saveFailed": "藏小设定时被毛线球绊倒了喵，再试一次嘛"
+  },
+  "modules": {
+    "title": "爬架小清单",
+    "desc": "这里有嗅嗅找到的可以挂上爬架的小玩具哦",
+    "scanning": "用小鼻子闻闻喵...",
+    "reload": "再闻一遍清单",
+    "save": "把改动藏进小包包",
+    "empty": "没有找到可以玩的小玩具喵",
+    "scanError": "嗅嗅时打了个喷嚏喵呜",
+    "saveSuccess": "小玩具安排已经藏好啦",
+    "saveFailed": "藏玩具时爪子软了一下喵，主人帮帮人家",
+    "searchPlaceholder": "找找小玩具...",
+    "filterLabel": "挑一挑:",
+    "filterAll": "全部小可爱",
+    "modes": {
+      "overlay": "叠毛毛模式",
+      "magic": "魔法喵喵模式",
+      "umount": "收起来模式",
+      "short": {
+        "overlay": "叠毛毛",
+        "magic": "魔法",
+        "ignore": "跳过"
+      }
+    },
+    "emptyState": "翻遍小窝窝也没找到喵呜~",
+    "umountHiddenHint": "收起来的小玩具先藏进纸箱啦",
+    "toggleError": "小爪爪没抓稳喵呜",
+    "authorLabel": "创作大大",
+    "descriptionLabel": "小介绍",
+    "unknownLabel": "喵喵？",
+    "noDescriptionLabel": "这位大大没写小纸条喵"
+  },
+  "info": {
+    "title": "关于这个小窝窝",
+    "projectLink": "小窝窝地址",
+    "donate": "请人家吃小鱼干",
+    "contributors": "帮忙的小猫咪",
+    "loading": "正在问问其他小猫贡献者喵...",
+    "loadFail": "问路时迷路了喵（可能小爪子被门夹到啦）",
+    "noBio": "这只猫猫好冷漠诶，头也不回就走了喵？"
+  }
+}
