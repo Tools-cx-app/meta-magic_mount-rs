@@ -237,21 +237,23 @@ pub fn parse_payload_arg(args: &[String]) -> Result<&str> {
 pub fn handle_show_config() -> Result<()> {
     let config = Config::load_or_default();
     let (ignore_list, custom_mounts) =
-        COMMAND_LIST.get().map_or_else(Config::read_custom_lists, |commands| {
-            commands.iter().cloned().fold(
-                (Vec::new(), Vec::new()),
-                |(mut ignore_list, mut custom_mounts), command| {
-                    match command {
-                        Command::Ignore { source } => ignore_list.push(source),
-                        Command::Mount { source, target } => {
-                            custom_mounts.push(ApiCustomMount { source, target });
+        COMMAND_LIST
+            .get()
+            .map_or_else(Config::read_custom_lists, |commands| {
+                commands.iter().cloned().fold(
+                    (Vec::new(), Vec::new()),
+                    |(mut ignore_list, mut custom_mounts), command| {
+                        match command {
+                            Command::Ignore { source } => ignore_list.push(source),
+                            Command::Mount { source, target } => {
+                                custom_mounts.push(ApiCustomMount { source, target });
+                            }
                         }
-                    }
 
-                    (ignore_list, custom_mounts)
-                },
-            )
-        });
+                        (ignore_list, custom_mounts)
+                    },
+                )
+            });
 
     println!(
         "{}",
