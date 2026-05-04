@@ -21,11 +21,11 @@ TG_API_ID = 611335
 TG_API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
 TG_MSG_TEMPLATE = """
 New push to Github
-```
+<pre>
 {commit_message}
-```
-See commit detail [here]({commit_url})
-[#ci_{run_no}](https://github.com/{github_repository}/actions/runs/{run_id})
+</pre>
+See commit detail <a href="{commit_url}">here</a>
+<a href="https://github.com/{github_repository}/actions/runs/{run_id}">#ci_{run_no}</a>
 """.strip()
 GH_BASE_URL = "https://api.github.com/repos/"
 GH_CI_WORKFLOW_NAME = "ci-build"
@@ -362,9 +362,10 @@ async def post(msg: str, files: list[str] = []):
             await persist_tg_session(bot.session.save())  # type: ignore
         if not files:
             logger.info("No files to post, sending message only")
-            await bot.send_message(settings.chat_id, msg)
+            await bot.send_message(settings.chat_id, msg, parse_mode="html")
         else:
-            await bot.send_file(settings.chat_id, files, caption=msg)
+            logger.info(f"Sending {len(files)} files with caption: {msg}")
+            await bot.send_file(settings.chat_id, files, caption=msg, parse_mode="html")
     logger.info("Successfully posted to Telegram")
 
 
