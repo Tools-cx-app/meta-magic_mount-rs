@@ -105,5 +105,9 @@
     "loading": "Loading contributors...",
     "loadFail": "Failed to load (API Rate Limit)",
     "noBio": "No bio available"
+  },
+  "content": {
+    "welcome": "Welcome to",
+    "mmrs": "Magic Mount-rs"
   }
 }

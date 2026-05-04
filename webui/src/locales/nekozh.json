@@ -46,6 +46,16 @@
     "partitionsDesc": "添加想要挂上去的小格子",
     "ignoreList": "跳过清单",
     "ignoreListDesc": "假装没看见的小路线",
+    "customMounts": "自己走过去吧？",
+    "customMountsDesc": "来自哪，又要去哪呢？",
+    "customMountSource": "来自哪",
+    "customMountTarget": "要去哪里",
+    "addCustomMount": "走过去喵？",
+    "editCustomMount": "换一个地方嘛",
+    "removeCustomMount": "好累喵...还是不去了吧",
+    "customMountDialogAdd": "走过去喵？",
+    "customMountDialogEdit": "换一个地方嘛",
+    "customMountDialogSave": "用小爪爪按住",
     "autoPlaceholder": "留空的话人家会用小鼻子选好喵",
     "reload": "重新闻闻配置",
     "save": "用小爪爪按住",
@@ -95,5 +105,9 @@
     "loading": "正在问问其他小猫贡献者喵...",
     "loadFail": "问路时迷路了喵（可能小爪子被门夹到啦）",
     "noBio": "这只猫猫好冷漠诶，头也不回就走了喵？"
+  },
+  "content": {
+    "welcome": "欢迎来到",
+    "mmrs": "魔法大爬架"
   }
 }

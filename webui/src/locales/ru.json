@@ -105,5 +105,9 @@
     "loading": "Загрузка контрибьюторов...",
     "loadFail": "Не удалось загрузить (лимит API)",
     "noBio": "Биография отсутствует"
+  },
+  "content": {
+    "welcome": "Welcome to",
+    "mmrs": "Magic Mount-rs"
   }
 }

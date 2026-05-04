@@ -105,5 +105,9 @@
     "loading": "加载贡献者中...",
     "loadFail": "加载失败 (可能触发 API 限制)",
     "noBio": "这位开发者很懒，什么都没写"
+  },
+  "content": {
+    "welcome": "Welcome to",
+    "mmrs": "Magic Mount-rs"
   }
 }
