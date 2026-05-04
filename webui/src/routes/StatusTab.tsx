@@ -163,8 +163,8 @@ export default function StatusTab() {
             }
           >
             <div class="hero-content">
-              <span class="hero-greeting">Welcome to</span>
-              <span class="hero-value">Magic Mount-rs</span>
+              <span class="hero-greeting">{uiStore.L.content.welcome}</span>
+              <span class="hero-value">{uiStore.L.content.mmrs}</span>
               <Show
                 when={sysStore.device.model && sysStore.device.model !== "-"}
               >

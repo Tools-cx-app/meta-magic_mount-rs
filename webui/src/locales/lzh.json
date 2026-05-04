@@ -105,5 +105,9 @@
     "loading": "載襄助者中…",
     "loadFail": "載不成（或觸天工限）",
     "noBio": "此匠懶甚，未著一字"
+  },
+  "content": {
+    "welcome": "Welcome to",
+    "mmrs": "Magic Mount-rs"
   }
 }

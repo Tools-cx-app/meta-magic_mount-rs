@@ -95,5 +95,9 @@
     "loading": "正在问问其他小猫贡献者喵...",
     "loadFail": "问路时迷路了喵（可能小爪子被门夹到啦）",
     "noBio": "这只猫猫好冷漠诶，头也不回就走了喵？"
+  },
+  "content": {
+    "welcome": "Welcome to",
+    "mmrs": "Magic Mount-rs"
   }
 }
