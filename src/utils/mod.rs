@@ -115,7 +115,10 @@ pub fn update_desc(file: u32, symbol: u32, ignore: u32) -> Result<()> {
             &text,
             "--temp",
         ])
-        .env("KSU_MODULE", env!("MODULE_ID"))
+        .envs([
+            ("KSU_MODULE", env!("MODULE_ID")),
+            ("AP_MODULE", env!("MODULE_ID")),
+        ])
         .output()?;
 
     if output.status.success() {
