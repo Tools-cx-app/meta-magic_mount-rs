@@ -13,9 +13,9 @@
 // limitations under the License.
 
 pub mod ksucalls;
+
 use std::{
-    fs::{self, create_dir_all},
-    io::Write,
+    fs::create_dir_all,
     path::{Path, PathBuf},
     process::Command,
 };
