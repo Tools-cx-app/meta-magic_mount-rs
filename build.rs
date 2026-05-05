@@ -124,5 +124,7 @@ fn gen_module_prop(data: &CargoConfig) -> Result<()> {
     writeln!(file, "description={}", package.description)?;
     writeln!(file, "actionIcon=launcher.png")?;
     writeln!(file, "metamodule=1")?;
+
+    println!("cargo:rustc-env=MODULE_ID={}", id);
     Ok(())
 }

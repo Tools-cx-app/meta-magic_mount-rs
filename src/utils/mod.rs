@@ -115,7 +115,7 @@ pub fn update_desc(file: u32, symbol: u32, ignore: u32) -> Result<()> {
             &text,
             "--temp",
         ])
-        .env("KSU_MODULE", "magic_mount_rs")
+        .env("KSU_MODULE", env!("MODULE_ID"))
         .output()?;
 
     if output.status.success() {
