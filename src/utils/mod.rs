@@ -17,6 +17,7 @@ use std::{
     fs::{self, create_dir_all},
     io::Write,
     path::{Path, PathBuf},
+    process::Command,
 };
 
 use anyhow::Context;
@@ -26,6 +27,7 @@ use regex_lite::Regex;
 use crate::{
     defs,
     errors::{Error, Result},
+    utils::ksucalls::KSU,
 };
 
 /// Validate `module_id` format and security
@@ -98,25 +100,32 @@ pub fn update_desc(file: u32, symbol: u32, ignore: u32) -> Result<()> {
         "[😋 MF {file},MS {symbol},IG {ignore}] An implementation of a metamodule using Magic Mount."
     );
 
-    let prop = fs::read_to_string(defs::MODULE_PROP)?;
-    let mut temp = tempfile::Builder::new().tempfile()?;
+    let cmd = if KSU.load(std::sync::atomic::Ordering::Relaxed) {
+        "ksud"
+    } else {
+        "apd"
+    };
 
-    let new: Vec<String> = prop
-        .lines()
-        .map(|l| {
-            if l.starts_with("description") {
-                format!("description={text}")
-            } else {
-                l.to_string()
-            }
-        })
-        .collect();
+    let output = Command::new(cmd)
+        .args([
+            "module",
+            "config",
+            "set",
+            "override.description",
+            &text,
+            "--temp",
+        ])
+        .env("KSU_MODULE", "magic_mount_rs")
+        .output()?;
 
-    temp.write_all(new.join("\n").as_bytes())
-        .map_err(|e| log::error!("Failed to update description: {e}"))
-        .unwrap();
-
-    fs::rename(temp.path(), defs::MODULE_PROP)?;
+    if output.status.success() {
+        log::debug!("module config override.description successful set!");
+    } else {
+        log::warn!(
+            "failed to set module config override.description: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
 
     Ok(())
 }

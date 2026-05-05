@@ -21,7 +21,7 @@ use ksu::{TryUmount, TryUmountFlags};
 
 use crate::errors::Result;
 
-static KSU: AtomicBool = AtomicBool::new(false);
+pub static KSU: AtomicBool = AtomicBool::new(false);
 static FLAG: AtomicBool = AtomicBool::new(false);
 static LIST: LazyLock<Mutex<TryUmount>> = LazyLock::new(|| Mutex::new(TryUmount::new()));
 
