@@ -43,8 +43,6 @@ jobs:
           cache-dependency-path: webui/pnpm-lock.yaml
       - name: Install build dependencies
         run: |
-          sudo apt update
-          sudo apt install -y gcc-multilib
           cargo install cargo-ndk --locked
       - name: Setup Webui deps
         run: |
