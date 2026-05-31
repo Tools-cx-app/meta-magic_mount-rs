@@ -35,4 +35,8 @@ pub enum Error {
     Rustix(#[from] rustix::io::Errno),
     #[error(transparent)]
     Regex(#[from] regex_lite::Error),
+    #[error(transparent)]
+    Library(#[from] libloading::Error),
+    #[error(transparent)]
+    CString(#[from] std::ffi::NulError),
 }

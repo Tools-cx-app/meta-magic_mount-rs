@@ -4,6 +4,8 @@
 mod zip_ext;
 
 use std::{
+    env,
+    ffi::CString,
     fs,
     path::{Path, PathBuf},
     process::Command,
@@ -11,11 +13,15 @@ use std::{
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
+use ed25519_dalek::SigningKey;
 use fs_extra::{dir, file};
+use libloading::{Library, Symbol};
 use serde::{Deserialize, Serialize};
 use zip::{CompressionMethod, write::FileOptions};
 
 use crate::zip_ext::zip_create_from_directory_with_options;
+
+type SignFunc = unsafe extern "C" fn(*const i8, *const i8) -> i32;
 
 #[derive(Deserialize)]
 struct Package {
@@ -225,6 +231,10 @@ fn build(verbose: bool) -> Result<()> {
 
     let _ = fs::remove_dir_all(&temp_dir);
     fs::create_dir_all(&temp_dir)?;
+    let (priv_key, pub_key) = generate_key()?;
+    unsafe {
+        env::set_var("PUB_KEY", pub_key.to_string_lossy().to_string());
+    }
 
     build_webui()?;
 
@@ -259,6 +269,9 @@ fn build(verbose: bool) -> Result<()> {
     if temp_dir.join(".gitignore").exists() {
         fs::remove_file(temp_dir.join(".gitignore")).unwrap();
     }
+    if temp_dir.join("signature").exists() {
+        fs::remove_file(temp_dir.join("signature")).unwrap();
+    }
 
     let bin_path = temp_dir.join("bin");
 
@@ -273,6 +286,9 @@ fn build(verbose: bool) -> Result<()> {
         bin_path.join("magic_mount_rs.armv7"),
         &file::CopyOptions::new().overwrite(true),
     )?;
+
+    generate_sign(priv_key)?;
+
     let options: FileOptions<'_, ()> = FileOptions::default()
         .compression_method(CompressionMethod::Deflated)
         .compression_level(Some(9));
@@ -292,6 +308,39 @@ fn build(verbose: bool) -> Result<()> {
 
 fn module_dir() -> PathBuf {
     Path::new("module").to_path_buf()
+}
+
+fn generate_key() -> Result<(CString, CString)> {
+    let mut seed = [0u8; 32];
+
+    getrandom::fill(&mut seed)?;
+    let priv_key = SigningKey::from_bytes(&seed);
+    let pub_key = priv_key.verifying_key();
+
+    let hex_cstring = |bytes: &[u8]| -> CString {
+        let hex_string: String = bytes.iter().map(|b| format!("{:02x}", b)).collect();
+        CString::new(hex_string).unwrap()
+    };
+    let priv_key = hex_cstring(&priv_key.to_keypair_bytes());
+    let pub_key = hex_cstring(&pub_key.to_bytes());
+
+    Ok((priv_key, pub_key))
+}
+fn generate_sign(key: CString) -> Result<()> {
+    #[cfg(target_arch = "x86_64")]
+    let lib = unsafe { Library::new("libs/x86_64/libchecker.so")? };
+    #[cfg(target_arch = "aarch64")]
+    let lib = unsafe { Library::new("libs/arm64-v8a/libchecker.so")? };
+
+    let generate_sign: Symbol<SignFunc> = unsafe { lib.get(b"GenerateSign")? };
+
+    let path = CString::new(temp_dir().to_string_lossy().to_string())?;
+
+    if unsafe { generate_sign(key.as_ptr() as *const i8, path.as_ptr() as *const i8) } < 0 {
+        eprintln!("failed to generate sign");
+    }
+
+    Ok(())
 }
 
 fn temp_dir() -> PathBuf {

@@ -7,8 +7,25 @@
 
 MODDIR="${0%/*}"
 
-# Binary path (architecture-specific binary selected during installation)
-BINARY="$MODDIR/meta-mm"
+ABI=$(getprop ro.product.cpu.abi)
+
+if [ -z "$ABI" ]; then
+  abort "! Failed to detect device architecture"
+fi
+
+case "$ABI" in
+arm64-v8a)
+  ARCH_BINARY="magic_mount_rs.aarch64"
+  ;;
+armeabi-v7a)
+  ARCH_BINARY="magic_mount_rs.armv7"
+  ;;
+*)
+  abort "! Unsupported platform: $ABI"
+  ;;
+esac
+
+BINARY="$MODDIR/bin/$ARCH_BINARY"
 
 if [ ! -f "$BINARY" ]; then
   log "ERROR: Binary not found: $BINARY"
