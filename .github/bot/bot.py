@@ -17,7 +17,7 @@ See commit detail <a href="{commit_url}">here</a>
 <a href="https://github.com/{github_repository}/actions/runs/{run_id}">#ci_{run_no}</a>
 """.strip()
 GH_BASE_URL = "https://api.github.com/repos/"
-GH_CI_WORKFLOW_NAME = "ci-build"
+GH_CI_WORKFLOW_FILE = "ci.yml"
 GH_CI_DIST_PATTERN = "./output/*.zip"
 COMMIT_TITLE_MAX_LEN: int = 64
 COMMIT_BODY_MAX_LEN: int = 128
@@ -31,6 +31,7 @@ from logging import basicConfig, getLogger
 from pathlib import Path
 from typing import cast
 from textwrap import shorten
+from time import sleep
 
 # Third-party imports
 from telethon import TelegramClient
@@ -116,8 +117,8 @@ async def list_workflow_runs(page: int = 1) -> dict:
     """
     logger.info(f"Listing workflow runs (page: {page})")
     return await github_api(
-        endpoint="/actions/runs",
-        params={"event": "push", "page": page, "status": "success"},
+        endpoint=f"/actions/workflows/{GH_CI_WORKFLOW_FILE}/runs",
+        params={"event": "push", "page": page},
     )
 
 
@@ -132,15 +133,30 @@ async def get_last_success_ci_commit() -> str | None:
     page = 1
     read = 0
     total = float("inf")
+    found_this_at_prior_page = False
+    wait_time = 1
     while read < total:
         data = await list_workflow_runs(page)
         total = data["total_count"]
         read += len(data["workflow_runs"])
+        found_this = found_this_at_prior_page
         for run in data["workflow_runs"]:
-            if run["name"] == GH_CI_WORKFLOW_NAME:
-                logger.info(f"Found last successful CI commit: {run['head_sha']}")
-                return run["head_sha"]
-        page += 1
+            if run["id"] == settings.run_id:
+                found_this = True
+                logger.info("Found this CI run.")
+                continue
+            if found_this:
+                if not run["conclusion"]:
+                    logger.info(f"CI run {run['id']} is not completed. Waiting {wait_time} seconds...")
+                    sleep(wait_time)
+                    wait_time *= 2
+                    break
+                if run["conclusion"] == "success":
+                    logger.info(f"Found last successful CI commit: {run['head_sha']}")
+                    return run["head_sha"]
+        else:
+            page += 1
+            found_this_at_prior_page = True
     logger.warning("No successful CI commit found")
     return None
 
