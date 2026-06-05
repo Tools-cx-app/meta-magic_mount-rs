@@ -14,7 +14,7 @@ on:
       - "xtask/**"
       - "build.rs"
       - ".github/workflows/ci.yml"
-      - ".github/test/**"
+      - ".github/bot/**"
   pull_request:
     branches: ["master"]
     paths:
