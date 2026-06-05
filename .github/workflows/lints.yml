@@ -32,8 +32,10 @@ jobs:
           toolchain: nightly
           targets: aarch64-linux-android
           components: rustfmt, clippy
+      - name: Install build dependencies
+        run: cargo install cargo-ndk --locked
       - name: Clippy code
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo ndk -t arm64-v8a -t armeabi-v7a clippy -- -D warnings
   format:
     runs-on: ubuntu-latest
     steps:
