@@ -47,7 +47,7 @@ fn verify_module_safety() -> Result<()> {
     let pub_key = CString::new(env!("PUB_KEY"))?;
     let path = CString::new(defs::SELF_MODULE_PATH)?;
 
-    if unsafe { verify_sign(pub_key.as_ptr() as *const i8, path.as_ptr() as *const i8) } != 1 {
+    if unsafe { verify_sign(pub_key.as_ptr().cast::<i8>(), path.as_ptr().cast::<i8>()) } != 1 {
         log::error!("failed to verify sign");
         panic!("verify sign is broken!!");
     }
