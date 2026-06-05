@@ -26,11 +26,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r29
+          add-to-path: true
+          local-cache: ${{ github.event_name == 'push' }}
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: nightly
-          targets: aarch64-linux-android
+          targets: aarch64-linux-android, armv7-linux-androideabi
           components: rustfmt, clippy
       - name: Install build dependencies
         run: cargo install cargo-ndk --locked
