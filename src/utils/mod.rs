@@ -1,22 +1,13 @@
 // Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 
 pub mod ksucalls;
+
 use std::{
     fs::{self, create_dir_all},
     io::Write,
     path::{Path, PathBuf},
+    process::Command,
 };
 
 use anyhow::Context;
@@ -26,6 +17,7 @@ use regex_lite::Regex;
 use crate::{
     defs,
     errors::{Error, Result},
+    utils::ksucalls::KSU,
 };
 
 /// Validate `module_id` format and security
@@ -93,11 +85,7 @@ where
     }
 }
 
-pub fn update_desc(file: u32, symbol: u32, ignore: u32) -> Result<()> {
-    let text = format!(
-        "[😋 MF {file},MS {symbol},IG {ignore}] An implementation of a metamodule using Magic Mount."
-    );
-
+fn legacy_update_desc(desc: &String) -> Result<()> {
     let prop = fs::read_to_string(defs::MODULE_PROP)?;
     let mut temp = tempfile::Builder::new().tempfile()?;
 
@@ -105,18 +93,57 @@ pub fn update_desc(file: u32, symbol: u32, ignore: u32) -> Result<()> {
         .lines()
         .map(|l| {
             if l.starts_with("description") {
-                format!("description={text}")
+                format!("description={desc}")
             } else {
                 l.to_string()
             }
         })
         .collect();
 
-    temp.write_all(new.join("\n").as_bytes())
-        .map_err(|e| log::error!("Failed to update description: {e}"))
-        .unwrap();
+    let _ = temp
+        .write_all(new.join("\n").as_bytes())
+        .map_err(|e| log::error!("Failed to update description: {e}"));
 
     fs::rename(temp.path(), defs::MODULE_PROP)?;
+
+    Ok(())
+}
+
+pub fn update_desc(file: u32, symbol: u32, ignore: u32) -> Result<()> {
+    let text = format!(
+        "[😋 MF {file},MS {symbol},IG {ignore}] An implementation of a metamodule using Magic Mount."
+    );
+
+    let cmd = if KSU.load(std::sync::atomic::Ordering::Relaxed) {
+        "ksud"
+    } else {
+        "apd"
+    };
+
+    let output = Command::new(cmd)
+        .args([
+            "module",
+            "config",
+            "set",
+            "override.description",
+            &text,
+            "--temp",
+        ])
+        .envs([
+            ("KSU_MODULE", env!("MODULE_ID")),
+            ("AP_MODULE", env!("MODULE_ID")),
+        ])
+        .output()?;
+
+    if output.status.success() {
+        log::debug!("module config override.description successful set!");
+    } else {
+        log::warn!(
+            "failed to set module config override.description: {}, fallback to write regular file",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        legacy_update_desc(&text)?;
+    }
 
     Ok(())
 }

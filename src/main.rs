@@ -1,16 +1,5 @@
 // Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
 
 #![deny(clippy::all, clippy::pedantic)]
 #![warn(clippy::nursery)]
@@ -35,6 +24,7 @@ use crate::{
     defs::MODULE_PATH,
     errors::Result,
     misc::cleanup,
+    utils::ksucalls::unmount,
 };
 
 fn main() -> Result<()> {
@@ -95,36 +85,21 @@ fn main() -> Result<()> {
         std::process::exit(1);
     }
 
-    let result = magic_mount::magic_mount(
+    let magic_mount_result = magic_mount::magic_mount(
         &tempdir,
         Path::new(MODULE_PATH),
         &config.mountsource,
         &config.partitions,
         config.umount,
     );
+    let bind_mount_result = bind_mount(config.umount);
 
     cleanup(tempdir);
+    unmount()?;
 
-    match result {
+    match magic_mount_result {
         Ok(()) => {
             log::info!("Magic Mount Completed Successfully");
-            let result = bind_mount(config.umount);
-
-            match result {
-                Ok(()) => {
-                    log::info!("Bind mount Completed Successfully");
-                    Ok(())
-                }
-                Err(e) => {
-                    log::error!("Bind mount Failed");
-                    let e = anyhow::Error::from(e);
-                    for cause in e.chain() {
-                        log::error!("{cause:#?}");
-                    }
-                    log::error!("{:#?}", e.backtrace());
-                    Err(e.into())
-                }
-            }
         }
         Err(e) => {
             log::error!("Magic Mount Failed");
@@ -134,7 +109,22 @@ fn main() -> Result<()> {
                 log::error!("{cause:#?}");
             }
             log::error!("{:#?}", e.backtrace());
-            Err(e.into())
         }
     }
+
+    match bind_mount_result {
+        Ok(()) => {
+            log::info!("Bind mount Completed Successfully");
+        }
+        Err(e) => {
+            log::error!("Bind mount Failed");
+            let e = anyhow::Error::from(e);
+            for cause in e.chain() {
+                log::error!("{cause:#?}");
+            }
+            log::error!("{:#?}", e.backtrace());
+        }
+    }
+
+    Ok(())
 }
