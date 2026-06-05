@@ -74,4 +74,6 @@ cargo xtask b
 
 ## Лицензия
 
-* [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0)
+За исключением файлов в каталогах `libs/` и `module/libs/`, все остальные файлы этого проекта являются открытым исходным кодом под лицензией [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
+
+> **Примечание:** Код в каталогах `libs/` и `module/libs/` **не является открытым исходным кодом** и не подпадает под действие вышеупомянутой лицензии Apache 2.0.

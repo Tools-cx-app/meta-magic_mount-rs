@@ -86,7 +86,9 @@ cargo xtask build
 
 ## 许可证
 
-* [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0)
+本项目除 `libs/` 和 `module/libs/` 目录下的文件外，其余所有文件均基于 [Apache 2.0 许可证](https://www.apache.org/licenses/LICENSE-2.0) 开源。
+
+> **注意：** `libs/` 与 `module/libs/` 目录内的代码**不进行开源**，不适用上述 Apache 2.0 许可。
 
 ## Star History
 
