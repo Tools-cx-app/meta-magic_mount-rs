@@ -331,6 +331,8 @@ fn generate_sign(key: CString) -> Result<()> {
     let lib = unsafe { Library::new("libs/x86_64/libchecker.so")? };
     #[cfg(target_arch = "aarch64")]
     let lib = unsafe { Library::new("libs/arm64-v8a/libchecker.so")? };
+    #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+    compile_error!("unsupported host arch, please use arm64-v8a/x86_64");
 
     let generate_sign: Symbol<SignFunc> = unsafe { lib.get(b"GenerateSign")? };
 
