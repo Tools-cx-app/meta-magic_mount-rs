@@ -4,8 +4,7 @@
 pub mod ksucalls;
 
 use std::{
-    fs::{self, create_dir_all},
-    io::Write,
+    fs::create_dir_all,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -85,30 +84,6 @@ where
     }
 }
 
-fn legacy_update_desc(desc: &String) -> Result<()> {
-    let prop = fs::read_to_string(defs::MODULE_PROP)?;
-    let mut temp = tempfile::Builder::new().tempfile()?;
-
-    let new: Vec<String> = prop
-        .lines()
-        .map(|l| {
-            if l.starts_with("description") {
-                format!("description={desc}")
-            } else {
-                l.to_string()
-            }
-        })
-        .collect();
-
-    let _ = temp
-        .write_all(new.join("\n").as_bytes())
-        .map_err(|e| log::error!("Failed to update description: {e}"));
-
-    fs::rename(temp.path(), defs::MODULE_PROP)?;
-
-    Ok(())
-}
-
 pub fn update_desc(file: u32, symbol: u32, ignore: u32) -> Result<()> {
     let text = format!(
         "[😋 MF {file},MS {symbol},IG {ignore}] An implementation of a metamodule using Magic Mount."
@@ -139,10 +114,9 @@ pub fn update_desc(file: u32, symbol: u32, ignore: u32) -> Result<()> {
         log::debug!("module config override.description successful set!");
     } else {
         log::warn!(
-            "failed to set module config override.description: {}, fallback to write regular file",
+            "failed to set module config override.description: {}",
             String::from_utf8_lossy(&output.stderr)
         );
-        legacy_update_desc(&text)?;
     }
 
     Ok(())
