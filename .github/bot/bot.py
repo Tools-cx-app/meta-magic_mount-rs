@@ -171,7 +171,7 @@ def parse_commit_message(msg: str) -> str:
     Returns:
         Parsed commit message
     """
-    msg = msg + "\n\n"
+    msg = msg.replace("<", "&lt;").replace(">", "&gt;") + "\n\n"
     title, body = msg.split("\n\n", 1)
     title = shorten(title, COMMIT_TITLE_MAX_LEN, placeholder="...")
     body = shorten(body, COMMIT_BODY_MAX_LEN, placeholder="...")
