@@ -39,7 +39,7 @@ esac
 
 # Ensure the binary is executable
 chmod 755 "$MODPATH/bin/$ARCH_BINARY" || abort "! Failed to set permissions"
-ln -s "$MODPATH/bin/$ARCH_BINARY" "$MODPATH/meta-mm" || abort "! Failed to create symlink"
+ln -s "./bin/$ARCH_BINARY" "$MODPATH/meta-mm" || abort "! Failed to create symlink"
 
 ui_print "- mmrs binary installed"
 
