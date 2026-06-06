@@ -2,7 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 headerPath = "LICENSE_HEADER"
-excludes = [".github/bot/requirements.txt", ".hintrc"]
+excludes = [
+  ".github/bot/requirements.txt", 
+  ".hintrc",
+  "libs/",
+  "module/libs/"
+]
 
 [properties]
 year = 2026
