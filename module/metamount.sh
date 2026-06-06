@@ -13,19 +13,7 @@ if [ -z "$ABI" ]; then
   abort "! Failed to detect device architecture"
 fi
 
-case "$ABI" in
-arm64-v8a)
-  ARCH_BINARY="magic_mount_rs.aarch64"
-  ;;
-armeabi-v7a)
-  ARCH_BINARY="magic_mount_rs.armv7"
-  ;;
-*)
-  abort "! Unsupported platform: $ABI"
-  ;;
-esac
-
-BINARY="$MODDIR/bin/$ARCH_BINARY"
+BINARY="$MODDIR/meta-mm"
 
 if [ ! -f "$BINARY" ]; then
   log "ERROR: Binary not found: $BINARY"
