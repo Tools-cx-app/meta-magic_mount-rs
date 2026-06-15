@@ -370,7 +370,9 @@ async def post(msg: str, files: list[str] = []):
             await bot.send_message(settings.chat_id, msg, parse_mode="html")
         else:
             logger.info(f"Sending {len(files)} files with caption: {msg}")
-            await bot.send_file(settings.chat_id, files, caption=msg, parse_mode="html")
+            caption = [''] * len(files)
+            caption[-1] = msg
+            await bot.send_file(settings.chat_id, files, caption=caption, parse_mode="html")
     logger.info("Successfully posted to Telegram")
 
 
