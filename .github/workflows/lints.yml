@@ -19,6 +19,8 @@ on:
       - 'Cargo.*'
       - 'build.rs'
       - 'module/**'
+permissions:
+  contents: read
 env:
   CARGO_TERM_COLOR: always
 jobs:
