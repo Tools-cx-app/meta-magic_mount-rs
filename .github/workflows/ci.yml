@@ -70,7 +70,8 @@ jobs:
           pnpm install --frozen-lockfile
       - name: Build
         run: |
-          cargo xtask build
+          cargo xtask build -t arm64
+          cargo xtask build -t armv7
       - name: Upload release version
         uses: actions/upload-artifact@v7
         with:
