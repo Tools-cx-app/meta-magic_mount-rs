@@ -12,7 +12,7 @@ use std::{
 };
 
 use anyhow::Result;
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use ed25519_dalek::SigningKey;
 use fs_extra::{dir, file};
 use libloading::{Library, Symbol};
@@ -50,6 +50,12 @@ struct Cli {
     command: Commands,
 }
 
+#[derive(Debug, ValueEnum, Clone)]
+enum Targets {
+    Arm64,
+    Armv7,
+}
+
 #[derive(Subcommand)]
 enum Commands {
     /// Check the build of mmrs
@@ -61,6 +67,9 @@ enum Commands {
 
     /// Build mmrs
     Build {
+        /// Build target (default: arm64)
+        #[clap(short, long, default_value = "arm64")]
+        target: Targets,
         /// Print detailed output (default: false)
         #[clap(short, long, default_value = "false")]
         verbose: bool,
@@ -87,6 +96,15 @@ enum Commands {
     Update,
 }
 
+impl Targets {
+    fn to_str(&self) -> &'static str {
+        match self {
+            Self::Arm64 => "arm64",
+            Self::Armv7 => "armv7",
+        }
+    }
+}
+
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
@@ -94,8 +112,8 @@ fn main() -> Result<()> {
         Commands::Check { verbose } => {
             check(verbose)?;
         }
-        Commands::Build { verbose } => {
-            build(verbose)?;
+        Commands::Build { verbose, target } => {
+            match_build(verbose, target)?;
         }
         Commands::Clean => {
             clean()?;
@@ -224,17 +242,63 @@ fn format(verbose: bool) -> Result<()> {
     Ok(())
 }
 
-fn build(verbose: bool) -> Result<()> {
+fn match_build(verbose: bool, target: Targets) -> Result<()> {
     let temp_dir = temp_dir();
+    let bin_path = temp_dir.join("bin");
     let toml = fs::read_to_string("Cargo.toml")?;
     let data: CargoConfig = toml::from_str(&toml)?;
-
-    let _ = fs::remove_dir_all(&temp_dir);
-    fs::create_dir_all(&temp_dir)?;
     let (priv_key, pub_key) = generate_key()?;
+
     unsafe {
         env::set_var("PUB_KEY", pub_key.to_string_lossy().to_string());
     }
+
+    fs::remove_dir_all(&temp_dir)?;
+    fs::create_dir_all(&temp_dir)?;
+    fs::create_dir_all(&bin_path)?;
+
+    build(verbose)?;
+    match target {
+        Targets::Arm64 => {
+            file::copy(
+                aarch64_bin_path(),
+                bin_path.join("magic_mount_rs.aarch64"),
+                &file::CopyOptions::new().overwrite(true),
+            )?;
+            fs::remove_dir_all(temp_dir.join("libs").join("arm"))?;
+        }
+        Targets::Armv7 => {
+            file::copy(
+                armv7_bin_path(),
+                bin_path.join("magic_mount_rs.armv7"),
+                &file::CopyOptions::new().overwrite(true),
+            )?;
+            fs::remove_dir_all(temp_dir.join("libs").join("arm64"))?;
+        }
+    }
+
+    generate_sign(priv_key)?;
+
+    let options: FileOptions<'_, ()> = FileOptions::default()
+        .compression_method(CompressionMethod::Deflated)
+        .compression_level(Some(9));
+    zip_create_from_directory_with_options(
+        &Path::new("output").join(format!(
+            "magic_mount_rs-{}-{}-{}.zip",
+            &data.package.version,
+            &cal_git_code()?,
+            target.to_str()
+        )),
+        &temp_dir,
+        |_| options,
+    )
+    .unwrap();
+
+    Ok(())
+}
+
+fn build(verbose: bool) -> Result<()> {
+    let temp_dir = temp_dir();
 
     build_webui()?;
 
@@ -272,37 +336,6 @@ fn build(verbose: bool) -> Result<()> {
     if temp_dir.join("signature").exists() {
         fs::remove_file(temp_dir.join("signature")).unwrap();
     }
-
-    let bin_path = temp_dir.join("bin");
-
-    let _ = fs::create_dir_all(&bin_path);
-    file::copy(
-        aarch64_bin_path(),
-        bin_path.join("magic_mount_rs.aarch64"),
-        &file::CopyOptions::new().overwrite(true),
-    )?;
-    file::copy(
-        armv7_bin_path(),
-        bin_path.join("magic_mount_rs.armv7"),
-        &file::CopyOptions::new().overwrite(true),
-    )?;
-
-    generate_sign(priv_key)?;
-
-    let options: FileOptions<'_, ()> = FileOptions::default()
-        .compression_method(CompressionMethod::Deflated)
-        .compression_level(Some(9));
-    zip_create_from_directory_with_options(
-        &Path::new("output").join(format!(
-            "magic_mount_rs-{}-{}.zip",
-            &data.package.version,
-            &cal_git_code()?
-        )),
-        &temp_dir,
-        |_| options,
-    )
-    .unwrap();
-
     Ok(())
 }
 
