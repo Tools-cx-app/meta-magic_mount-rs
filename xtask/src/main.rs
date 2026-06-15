@@ -253,10 +253,9 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
         env::set_var("PUB_KEY", pub_key.to_string_lossy().to_string());
     }
 
-    fs::remove_dir_all(&temp_dir)?;
-    fs::create_dir_all(&temp_dir)?;
-    fs::create_dir_all(&bin_path)?;
-
+    let _ = fs::remove_dir_all(&temp_dir);
+    let _ = fs::create_dir_all(&temp_dir);
+    let _ = fs::create_dir_all(&bin_path);
     build(verbose)?;
     match target {
         Targets::Arm64 => {
