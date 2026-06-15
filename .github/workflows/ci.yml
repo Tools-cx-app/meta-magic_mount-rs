@@ -77,7 +77,6 @@ jobs:
         with:
           name: meta-mm-${{ github.run_number }}
           path: output/*.zip
-          archive: false
       - name: Upload
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         env:
