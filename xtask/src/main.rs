@@ -54,6 +54,7 @@ struct Cli {
 enum Targets {
     Arm64,
     Armv7,
+    Universal,
 }
 
 #[derive(Subcommand)]
@@ -101,6 +102,7 @@ impl Targets {
         match self {
             Self::Arm64 => "arm64",
             Self::Armv7 => "armv7",
+            Self::Universal => "universal",
         }
     }
 }
@@ -273,6 +275,19 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
                 &file::CopyOptions::new().overwrite(true),
             )?;
             fs::remove_dir_all(temp_dir.join("libs").join("arm64-v8a"))?;
+        }
+        Targets::Universal => {
+            file::copy(
+                armv7_bin_path(),
+                bin_path.join("magic_mount_rs.armv7"),
+                &file::CopyOptions::new().overwrite(true),
+            )?;
+
+            file::copy(
+                aarch64_bin_path(),
+                bin_path.join("magic_mount_rs.aarch64"),
+                &file::CopyOptions::new().overwrite(true),
+            )?;
         }
     }
 
