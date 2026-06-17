@@ -33,6 +33,7 @@ pub fn bind_mount(umount: bool) -> Result<()> {
         let mut has_mirror = false;
 
         if !target.exists()
+            && target.parent().is_some_and(|p| !p.has_root())
             && let Some(parent) = target.parent()
         {
             for entry in parent.read_dir()?.flatten() {
