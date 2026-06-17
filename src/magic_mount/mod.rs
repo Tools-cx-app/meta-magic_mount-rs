@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub mod node;
-mod utils;
+pub mod utils;
 
 use std::{
     fs,
