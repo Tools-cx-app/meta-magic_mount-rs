@@ -46,9 +46,9 @@ pub fn bind_mount(umount: bool) -> Result<()> {
         }
 
         if has_mirror {
-            mount_bind(workdir.path(), &t)?;
+            mount_bind(workdir.path(), target.parent().unwrap())?;
         } else {
-            mount_bind(&s, &t)?;
+            mount_bind(source, target)?;
         }
         if umount {
             send_unmountable(&t);
