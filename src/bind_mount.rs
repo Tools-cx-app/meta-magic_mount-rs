@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
 // SPDX-License-Identifier: Apache-2.0
 
-use std::path::Path;
+use std::{fs, path::Path};
 
 use rustix::mount::mount_bind;
 
@@ -32,9 +32,8 @@ pub fn bind_mount(umount: bool) -> Result<()> {
         let workdir = tempfile::Builder::new().tempdir()?;
         let mut has_mirror = false;
 
-        if !target.exists()
-            && target.parent().is_some_and(|p| !p.has_root())
-            && let Some(parent) = target.parent()
+        if let Some(parent) = target.parent()
+            && parent.exists()
         {
             for entry in parent.read_dir()?.flatten() {
                 mount_mirror(parent, workdir.path(), &entry)?;
@@ -47,7 +46,18 @@ pub fn bind_mount(umount: bool) -> Result<()> {
         }
 
         if has_mirror {
-            mount_bind(workdir.path(), target.parent().unwrap())?;
+            // mirror source file to workdir
+            let mirror_target = workdir.path().join(target.file_name().unwrap());
+            if source.is_dir() {
+                fs::create_dir_all(&mirror_target)?;
+            } else {
+                if let Some(p) = mirror_target.parent() {
+                    std::fs::create_dir_all(p)?;
+                }
+                fs::File::create(&mirror_target)?;
+            }
+
+            mount_bind(source, &mirror_target)?;
         } else {
             mount_bind(source, target)?;
         }
