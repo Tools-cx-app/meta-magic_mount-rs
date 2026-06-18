@@ -803,8 +803,18 @@ dependencies = [
 
 [[package]]
 name = "machikado-rs"
-version = "0.1.0"
-source = "git+https://github.com/VeryBaaad/machikado-rs.git?branch=master#777e50436959d50794c927cd8b5295ea0f32ac44"
+version = "0.0.1"
+source = "git+https://github.com/VeryBaaad/machikado-rs.git?branch=master#af8d8774554efd8564320bdbe6188a92404e3df6"
+dependencies = [
+ "ed25519-dalek",
+ "rand",
+ "walkdir",
+]
+
+[[package]]
+name = "machikado-rs"
+version = "0.0.1"
+source = "git+https://github.com/VeryBaaad/machikado-rs.git#af8d8774554efd8564320bdbe6188a92404e3df6"
 dependencies = [
  "ed25519-dalek",
  "rand",
@@ -826,7 +836,7 @@ dependencies = [
  "ksu",
  "libc",
  "log",
- "machikado-rs",
+ "machikado-rs 0.0.1 (git+https://github.com/VeryBaaad/machikado-rs.git)",
  "nom",
  "regex-lite",
  "rustc-hash",
@@ -1485,7 +1495,7 @@ dependencies = [
  "fs_extra",
  "getrandom 0.4.3",
  "libloading",
- "machikado-rs",
+ "machikado-rs 0.0.1 (git+https://github.com/VeryBaaad/machikado-rs.git?branch=master)",
  "serde",
  "serde_json",
  "toml",
