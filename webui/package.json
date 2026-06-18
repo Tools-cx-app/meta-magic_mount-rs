@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "vite build --emptyOutDir",
     "check": "vue-tsc -b",
     "preview": "vite preview"
   },
