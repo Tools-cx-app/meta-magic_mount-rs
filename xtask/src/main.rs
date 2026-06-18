@@ -238,34 +238,39 @@ fn format(verbose: bool) -> Result<()> {
 
 fn match_build(verbose: bool, target: Targets) -> Result<()> {
     let temp_dir = temp_dir();
-    let bin_path = temp_dir.join("bin");
     let toml = fs::read_to_string("Cargo.toml")?;
     let data: CargoConfig = toml::from_str(&toml)?;
 
     let _ = fs::remove_dir_all(&temp_dir);
     let _ = fs::create_dir_all(&temp_dir);
-    let _ = fs::create_dir_all(&bin_path);
     build(verbose)?;
     match target {
         Targets::Arm64 => {
             file::copy(
                 aarch64_bin_path(),
-                bin_path.join("magic_mount_rs.aarch64"),
+                temp_dir.join("meta-mm"),
                 &file::CopyOptions::new().overwrite(true),
             )?;
-            fs::remove_dir_all(temp_dir.join("libs").join("arm"))?;
         }
         Targets::Armv7 => {
             file::copy(
                 armv7_bin_path(),
-                bin_path.join("magic_mount_rs.armv7"),
+                temp_dir.join("meta-mm"),
                 &file::CopyOptions::new().overwrite(true),
             )?;
-            fs::remove_dir_all(temp_dir.join("libs").join("arm64-v8a"))?;
         }
     }
 
-    generate_sign(priv_key)?;
+    let priv_key: [u8; 64] = fs::read("priv_key")?
+        .try_into()
+        .map_err(|_| anyhow::anyhow!("priv_key must be exactly 64 bytes"))?;
+    let entries = machikado_rs::load_folder_files(
+        &temp_dir,
+        &[],
+        &["customize.sh", "mazoku", "module.prop"],
+    )?;
+    let machikado = machikado_rs::sign_file_entries(&entries, &priv_key)?;
+    fs::write(temp_dir.join("machikado"), machikado)?;
 
     let options: FileOptions<'_, ()> = FileOptions::default()
         .compression_method(CompressionMethod::Deflated)
@@ -279,8 +284,7 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
         )),
         &temp_dir,
         |_| options,
-    )
-    .unwrap();
+    )?;
 
     Ok(())
 }
@@ -315,11 +319,10 @@ fn build(verbose: bool) -> Result<()> {
         &module_dir,
         &temp_dir,
         &dir::CopyOptions::new().overwrite(true).content_only(true),
-    )
-    .unwrap();
+    )?;
 
     if temp_dir.join(".gitignore").exists() {
-        fs::remove_file(temp_dir.join(".gitignore")).unwrap();
+        fs::remove_file(temp_dir.join(".gitignore"))?;
     }
     Ok(())
 }

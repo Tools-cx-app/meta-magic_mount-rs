@@ -5,3 +5,5 @@
 .venv/
 .vscode/
 **/__pycache__/
+priv_key
+pub_key

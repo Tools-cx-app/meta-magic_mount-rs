@@ -10,4 +10,6 @@ pub const SKIP_MOUNT_FILE_NAME: &str = "skip_mount";
 pub const REPLACE_DIR_XATTR: &str = "trusted.overlay.opaque";
 pub const REPLACE_DIR_FILE_NAME: &str = ".replace";
 pub const CONFIG_FILE: &str = "/data/adb/magic_mount/config.toml";
-pub const MODULE_PROP: &str = "/data/adb/modules/magic_mount_rs/module.prop";
+pub const SELF_MODULE_PATH: &str = "/data/adb/modules/magic_mount_rs";
+pub const MACHIKADO_FILE: &str = "/data/adb/modules/magic_mount_rs/machikado";
+pub const MAZOKU_FILE: &str = "/data/adb/modules/magic_mount_rs/mazoku";
