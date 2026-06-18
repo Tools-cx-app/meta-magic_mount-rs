@@ -13,12 +13,10 @@ import {
   MiuixBasicComponent,
   MiuixText,
 } from "miuix-vue";
-import hybrid from "../components/logo.vue";
+import magicmount from "../components/logo.vue";
 import { useI18n } from "vue-i18n";
 import axios from "axios";
 import { API } from "../lib/api";
-
-const version = "v0.1.0-alpha";
 
 interface Contributor {
   id: number;
@@ -30,8 +28,14 @@ interface Contributor {
   type: string;
 }
 
+const version = ref("");
+
 const { t } = useI18n();
 const contributors = ref<Contributor[]>([]);
+
+API.getVersion().then((ver) => {
+  version.value = ver;
+});
 
 axios
   .get<Contributor[]>(
@@ -43,18 +47,24 @@ axios
       return contributor.type === "User";
     });
     for (let i = 0; i < contributors.value.length; i++) {
-      axios.get(contributors.value[i].url).then(function (response) {
-        if (response.data.bio === null) {
+      axios
+        .get(contributors.value[i].url)
+        .then(function (response) {
+          if (response.data.bio === null) {
+            contributors.value[i].bio = t("info.noBio");
+          } else {
+            contributors.value[i].bio = response.data.bio;
+          }
+          if (response.data.name === null) {
+            contributors.value[i].name = contributors.value[i].login;
+          } else {
+            contributors.value[i].name = response.data.name;
+          }
+        })
+        .catch(function () {
           contributors.value[i].bio = t("info.noBio");
-        } else {
-          contributors.value[i].bio = response.data.bio;
-        }
-        if (response.data.name === null) {
           contributors.value[i].name = contributors.value[i].login;
-        } else {
-          contributors.value[i].name = response.data.name;
-        }
-      });
+        });
     }
   })
   .catch(function (error) {
@@ -71,7 +81,7 @@ function open_github_repo() {
 <template>
   <div class="page">
     <div class="hero">
-      <hybrid />
+      <magicmount />
       <h1>{{ t("common.appName") }}</h1>
       <MiuixText>{{ version }}</MiuixText>
     </div>
