@@ -3,7 +3,6 @@
 
 name: release-build
 on:
-  workflow_dispatch:
   push:
     tags:
       - "v*.*.*"
@@ -75,7 +74,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Push Telegram Notice
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
