@@ -39,6 +39,7 @@ fn init_logger() {
     }
 }
 
+#[cfg(not(test))]
 fn verify_module_safety() -> Result<()> {
     let lib = unsafe { Library::new(defs::LIBRARY)? };
 
@@ -82,6 +83,7 @@ pub fn pre_init() {
     );
 
     init_logger();
+    #[cfg(not(test))]
     let _ = verify_module_safety();
     ksucalls::check_ksu();
     init_list();
