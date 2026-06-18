@@ -210,7 +210,7 @@ async def generate_history(base: str, head: str) -> tuple[str, str]:
         for commit in data["commits"]:
             len_msgs = len(msg)
             proceed_commits += 1
-            msg += f"{parse_commit_message(commit['commit']['message'])}\n---\n"
+            msg += f"{parse_commit_message(commit['commit']['message'])}\n\n---\n\n"
             if len(msg) >= 512:
                 msg = msg[:len_msgs]
                 proceed_commits -= 1
@@ -224,7 +224,7 @@ async def generate_history(base: str, head: str) -> tuple[str, str]:
         msg = "No commits found???"
         logger.warning("No commits found in history")
     else:
-        msg = msg[:-5]  # remove tail
+        msg = msg[:-7]  # remove tail
         logger.info(f"Generated commit history with {proceed_commits} commits")
     return data["html_url"], msg
 
