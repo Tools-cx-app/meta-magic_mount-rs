@@ -4,7 +4,7 @@
 # Constants
 TG_API_ID = 611335
 TG_API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
-TG_MSG_TEMPLATE = """
+TG_MSG_TEMPLATE_CI = """
 New push to Github
 <pre>
 {commit_message}
@@ -12,6 +12,15 @@ New push to Github
 See commit detail <a href="{commit_url}">here</a>
 <a href="https://github.com/{github_repository}/actions/runs/{run_id}">#ci_{run_no}</a>
 """.strip()
+TG_MSG_TEMPLATE_RELEASE = '''
+New release available
+
+## {name}
+
+{body}
+
+[Detail]({url})
+'''
 GH_BASE_URL = "https://api.github.com/repos/"
 GH_CI_DIST_PATTERN = "./output/*.zip"
 COMMIT_TITLE_MAX_LEN: int = 64
@@ -56,6 +65,7 @@ class Settings(BaseSettings):
     github_sha: str
     persist_token: str | None = None
     export_session: bool = False
+    is_release: bool = False
 
 
 # Global state cache
@@ -153,6 +163,22 @@ async def get_last_success_ci_commit() -> str | None:
     logger.warning("No successful CI commit found")
     return None
 
+async def get_latest_release() -> dict:
+    logger.info("Getting latest release")
+    data = await github_api(endpoint="/releases/latest")
+    logger.info(f"Got latest release: {data.get('tag_name', 'unknown')}")
+    return data
+
+async def generate_msg_release() -> str:
+    logger.info("Generating Telegram release message")
+    release = await get_latest_release()
+    message = TG_MSG_TEMPLATE_RELEASE.format(
+        name=release["name"],
+        body=release["body"],
+        url=release["html_url"],
+    )
+    logger.info("Generated Telegram release message")
+    return message
 
 async def compare_commit(base: str, head: str, page: int = 1) -> dict:
     logger.info(f"Comparing commits: {base}...{head} (page: {page})")
@@ -203,14 +229,14 @@ async def generate_history(base: str, head: str) -> tuple[str, str]:
     return data["html_url"], msg
 
 
-async def generate_msg() -> str:
+async def generate_msg_ci() -> str:
     logger.info("Generating Telegram message")
     base_hash = await get_last_success_ci_commit()
     if base_hash is None:
         logger.warning("No last success CI commit found, cannot generate message")
         return "No last success CI commit found???"
     commit_url, history_msg = await generate_history(base_hash, settings.github_sha)
-    message = TG_MSG_TEMPLATE.format(
+    message = TG_MSG_TEMPLATE_CI.format(
         commit_message=history_msg.strip(),
         commit_url=commit_url,
         run_no=settings.run_no,
@@ -300,7 +326,10 @@ async def post(msg: str, files: list[str] = []):
 
 async def main():
     logger.info("Starting main function")
-    msg = await generate_msg()
+    if settings.is_release:
+        msg = await generate_msg_release()
+    else:
+        msg = await generate_msg_ci()
     files = get_dist()
     await post(msg, files)
     logger.info("Post done successfully")
