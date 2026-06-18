@@ -1,10 +1,6 @@
 # Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
 # SPDX-License-Identifier: Apache-2.0
 
-"""
-Automatically post new CI to telegram
-"""
-
 # Constants
 TG_API_ID = 611335
 TG_API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
@@ -17,7 +13,6 @@ See commit detail <a href="{commit_url}">here</a>
 <a href="https://github.com/{github_repository}/actions/runs/{run_id}">#ci_{run_no}</a>
 """.strip()
 GH_BASE_URL = "https://api.github.com/repos/"
-GH_CI_WORKFLOW_FILE = "ci.yml"
 GH_CI_DIST_PATTERN = "./output/*.zip"
 COMMIT_TITLE_MAX_LEN: int = 64
 COMMIT_BODY_MAX_LEN: int = 128
@@ -28,7 +23,6 @@ from base64 import b64encode
 from collections.abc import Awaitable
 from glob import glob
 from logging import basicConfig, getLogger
-from pathlib import Path
 from typing import cast
 from textwrap import shorten
 from time import sleep
@@ -38,7 +32,8 @@ from telethon import TelegramClient
 from telethon.sessions import StringSession
 from httpx import AsyncClient
 from nacl import encoding, public
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 # Configure logging
 basicConfig(
@@ -51,7 +46,6 @@ logger = getLogger("bot")
 
 # Environment variables
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=Path(__file__).parent / ".env")
     bot_token: str
     chat_id: int
     run_no: int
@@ -64,7 +58,12 @@ class Settings(BaseSettings):
     export_session: bool = False
 
 
-settings = Settings()  # pyright: ignore[reportCallIssue]
+# Global state cache
+class Cache:
+    workflow_file: str | None = None
+
+
+settings = Settings() # pyright: ignore[reportCallIssue]
 
 # Global variables
 client = AsyncClient()
@@ -77,19 +76,6 @@ async def github_api(
     json: dict | None = None,
     token: str = settings.github_token,
 ) -> dict:
-    """
-    GitHub RESTful API helper function.
-
-    Args:
-        endpoint: API endpoint
-        params: Query parameters
-        method: HTTP method
-        json: Request body
-        token: GitHub token
-
-    Returns:
-        Result of GitHub RESTful API
-    """
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github+json",
@@ -105,30 +91,35 @@ async def github_api(
     return response.json()
 
 
+async def get_workflow_run(run_id: int) -> dict:
+    logger.info(f"Getting workflow run: {run_id}")
+    data = await github_api(endpoint=f"/actions/runs/{run_id}")
+    logger.info(f"Got workflow run: {run_id}")
+    return data
+
+
+async def get_workflow_file() -> str:
+    if not Cache.workflow_file:
+        logger.info("Workflow file not cached, fetching from workflow run")
+        run = await get_workflow_run(settings.run_id)
+        workflow_path = cast(str, run["path"])
+        Cache.workflow_file = workflow_path.rsplit("/", 1)[-1].split("@", 1)[0]
+        logger.info(f"Cached workflow file: {Cache.workflow_file}")
+    else:
+        logger.info(f"Using cached workflow file: {Cache.workflow_file}")
+
+    return Cache.workflow_file
+
+
 async def list_workflow_runs(page: int = 1) -> dict:
-    """
-    List workflow runs for the repository.
-
-    Args:
-        page: Page number for pagination
-
-    Returns:
-        Result of GitHub RESTful API
-    """
     logger.info(f"Listing workflow runs (page: {page})")
     return await github_api(
-        endpoint=f"/actions/workflows/{GH_CI_WORKFLOW_FILE}/runs",
+        endpoint=f"/actions/workflows/{await get_workflow_file()}/runs",
         params={"event": "push", "page": page},
     )
 
 
 async def get_last_success_ci_commit() -> str | None:
-    """
-    Get the last successful CI commit SHA.
-
-    Returns:
-        Last successful CI commit SHA or None if not found
-    """
     logger.info("Getting last successful CI commit")
     page = 1
     read = 0
@@ -147,7 +138,9 @@ async def get_last_success_ci_commit() -> str | None:
                 continue
             if found_this:
                 if not run["conclusion"]:
-                    logger.info(f"CI run {run['id']} is not completed. Waiting {wait_time} seconds...")
+                    logger.info(
+                        f"CI run {run['id']} is not completed. Waiting {wait_time} seconds..."
+                    )
                     sleep(wait_time)
                     wait_time *= 2
                     break
@@ -162,51 +155,24 @@ async def get_last_success_ci_commit() -> str | None:
 
 
 async def compare_commit(base: str, head: str, page: int = 1) -> dict:
-    """
-    Compare two commits.
-
-    Args:
-        base: Base commit SHA
-        head: Head commit SHA
-        page: Page number for pagination
-
-    Returns:
-        Result of GitHub Restful API
-    """
     logger.info(f"Comparing commits: {base}...{head} (page: {page})")
     return await github_api(endpoint=f"/compare/{base}...{head}", params={"page": page})
 
 
 def parse_commit_message(msg: str) -> str:
-    """
-    Parse commit message to avoid too long message.
-
-    Args:
-        msg: Commit message
-
-    Returns:
-        Parsed commit message
-    """
+    logger.info("Parsing commit message")
     msg = msg.replace("<", "&lt;").replace(">", "&gt;") + "\n\n"
     title, body = msg.split("\n\n", 1)
     title = shorten(title, COMMIT_TITLE_MAX_LEN, placeholder="...")
     body = shorten(body, COMMIT_BODY_MAX_LEN, placeholder="...")
     if not body:
+        logger.info("Commit message has no body, returning title only")
         return title
+    logger.info("Parsed commit message with title and body")
     return f"{title}\n\n{body}"
 
 
 async def generate_history(base: str, head: str) -> tuple[str, str]:
-    """
-    Generate commit history between two commits.
-
-    Args:
-        base: Base commit SHA
-        head: Head commit SHA
-
-    Returns:
-        Tuple of (commit_url, history_message)
-    """
     logger.info(f"Generating commit history between {base} and {head}")
     msg = ""
     page = 1
@@ -234,16 +200,10 @@ async def generate_history(base: str, head: str) -> tuple[str, str]:
     else:
         msg = msg[:-5]  # remove tail
         logger.info(f"Generated commit history with {proceed_commits} commits")
-    return data["html_url"], msg  # pyright: ignore[reportPossiblyUnboundVariable]
+    return data["html_url"], msg
 
 
 async def generate_msg() -> str:
-    """
-    Generate Telegram message for CI notification.
-
-    Returns:
-        Formatted Telegram message
-    """
     logger.info("Generating Telegram message")
     base_hash = await get_last_success_ci_commit()
     if base_hash is None:
@@ -262,12 +222,6 @@ async def generate_msg() -> str:
 
 
 async def get_public_key() -> tuple[str, str]:
-    """
-    Get GitHub public key for encrypting secrets.
-
-    Returns:
-        Tuple of (key_id, public_key)
-    """
     logger.info("Getting GitHub public key for secrets encryption")
     data = await github_api(endpoint="/actions/secrets/public-key")
     logger.info(f"Got public key with ID: {data['key_id']}")
@@ -275,16 +229,6 @@ async def get_public_key() -> tuple[str, str]:
 
 
 def encrypt(public_key: str, secret_value: str) -> str:
-    """
-    Encrypt secret value using public key.
-
-    Args:
-        public_key: GitHub public key
-        secret_value: Secret value to encrypt
-
-    Returns:
-        Encrypted secret value
-    """
     logger.info("Encrypting secret value")
     public_key_obj = public.PublicKey(
         public_key.encode("utf-8"),
@@ -298,13 +242,6 @@ def encrypt(public_key: str, secret_value: str) -> str:
 
 
 async def set_secret(name: str, value: str):
-    """
-    Set GitHub secret.
-
-    Args:
-        name: Secret name
-        value: Secret value
-    """
     logger.info(f"Setting GitHub secret: {name}")
     kid, key = await get_public_key()
     encrypted_value = encrypt(key, value)
@@ -317,12 +254,6 @@ async def set_secret(name: str, value: str):
 
 
 async def persist_tg_session(session: str):
-    """
-    Persist Telegram session string to GitHub secrets.
-
-    Args:
-        session: Telegram session string
-    """
     if settings.export_session:
         logger.warning(f"Exporting session: {session}")
     if not settings.persist_token:
@@ -334,12 +265,6 @@ async def persist_tg_session(session: str):
 
 
 def get_dist() -> list[str]:
-    """
-    Get distribution files matching the pattern.
-
-    Returns:
-        List of distribution files
-    """
     logger.info(f"Getting distribution files with pattern: {GH_CI_DIST_PATTERN}")
     files = glob(GH_CI_DIST_PATTERN)
     logger.info(f"Found {len(files)} distribution files")
@@ -347,20 +272,15 @@ def get_dist() -> list[str]:
 
 
 async def post(msg: str, files: list[str] = []):
-    """
-    Post message and files to Telegram.
-
-    Args:
-        msg: Message to send
-        files: List of files to send
-    """
     logger.info(f"Posting to Telegram (files: {len(files)})")
-    bot = TelegramClient(
-        StringSession(settings.bot_ci_session),  # pyright: ignore[reportArgumentType]
-        TG_API_ID,
-        TG_API_HASH,
-    ).start(bot_token=settings.bot_token)
-    bot: TelegramClient = await cast(Awaitable, bot)
+    bot: TelegramClient = await cast(
+        Awaitable,
+        TelegramClient(
+            StringSession(cast(str, settings.bot_ci_session)),
+            TG_API_ID,
+            TG_API_HASH,
+        ).start(bot_token=settings.bot_token)
+    )
     async with bot:
         if not settings.bot_ci_session:
             logger.info("No session string found, exporting and persisting new session")
@@ -370,16 +290,15 @@ async def post(msg: str, files: list[str] = []):
             await bot.send_message(settings.chat_id, msg, parse_mode="html")
         else:
             logger.info(f"Sending {len(files)} files with caption: {msg}")
-            caption = [''] * len(files)
+            caption = [""] * len(files)
             caption[-1] = msg
-            await bot.send_file(settings.chat_id, files, caption=caption, parse_mode="html")
+            await bot.send_file(
+                settings.chat_id, files, caption=caption, parse_mode="html"
+            )
     logger.info("Successfully posted to Telegram")
 
 
 async def main():
-    """
-    Main function to generate message and post to Telegram.
-    """
     logger.info("Starting main function")
     msg = await generate_msg()
     files = get_dist()
