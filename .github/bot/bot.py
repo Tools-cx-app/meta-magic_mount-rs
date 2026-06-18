@@ -13,7 +13,7 @@ See commit detail <a href="{commit_url}">here</a>
 <a href="https://github.com/{github_repository}/actions/runs/{run_id}">#ci_{run_no}</a>
 """.strip()
 TG_MSG_EXPECTED_PARSE_MODE_CI = "html"
-TG_MSG_TEMPLATE_RELEASE = '''
+TG_MSG_TEMPLATE_RELEASE = """
 New release available
 
 ## {name}
@@ -21,7 +21,7 @@ New release available
 {body}
 
 [Detail]({url})
-'''
+"""
 TG_MSG_EXPECTED_PARSE_MODE_RELEASE = "markdown"
 GH_BASE_URL = "https://api.github.com/repos/"
 GH_CI_DIST_PATTERN = "./output/*.zip"
@@ -76,7 +76,7 @@ class Cache:
     workflow_file: str | None = None
 
 
-settings = Settings() # pyright: ignore[reportCallIssue]
+settings = Settings()  # pyright: ignore[reportCallIssue]
 
 # Global variables
 client = AsyncClient()
@@ -166,22 +166,25 @@ async def get_last_success_ci_commit() -> str | None:
     logger.warning("No successful CI commit found")
     return None
 
+
 async def get_latest_release() -> dict:
     logger.info("Getting latest release")
     data = await github_api(endpoint="/releases/latest")
     logger.info(f"Got latest release: {data.get('tag_name', 'unknown')}")
     return data
 
+
 async def generate_msg_release() -> str:
     logger.info("Generating Telegram release message")
     release = await get_latest_release()
     message = TG_MSG_TEMPLATE_RELEASE.format(
-        name = release["name"],
-        body = shorten(release["body"], RELEASE_NOTE_MAX_LEN, placeholder="..."),
-        url = release["html_url"],
+        name=release["name"],
+        body=shorten(release["body"], RELEASE_NOTE_MAX_LEN, placeholder="..."),
+        url=release["html_url"],
     )
     logger.info("Generated Telegram release message")
     return message
+
 
 async def compare_commit(base: str, head: str, page: int = 1) -> dict:
     logger.info(f"Comparing commits: {base}...{head} (page: {page})")
@@ -306,7 +309,7 @@ async def post(msg: str, files: list[str], parse_mode: str):
             StringSession(cast(str, settings.bot_ci_session)),
             TG_API_ID,
             TG_API_HASH,
-        ).start(bot_token=settings.bot_token)
+        ).start(bot_token=settings.bot_token),
     )
     async with bot:
         if not settings.bot_ci_session:
