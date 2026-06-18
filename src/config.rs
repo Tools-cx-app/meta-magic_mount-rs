@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{fmt, fs};
+use std::{fmt, fs, path::Path};
 
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
@@ -84,9 +84,11 @@ impl Config {
         self.umount = enabled;
     }
 
-    pub fn load() -> Result<Self> {
-        let content =
-            fs::read_to_string(defs::CONFIG_FILE).context("failed to read config file")?;
+    pub fn load<P>(path: P) -> Result<Self>
+    where
+        P: AsRef<Path>,
+    {
+        let content = fs::read_to_string(path).context("failed to read config file")?;
 
         let config: Self = toml::from_str(&content).unwrap_or_else(|e| {
             log::error!("Failed to deserialize config to toml: {e}");
@@ -96,8 +98,11 @@ impl Config {
         Ok(config)
     }
 
-    pub fn load_or_default() -> Self {
-        match Self::load() {
+    pub fn load_or_default<P>(path: P) -> Self
+    where
+        P: AsRef<Path>,
+    {
+        match Self::load(path) {
             Ok(config) => config,
             Err(err) => {
                 log::warn!("Failed to load config, using default: {err}");
@@ -106,19 +111,25 @@ impl Config {
         }
     }
 
-    fn save(&self) -> Result<()> {
+    fn save<P>(&self, path: P) -> Result<()>
+    where
+        P: AsRef<Path>,
+    {
         let content = toml::to_string_pretty(self).context("failed to serialize config to toml")?;
 
-        if let Some(parent) = std::path::Path::new(defs::CONFIG_FILE).parent() {
+        if let Some(parent) = path.as_ref().parent() {
             fs::create_dir_all(parent).context("failed to create config directory")?;
         }
 
-        fs::write(defs::CONFIG_FILE, content).context("failed to write config file")?;
+        fs::write(path, content).context("failed to write config file")?;
         Ok(())
     }
 
-    fn read_custom_lists() -> (Vec<String>, Vec<ApiCustomMount>) {
-        parser_custom(defs::CUSTOM_LIST_PATH).into_iter().fold(
+    fn read_custom_lists<P>(path: P) -> (Vec<String>, Vec<ApiCustomMount>)
+    where
+        P: AsRef<Path>,
+    {
+        parser_custom(path).into_iter().fold(
             (Vec::new(), Vec::new()),
             |(mut ignore_list, mut custom_mounts), command| {
                 match command {
@@ -141,8 +152,15 @@ impl Config {
         }
     }
 
-    fn write_custom_list(ignore_list: &[String], custom_mounts: &[ApiCustomMount]) -> Result<()> {
-        if let Some(parent) = std::path::Path::new(defs::CUSTOM_LIST_PATH).parent() {
+    fn write_custom_list<P>(
+        path: P,
+        ignore_list: &[String],
+        custom_mounts: &[ApiCustomMount],
+    ) -> Result<()>
+    where
+        P: AsRef<Path>,
+    {
+        if let Some(parent) = path.as_ref().parent() {
             fs::create_dir_all(parent).context("failed to create custom list directory")?;
         }
 
@@ -163,7 +181,7 @@ impl Config {
             content.push('\n');
         }
 
-        fs::write(defs::CUSTOM_LIST_PATH, content).context("failed to write custom list")?;
+        fs::write(path, content).context("failed to write custom list")?;
         Ok(())
     }
 
@@ -224,25 +242,25 @@ pub fn parse_payload_arg(args: &[String]) -> Result<&str> {
 }
 
 pub fn handle_show_config() -> Result<()> {
-    let config = Config::load_or_default();
-    let (ignore_list, custom_mounts) =
-        COMMAND_LIST
-            .get()
-            .map_or_else(Config::read_custom_lists, |commands| {
-                commands.iter().cloned().fold(
-                    (Vec::new(), Vec::new()),
-                    |(mut ignore_list, mut custom_mounts), command| {
-                        match command {
-                            Command::Ignore { source } => ignore_list.push(source),
-                            Command::Mount { source, target } => {
-                                custom_mounts.push(ApiCustomMount { source, target });
-                            }
+    let config = Config::load_or_default(defs::CONFIG_FILE);
+    let (ignore_list, custom_mounts) = COMMAND_LIST.get().map_or_else(
+        || Config::read_custom_lists(defs::CUSTOM_LIST_PATH),
+        |commands| {
+            commands.iter().cloned().fold(
+                (Vec::new(), Vec::new()),
+                |(mut ignore_list, mut custom_mounts), command| {
+                    match command {
+                        Command::Ignore { source } => ignore_list.push(source),
+                        Command::Mount { source, target } => {
+                            custom_mounts.push(ApiCustomMount { source, target });
                         }
+                    }
 
-                        (ignore_list, custom_mounts)
-                    },
-                )
-            });
+                    (ignore_list, custom_mounts)
+                },
+            )
+        },
+    );
 
     println!(
         "{}",
@@ -260,15 +278,16 @@ pub fn handle_save_config(args: &[String]) -> Result<()> {
 
     let ignore_list = payload.ignore_list.clone();
     let custom_mounts = payload.custom_mounts.clone();
-    let mut config = Config::load_or_default();
+    let mut config = Config::load_or_default(defs::CONFIG_FILE);
     config.apply_api_payload(payload);
-    config.save()?;
+    config.save(defs::CONFIG_FILE)?;
     if ignore_list.is_some() || custom_mounts.is_some() {
-        let (current_ignore_list, current_custom_mounts) = Config::read_custom_lists();
+        let (current_ignore_list, current_custom_mounts) =
+            Config::read_custom_lists(defs::CUSTOM_LIST_PATH);
         let ignore_list = ignore_list.unwrap_or(current_ignore_list);
         let custom_mounts = custom_mounts.unwrap_or(current_custom_mounts);
 
-        Config::write_custom_list(&ignore_list, &custom_mounts)?;
+        Config::write_custom_list(defs::CUSTOM_LIST_PATH, &ignore_list, &custom_mounts)?;
     }
 
     println!("{}", json!({ "ok": true }));
@@ -277,8 +296,181 @@ pub fn handle_save_config(args: &[String]) -> Result<()> {
 
 pub fn handle_gen_config() -> Result<()> {
     let config = Config::default();
-    config.save()?;
-    Config::write_custom_list(&[], &[])?;
+    config.save(defs::CONFIG_FILE)?;
+    Config::write_custom_list(defs::CUSTOM_LIST_PATH, &[], &[])?;
     println!("{}", json!({ "ok": true }));
     Ok(())
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_decode_hex_valid_cases() {
+        let input_lowercase = "74657374";
+        let input_uppercase = "54455354";
+        let input_extremes = "00ff00ff";
+
+        assert_eq!(decode_hex(input_lowercase).unwrap(), b"test".to_vec());
+        assert_eq!(decode_hex(input_uppercase).unwrap(), b"TEST".to_vec());
+        assert_eq!(decode_hex("").unwrap(), Vec::<u8>::new());
+        assert_eq!(
+            decode_hex(input_extremes).unwrap(),
+            vec![0x00, 0xFF, 0x00, 0xFF]
+        );
+    }
+
+    #[test]
+    fn test_decode_hex_invalid_length_error() {
+        let input_odd_1 = "a";
+        let input_odd_5 = "12345";
+
+        assert!(matches!(
+            decode_hex(input_odd_1),
+            Err(Error::PayloadContain)
+        ));
+        assert!(matches!(
+            decode_hex(input_odd_5),
+            Err(Error::PayloadContain)
+        ));
+    }
+
+    #[test]
+    fn test_parse_payload_arg_success() {
+        let args = vec![
+            "magic_mount".to_string(),
+            "--payload".to_string(),
+            "7b7d".to_string(),
+        ];
+        assert_eq!(parse_payload_arg(&args).unwrap(), "7b7d");
+    }
+
+    #[test]
+    fn test_parse_payload_arg_missing() {
+        let args = vec!["magic_mount".to_string(), "--wrong-flag".to_string()];
+        assert!(parse_payload_arg(&args).is_err());
+    }
+
+    #[test]
+    fn test_format_custom_path() {
+        assert_eq!(
+            Config::format_custom_path("/system/bin/sh"),
+            "/system/bin/sh"
+        );
+
+        assert_eq!(
+            Config::format_custom_path("/data/local/my module name"),
+            "\"/data/local/my module name\""
+        );
+    }
+
+    #[test]
+    fn test_apply_api_payload() {
+        let mut config = Config::default();
+
+        let payload = ApiConfigPayload {
+            mountsource: Some("APatch".to_string()),
+            partitions: Some(vec!["system".to_string(), "product".to_string()]),
+            umount: Some(true),
+            disable_umount: None,
+            ignore_list: None,
+            custom_mounts: None,
+        };
+
+        config.apply_api_payload(payload);
+        assert_eq!(config.mountsource, "APatch");
+        assert_eq!(
+            config.partitions,
+            vec!["system".to_string(), "product".to_string()]
+        );
+        assert!(config.umount);
+    }
+
+    #[test]
+    fn test_apply_api_payload_disable_umount() {
+        let mut config = Config {
+            mountsource: "KSU".to_string(),
+            partitions: vec![],
+            umount: true,
+        };
+
+        let payload = ApiConfigPayload {
+            mountsource: None,
+            partitions: None,
+            umount: None,
+            disable_umount: Some(true),
+            ignore_list: None,
+            custom_mounts: None,
+        };
+
+        config.apply_api_payload(payload);
+        assert!(!config.umount);
+    }
+
+    #[test]
+    fn test_config_save_and_load_flow() {
+        let tmp_dir = tempfile::tempdir().unwrap();
+        let config_file_path = tmp_dir.path().join("config.toml");
+
+        let mut config = Config::default();
+        config.mountsource = "Magisk".to_string();
+        config.partitions = vec!["vendor".to_string()];
+        config.umount = true;
+        assert!(config.save(&config_file_path).is_ok());
+
+        let loaded_config = Config::load(&config_file_path).unwrap();
+        assert_eq!(loaded_config.mountsource, "Magisk");
+        assert_eq!(loaded_config.partitions, vec!["vendor".to_string()]);
+        assert!(loaded_config.umount);
+    }
+
+    #[test]
+    fn test_load_or_default_fallback() {
+        let tmp_dir = tempfile::tempdir().unwrap();
+        let non_existent = tmp_dir.path().join("missing.toml");
+
+        let config = Config::load_or_default(&non_existent);
+        assert_eq!(config.mountsource, "KSU");
+        assert!(!config.umount);
+    }
+
+    #[test]
+    fn test_write_custom_list_serialization() {
+        let tmp_dir = tempfile::tempdir().unwrap();
+        let list_file_path = tmp_dir.path().join("custom.list");
+
+        let ignore_list = vec!["/system/app".to_string()];
+        let custom_mounts = vec![ApiCustomMount {
+            source: "/data/local/test app".to_string(),
+            target: "/system/priv-app".to_string(),
+        }];
+
+        assert!(Config::write_custom_list(&list_file_path, &ignore_list, &custom_mounts).is_ok());
+
+        let file_content = fs::read_to_string(&list_file_path).unwrap();
+        let lines: Vec<&str> = file_content.lines().collect();
+
+        assert_eq!(lines.len(), 2);
+        assert_eq!(lines[0], "ignore /system/app");
+        assert_eq!(lines[1], "bind \"/data/local/test app\" /system/priv-app");
+    }
+
+    #[test]
+    fn test_into_api_struct_mapping() {
+        let config = Config {
+            mountsource: "KSU".to_string(),
+            partitions: vec!["system".to_string()],
+            umount: false,
+        };
+        let ignore_list = vec!["/data/local/tmp".to_string()];
+        let custom_mounts = vec![];
+
+        let api_config = config.into_api(ignore_list, custom_mounts);
+        assert_eq!(api_config.mountsource, "KSU");
+        assert_eq!(api_config.partitions, vec!["system".to_string()]);
+        assert!(!api_config.umount);
+        assert!(api_config.disable_umount);
+        assert_eq!(api_config.ignore_list[0], "/data/local/tmp");
+    }
+}
+

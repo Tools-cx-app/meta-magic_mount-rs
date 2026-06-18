@@ -47,7 +47,7 @@ fn main() -> Result<()> {
                 handle_gen_config()?;
             }
             "modules" => {
-                let config = Config::load_or_default();
+                let config = Config::load_or_default(defs::CONFIG_FILE);
                 let modules = scanner::list_modules(MODULE_PATH, &config.partitions);
                 println!("{}", serde_json::to_string(&modules)?);
             }
@@ -60,7 +60,7 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    let config = Config::load()?;
+    let config = Config::load(defs::CONFIG_FILE)?;
 
     log::info!("Magic Mount Starting");
     log::info!("config info:\n{config}");
