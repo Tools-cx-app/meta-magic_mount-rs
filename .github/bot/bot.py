@@ -25,8 +25,9 @@ New release available
 TG_MSG_EXPECTED_PARSE_MODE_RELEASE = "markdown"
 GH_BASE_URL = "https://api.github.com/repos/"
 GH_CI_DIST_PATTERN = "./output/*.zip"
-COMMIT_TITLE_MAX_LEN: int = 64
-COMMIT_BODY_MAX_LEN: int = 128
+COMMIT_TITLE_MAX_LEN = 64
+COMMIT_BODY_MAX_LEN = 128
+RELEASE_NOTE_MAX_LEN = 2048
 
 
 # Standard imports
@@ -175,9 +176,9 @@ async def generate_msg_release() -> str:
     logger.info("Generating Telegram release message")
     release = await get_latest_release()
     message = TG_MSG_TEMPLATE_RELEASE.format(
-        name=release["name"],
-        body=release["body"],
-        url=release["html_url"],
+        name = release["name"],
+        body = shorten(release["body"], RELEASE_NOTE_MAX_LEN, placeholder="..."),
+        url = release["html_url"],
     )
     logger.info("Generated Telegram release message")
     return message
