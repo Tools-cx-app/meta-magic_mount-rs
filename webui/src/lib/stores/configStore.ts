@@ -18,10 +18,7 @@ async function loadConfig() {
     const data = await API.loadConfig();
     config.value = { ...data };
   } catch {
-    uiStore.showToast(
-      "Failed to load config",
-      "error",
-    );
+    uiStore.showToast("Failed to load config", "error");
   }
   loading.value = false;
 }
@@ -30,15 +27,9 @@ async function saveConfig() {
   saving.value = true;
   try {
     await API.saveConfig(config.value);
-    uiStore.showToast(
-      "Configuration saved",
-      "success",
-    );
+    uiStore.showToast("Configuration saved", "success");
   } catch {
-    uiStore.showToast(
-      "Failed to save configuration",
-      "error",
-    );
+    uiStore.showToast("Failed to save configuration", "error");
   }
   saving.value = false;
 }

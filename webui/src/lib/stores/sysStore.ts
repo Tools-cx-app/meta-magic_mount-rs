@@ -34,10 +34,7 @@ async function loadStatus() {
       systemInfo.value = info;
       hasLoaded = true;
     } catch {
-      uiStore.showToast(
-        "Failed to load system status",
-        "error",
-      );
+      uiStore.showToast("Failed to load system status", "error");
     } finally {
       loading.value = false;
       pendingLoad = null;
@@ -59,10 +56,7 @@ async function rebootDevice() {
   try {
     await API.reboot();
   } catch {
-    uiStore.showToast(
-      "Reboot failed",
-      "error",
-    );
+    uiStore.showToast("Reboot failed", "error");
   }
 }
 

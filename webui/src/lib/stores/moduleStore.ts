@@ -20,10 +20,7 @@ async function loadModules() {
       modules.value = [...data];
       hasLoaded = true;
     } catch {
-      uiStore.showToast(
-        "Failed to scan modules",
-        "error",
-      );
+      uiStore.showToast("Failed to scan modules", "error");
     } finally {
       loading.value = false;
       pendingLoad = null;

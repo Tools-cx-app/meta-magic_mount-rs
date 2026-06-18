@@ -1,5 +1,5 @@
 <template>
-<div class="logo-wrapper">
+  <div class="logo-wrapper">
     <svg
       viewBox="0 0 160 210"
       xmlns="http://www.w3.org/2000/svg"
@@ -49,7 +49,7 @@
   </div>
 </template>
 
-<style> 
+<style>
 .logo-wrapper {
   --logo-accent: var(--m-color-primary);
   --logo-flow: var(--m-color-tertiary-container);
@@ -254,6 +254,4 @@
 }
 </style>
 
-export default {
-  name: 'MagicLogo',
-};
+export default { name: 'MagicLogo', };

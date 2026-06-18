@@ -1,58 +1,58 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from "vue";
 
 interface ExtendedIconWeightData {
-  vw: number
-  vh: number
-  d: string
+  vw: number;
+  vh: number;
+  d: string;
 }
 
-type MiuixIconWeight = 'light' | 'normal' | 'regular' | 'medium' | 'demibold'
+type MiuixIconWeight = "light" | "normal" | "regular" | "medium" | "demibold";
 
 interface ExtendedIcon {
-  name: string
-  light: ExtendedIconWeightData
-  normal: ExtendedIconWeightData
-  regular: ExtendedIconWeightData
-  medium: ExtendedIconWeightData
-  demibold: ExtendedIconWeightData
+  name: string;
+  light: ExtendedIconWeightData;
+  normal: ExtendedIconWeightData;
+  regular: ExtendedIconWeightData;
+  medium: ExtendedIconWeightData;
+  demibold: ExtendedIconWeightData;
 }
 
 interface Props {
-  disabled?: boolean
-  holdDown?: boolean
-  size?: number
-  color?: string
-  icon?: ExtendedIcon | ExtendedIconWeightData
-  weight?: MiuixIconWeight
+  disabled?: boolean;
+  holdDown?: boolean;
+  size?: number;
+  color?: string;
+  icon?: ExtendedIcon | ExtendedIconWeightData;
+  weight?: MiuixIconWeight;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   holdDown: false,
   size: 24,
-  weight: 'regular',
-})
+  weight: "regular",
+});
 
 const emit = defineEmits<{
-  click: [event: MouseEvent]
-}>()
+  click: [event: MouseEvent];
+}>();
 
 const iconStyle = computed(() => ({
   width: `${props.size}px`,
   height: `${props.size}px`,
-  color: props.color && props.color !== 'none' ? props.color : undefined,
-}))
+  color: props.color && props.color !== "none" ? props.color : undefined,
+}));
 
 const glyph = computed<ExtendedIconWeightData | null>(() => {
-  const i = props.icon
-  if (!i) return null
-  return 'regular' in i ? i[props.weight] : i
-})
+  const i = props.icon;
+  if (!i) return null;
+  return "regular" in i ? i[props.weight] : i;
+});
 
 function onClick(event: MouseEvent): void {
-  if (props.disabled) return
-  emit('click', event)
+  if (props.disabled) return;
+  emit("click", event);
 }
 </script>
 
@@ -69,7 +69,12 @@ function onClick(event: MouseEvent): void {
     @click="onClick"
   >
     <span class="m-icon" :style="iconStyle">
-      <svg v-if="glyph" :viewBox="`0 0 ${glyph.vw} ${glyph.vh}`" fill="none" aria-hidden="true">
+      <svg
+        v-if="glyph"
+        :viewBox="`0 0 ${glyph.vw} ${glyph.vh}`"
+        fill="none"
+        aria-hidden="true"
+      >
         <path
           :d="glyph.d"
           :transform="`matrix(1 0 0 -1 0 ${glyph.vh})`"
@@ -103,7 +108,7 @@ function onClick(event: MouseEvent): void {
   overflow: hidden;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
@@ -179,6 +184,4 @@ function onClick(event: MouseEvent): void {
 }
 </style>
 
-export default {
-  name: 'CustomIconButton',
-};
+export default { name: 'CustomIconButton', };

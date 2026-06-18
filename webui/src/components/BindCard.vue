@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { MiuixText } from 'miuix-vue'
-import { Settings } from 'miuix-vue/icons'
-import CustomIconButton from './CustomIconButton.vue'
+import { MiuixText } from "miuix-vue";
+import { Settings } from "miuix-vue/icons";
+import CustomIconButton from "./CustomIconButton.vue";
 
 interface Props {
-  source: string
-  target: string
-  sourceLabel?: string
-  targetLabel?: string
+  source: string;
+  target: string;
+  sourceLabel?: string;
+  targetLabel?: string;
 }
 
 withDefaults(defineProps<Props>(), {
-  sourceLabel: 'Source',
-  targetLabel: 'Target'
-})
+  sourceLabel: "Source",
+  targetLabel: "Target",
+});
 
 const emit = defineEmits<{
-  edit: []
-}>()
+  edit: [];
+}>();
 </script>
 
 <template>

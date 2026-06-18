@@ -80,7 +80,7 @@ export const MockAPI: AppAPI = {
 
   reboot: async () => {
     console.log("[MockAPI] Reboot requested");
-    // eslint-disable-next-line no-alert
+
     alert("Reboot requested (Mock)");
   },
 

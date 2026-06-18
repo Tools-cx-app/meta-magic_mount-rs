@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { 
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
+import { useI18n } from "vue-i18n";
+import {
   MiuixSnackbarHost,
   MiuixScrollArea,
   MiuixIcon,
@@ -9,80 +9,90 @@ import {
   MiuixTopAppBar,
   MiuixIconButton,
   MiuixButton,
-  MiuixDialog } from 'miuix-vue'
+  MiuixDialog,
+} from "miuix-vue";
 import {
   ScreenMirroring,
   Settings,
   Info,
   Folder,
-  Close2  } from 'miuix-vue/icons'
+  Close2,
+} from "miuix-vue/icons";
 
-import status from './page/status.vue'
-import config from './page/config.vue'
-import modules from './page/modules.vue'
-import about from './page/about.vue'
-import { sysStore } from './lib/stores/sysStore'
+import status from "./page/status.vue";
+import config from "./page/config.vue";
+import modules from "./page/modules.vue";
+import about from "./page/about.vue";
+import { sysStore } from "./lib/stores/sysStore";
 
-const { t } = useI18n()
+const { t } = useI18n();
 
-const Apptitle = t('common.appName')
-const Reboottitle = t('common.rebootTitle')
-const RebootSummary = t('common.rebootConfirm')
+const Apptitle = t("common.appName");
+const Reboottitle = t("common.rebootTitle");
+const RebootSummary = t("common.rebootConfirm");
 
-const rebootreq_click = ref(false)
+const rebootreq_click = ref(false);
 
-const pages = [status,config,modules,about]
-const titles = [t('tabs.status'),t('tabs.config'),t('tabs.modules'), t('tabs.info')]
-const navItems = titles.map((label) => ({ label }))
-const navicoms = [ScreenMirroring,Settings,Folder,Info]
+const pages = [status, config, modules, about];
+const titles = [
+  t("tabs.status"),
+  t("tabs.config"),
+  t("tabs.modules"),
+  t("tabs.info"),
+];
+const navItems = titles.map((label) => ({ label }));
+const navicoms = [ScreenMirroring, Settings, Folder, Info];
 
-const navindex = ref(0)
-const activepage = computed(() => pages[navindex.value])
+const navindex = ref(0);
+const activepage = computed(() => pages[navindex.value]);
 
 interface Scroller {
-  getScrollTop: () => number
-  setScrollTop: (top: number) => void
+  getScrollTop: () => number;
+  setScrollTop: (top: number) => void;
 }
-const scrollerRef = ref<Scroller | null>(null)
-const scrollPositions = new Map<number, number>()
+const scrollerRef = ref<Scroller | null>(null);
+const scrollPositions = new Map<number, number>();
 
 watch(
   navindex,
   (_next, prev) => {
-    scrollPositions.set(prev, scrollerRef.value?.getScrollTop() ?? 0)
+    scrollPositions.set(prev, scrollerRef.value?.getScrollTop() ?? 0);
   },
-  { flush: 'pre' },
-)
+  { flush: "pre" },
+);
 
 function onPageEnter(): void {
-  scrollerRef.value?.setScrollTop(scrollPositions.get(navindex.value) ?? 0)
+  scrollerRef.value?.setScrollTop(scrollPositions.get(navindex.value) ?? 0);
 }
 
 function reboot_system(): void {
-  sysStore.rebootDevice()
-  rebootreq_click.value = false
+  sysStore.rebootDevice();
+  rebootreq_click.value = false;
 }
 
-const bottomBarRef = ref<HTMLElement | null>(null)
-let barObserver: ResizeObserver | null = null
+const bottomBarRef = ref<HTMLElement | null>(null);
+let barObserver: ResizeObserver | null = null;
 
 function syncSnackbarInset(): void {
-  const h = bottomBarRef.value?.offsetHeight ?? 0
-  document.documentElement.style.setProperty('--m-snackbar-inset-bottom', `${h}px`)
+  const h = bottomBarRef.value?.offsetHeight ?? 0;
+  document.documentElement.style.setProperty(
+    "--m-snackbar-inset-bottom",
+    `${h}px`,
+  );
 }
 
 onMounted(() => {
   if (bottomBarRef.value) {
-    barObserver = new ResizeObserver(syncSnackbarInset)
-    barObserver.observe(bottomBarRef.value)
+    barObserver = new ResizeObserver(syncSnackbarInset);
+    barObserver.observe(bottomBarRef.value);
   }
-  syncSnackbarInset()
-})
+  syncSnackbarInset();
+});
 
 onBeforeUnmount(() => {
-  barObserver?.disconnect()
-  document.documentElement.style.removeProperty('--m-snackbar-inset-bottom')
-})
+  barObserver?.disconnect();
+  document.documentElement.style.removeProperty("--m-snackbar-inset-bottom");
+});
 </script>
 
 <template>
@@ -102,7 +112,7 @@ onBeforeUnmount(() => {
         </KeepAlive>
       </Transition>
     </MiuixScrollArea>
-  
+
     <div ref="bottomBarRef" class="app__bottom">
       <MiuixNavigationBar v-model="navindex" :items="navItems">
         <template #icon="{ index }">
@@ -114,15 +124,20 @@ onBeforeUnmount(() => {
 
   <MiuixSnackbarHost />
 
-  <MiuixDialog 
+  <MiuixDialog
     v-model="rebootreq_click"
     :title="Reboottitle"
     :summary="RebootSummary"
-    @close="rebootreq_click = false"> 
-    <template #default="{close}">
-      <div class="ex-dialog-actions"> 
-        <MiuixButton class="ex-grow" @click="close">{{t('common.cancel')}}</MiuixButton>
-        <MiuixButton class="ex-grow" type="primary" @click="reboot_system">{{t('common.reboot')}}</MiuixButton>
+    @close="rebootreq_click = false"
+  >
+    <template #default="{ close }">
+      <div class="ex-dialog-actions">
+        <MiuixButton class="ex-grow" @click="close">
+          {{ t("common.cancel") }}
+        </MiuixButton>
+        <MiuixButton class="ex-grow" type="primary" @click="reboot_system">
+          {{ t("common.reboot") }}
+        </MiuixButton>
       </div>
     </template>
   </MiuixDialog>
@@ -136,14 +151,14 @@ onBeforeUnmount(() => {
   background: var(--m-color-surface);
 }
 .app__body {
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-    --m-scroll-area-inset-top: 52px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  --m-scroll-area-inset-top: 52px;
 }
 
 .app__bottom {
-  flex:none;
+  flex: none;
   z-index: 10;
 }
 

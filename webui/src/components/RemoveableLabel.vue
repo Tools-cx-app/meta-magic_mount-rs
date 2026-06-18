@@ -1,27 +1,37 @@
 <script setup lang="ts">
-import { MiuixText } from 'miuix-vue'
-import { Close } from 'miuix-vue/icons'
-import CustomIconButton from './CustomIconButton.vue'
+import { MiuixText } from "miuix-vue";
+import { Close } from "miuix-vue/icons";
+import CustomIconButton from "./CustomIconButton.vue";
 
 interface Props {
-  text: string
-  buttonalign?: string
+  text: string;
+  buttonalign?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  buttonalign: 'end',
-})
+  buttonalign: "end",
+});
 
 const emit = defineEmits<{
-  remove: []
-}>()
+  remove: [];
+}>();
 </script>
 
 <template>
   <div class="chip-item">
-    <CustomIconButton v-if="props.buttonalign === 'start'" :icon="Close" :size="16" @click="emit('remove')" />
+    <CustomIconButton
+      v-if="props.buttonalign === 'start'"
+      :icon="Close"
+      :size="16"
+      @click="emit('remove')"
+    />
     <MiuixText size="13">{{ text }}</MiuixText>
-    <CustomIconButton  v-if="props.buttonalign === 'end'" :icon="Close" :size="16" @click="emit('remove')" />
+    <CustomIconButton
+      v-if="props.buttonalign === 'end'"
+      :icon="Close"
+      :size="16"
+      @click="emit('remove')"
+    />
   </div>
 </template>
 
@@ -36,5 +46,4 @@ const emit = defineEmits<{
   margin-right: 8px;
   margin-bottom: 8px;
 }
-
 </style>

@@ -13,8 +13,8 @@ type KsuExec = (cmd: string) => Promise<KsuExecResult>;
 let ksuExec: KsuExec | null = null;
 
 try {
-    const ksu = await import("kernelsu").catch(() => null);
-    ksuExec = ksu ? ksu.exec : null;
+  const ksu = await import("kernelsu").catch(() => null);
+  ksuExec = ksu ? ksu.exec : null;
 } catch {}
 
 const shouldUseMock = import.meta.env.DEV || !ksuExec;
