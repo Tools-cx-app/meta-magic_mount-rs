@@ -1,3 +1,9 @@
+<!--
+
+    Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
+    SPDX-License-Identifier: Apache-2.0
+
+-->
 <script setup lang="ts">
 import { MiuixText } from "miuix-vue";
 import { Settings } from "miuix-vue/icons";

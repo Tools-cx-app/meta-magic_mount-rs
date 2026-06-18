@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { createApp } from "vue";
 // import Vconsole from 'vconsole'
 import i18n, { initI18n } from "./locales";

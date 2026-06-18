@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ref, computed } from "vue";
 import type { ToastMessage } from "../types";
 import { getSupportedLocales, loadLocale, switchLocale } from "../../locales";

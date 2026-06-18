@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ref } from "vue";
 import type { DeviceInfo, SystemInfo } from "../types";
 import { API } from "../api";

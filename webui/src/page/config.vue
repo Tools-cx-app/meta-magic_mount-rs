@@ -1,3 +1,9 @@
+<!--
+
+    Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
+    SPDX-License-Identifier: Apache-2.0
+
+-->
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
