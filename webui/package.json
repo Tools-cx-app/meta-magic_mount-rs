@@ -1,34 +1,36 @@
 {
-  "name": "magic-mount-webui",
+  "name": "magic-mount",
+  "license":"Apache-2.0",
   "private": true,
-  "packageManager": "pnpm@10.26.0",
+  "version": "0.1.0-alpha",
   "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
-    "build": "vite build --emptyOutDir",
-    "dev": "vite",
-    "format": "prettier --write .",
-    "lint": "eslint . && prettier --check .",
-    "lint:fix": "eslint . --fix && prettier --write .",
-    "preview": "vite preview",
-    "typecheck": "tsgo --noEmit"
+    "dev": "vite --host",
+    "build": "vite build",
+    "check": "vue-tsc -b",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@material/material-color-utilities": "^0.4.0",
-    "@material/web": "^2.4.1",
-    "kernelsu": "^3.0.2",
-    "solid-js": "^1.9.13"
+    "vue": "^3.5.34"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@rayxiom/eslint-config": "^4.5.1",
-    "@rayxiom/prettier-config": "^4.5.1",
-    "@typescript/native-preview": "7.0.0-dev.20260616.1",
-    "eslint": "^10.5.0",
-    "globals": "^17.6.0",
-    "prettier": "^3.8.4",
-    "tslib": "^2.8.1",
-    "typescript": "^6.0.3",
-    "vite": "^8.0.16",
-    "vite-plugin-solid": "^2.11.12"
+    "@types/node": "^24.12.3",
+    "@vitejs/plugin-vue": "^6.0.6",
+    "@vue/tsconfig": "^0.9.1",
+    "@vueuse/core": "^14.3.0",
+    "axios": "^1.17.0",
+    "kernelsu": "^3.0.2",
+    "miuix-vue": "^0.1.1",
+    "motion-v": "^2.3.0",
+    "sass-embedded": "^1.100.0",
+    "typescript": "~6.0.2",
+    "vconsole": "^3.15.1",
+    "vite": "^8.0.12",
+    "vue-i18n": "^11.4.5",
+    "vue-tsc": "^3.2.8"
   }
 }

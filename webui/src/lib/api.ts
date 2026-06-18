@@ -1,9 +1,4 @@
-/*
- * Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import type { AppAPI, AppConfig, CustomMount, Module } from "../types";
+import type { AppAPI, AppConfig, CustomMount, Module } from "./types";
 import { MockAPI } from "./api.mock";
 import { DEFAULT_CONFIG, PATHS } from "./constants";
 
@@ -17,11 +12,13 @@ type KsuExec = (cmd: string) => Promise<KsuExecResult>;
 
 let ksuExec: KsuExec | null = null;
 
-try {
-  const ksu = await import("kernelsu").catch(() => null);
-
-  ksuExec = ksu ? ksu.exec : null;
-} catch {}
+async function initKsu() {
+  if (ksuExec !== null) return;
+  try {
+    const ksu = await import("kernelsu").catch(() => null);
+    ksuExec = ksu ? ksu.exec : null;
+  } catch {}
+}
 
 const shouldUseMock = import.meta.env.DEV || !ksuExec;
 
@@ -120,6 +117,7 @@ function normalizeModule(module: Record<string, unknown>): Module {
 
 const RealAPI: AppAPI = {
   loadConfig: async () => {
+    await initKsu();
     const { errno, stdout, stderr } = await ksuExec!(
       `${PATHS.BINARY} show-config`,
     );
@@ -132,6 +130,7 @@ const RealAPI: AppAPI = {
   },
 
   saveConfig: async (config: AppConfig) => {
+    await initKsu();
     const payload = stringToHex(
       JSON.stringify(createStandardConfigPayload(config)),
     );
@@ -145,6 +144,7 @@ const RealAPI: AppAPI = {
   },
 
   scanModules: async () => {
+    await initKsu();
     const { errno, stdout, stderr } = await ksuExec!(`${PATHS.BINARY} modules`);
 
     if (errno === 0 && stdout) {
@@ -157,6 +157,7 @@ const RealAPI: AppAPI = {
   },
 
   getSystemInfo: async () => {
+    await initKsu();
     try {
       const cmd = `
         echo "KERNEL:$(uname -r)"
@@ -185,6 +186,7 @@ const RealAPI: AppAPI = {
   },
 
   getDeviceStatus: async () => {
+    await initKsu();
     const cmd = `
       getprop ro.product.model
       getprop ro.build.version.release
@@ -199,6 +201,7 @@ const RealAPI: AppAPI = {
   },
 
   getVersion: async () => {
+    await initKsu();
     const cmd = `${PATHS.BINARY} version`;
 
     try {
@@ -207,7 +210,6 @@ const RealAPI: AppAPI = {
       if (errno === 0 && stdout) {
         try {
           const res = JSON.parse(stdout);
-
           return res.version ?? "0.0.0";
         } catch {
           return stdout.trim() || "0.0.0";
@@ -219,6 +221,7 @@ const RealAPI: AppAPI = {
   },
 
   openLink: async (url: string) => {
+    await initKsu();
     const safeUrl = shellEscapeDoubleQuoted(url);
     const cmd = `am start -a android.intent.action.VIEW -d "${safeUrl}"`;
 
@@ -226,6 +229,7 @@ const RealAPI: AppAPI = {
   },
 
   reboot: async () => {
+    await initKsu();
     const cmd = "svc power reboot || reboot";
 
     await ksuExec!(cmd);

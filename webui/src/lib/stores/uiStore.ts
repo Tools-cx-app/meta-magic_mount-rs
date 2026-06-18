@@ -1,72 +1,65 @@
-/*
- * Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
- * SPDX-License-Identifier: Apache-2.0
- */
+import { ref, computed } from "vue";
+import type { ToastMessage } from "../types";
+import { getSupportedLocales, loadLocale, switchLocale } from "../../locales";
 
-import { createMemo, createRoot, createSignal } from "solid-js";
+const lang = ref("en");
+const toast = ref<ToastMessage>({
+  id: "init",
+  text: "",
+  type: "info",
+  visible: false,
+});
+const isReady = ref(false);
 
-import type { LanguageOption, ToastMessage } from "../../types";
-import { availableLanguages, locales } from "../i18n";
+const availableLanguages = ref<{ code: string; display: string }[]>([]);
 
-function createUiStore() {
-  const [lang, setLangSignal] = createSignal("en");
-  const [toast, setToast] = createSignal<ToastMessage>({
-    id: "init",
-    text: "",
-    type: "info",
-    visible: false,
-  });
-  const [isReady, setIsReady] = createSignal(false);
-
-  const L = createMemo(() => locales[lang()] ?? locales.en);
-  const toasts = createMemo(() => {
-    const t = toast();
-
-    return t.visible ? [t] : [];
-  });
-
-  function showToast(text: string, type: ToastMessage["type"] = "info"): void {
-    const id = Date.now().toString();
-    setToast({ id, text, type, visible: true });
-    setTimeout(() => {
-      if (toast().id === id) {
-        setToast((prev) => ({ ...prev, visible: false }));
-      }
-    }, 3000);
-  }
-
-  function setLang(code: string) {
-    setLangSignal(code);
-    localStorage.setItem("mm-lang", code);
-  }
-
-  async function init() {
-    const savedLang = localStorage.getItem("mm-lang") ?? "en";
-    setLangSignal(savedLang);
-    localStorage.removeItem("mm-fix-nav");
-    setIsReady(true);
-  }
-
-  return {
-    get lang() {
-      return lang();
-    },
-    get availableLanguages(): LanguageOption[] {
-      return availableLanguages;
-    },
-    get L() {
-      return L();
-    },
-    get toasts() {
-      return toasts();
-    },
-    get isReady() {
-      return isReady();
-    },
-    showToast,
-    setLang,
-    init,
-  };
+async function fetchAvailableLanguages() {
+  availableLanguages.value = await getSupportedLocales();
 }
 
-export const uiStore = createRoot(createUiStore);
+function showToast(text: string, type: ToastMessage["type"] = "info"): void {
+  const id = Date.now().toString();
+  toast.value = { id, text, type, visible: true };
+  setTimeout(() => {
+    if (toast.value.id === id) {
+      toast.value.visible = false;
+    }
+  }, 3000);
+}
+
+async function setLang(code: string) {
+  lang.value = code;
+  await switchLocale(code);
+}
+
+async function init() {
+  const savedLang = localStorage.getItem("locale") ?? "en";
+  await loadLocale(savedLang);
+  lang.value = savedLang;
+  localStorage.removeItem("mm-fix-nav");
+  await fetchAvailableLanguages();
+  isReady.value = true;
+}
+
+const toasts = computed(() => {
+  const t = toast.value;
+  return t.visible ? [t] : [];
+});
+
+export const uiStore = {
+  get lang() {
+    return lang.value;
+  },
+  get availableLanguages() {
+    return availableLanguages.value;
+  },
+  get toasts() {
+    return toasts.value;
+  },
+  get isReady() {
+    return isReady.value;
+  },
+  showToast,
+  setLang,
+  init,
+};

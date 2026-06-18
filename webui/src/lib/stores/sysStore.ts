@@ -1,98 +1,88 @@
-/*
- * Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import { createRoot, createSignal } from "solid-js";
-
-import type { DeviceInfo, SystemInfo } from "../../types";
+import { ref } from "vue";
+import type { DeviceInfo, SystemInfo } from "../types";
 import { API } from "../api";
 import { uiStore } from "./uiStore";
 
-function createSysStore() {
-  const [device, setDevice] = createSignal<DeviceInfo>({
-    model: "-",
-  });
-  const [version, setVersion] = createSignal("...");
-  const [systemInfo, setSystemInfo] = createSignal<SystemInfo>({
-    kernel: "-",
-    selinux: "-",
-  });
-  const [loading, setLoading] = createSignal(false);
-  let pendingLoad: Promise<void> | null = null;
-  let hasLoaded = false;
+const device = ref<DeviceInfo>({
+  model: "-",
+});
+const version = ref("...");
+const systemInfo = ref<SystemInfo>({
+  kernel: "-",
+  selinux: "-",
+});
+const loading = ref(false);
+let pendingLoad: Promise<void> | null = null;
+let hasLoaded = false;
 
-  async function loadStatus() {
-    if (pendingLoad) {
-      return pendingLoad;
-    }
-
-    setLoading(true);
-    pendingLoad = (async () => {
-      try {
-        const [baseDevice, nextVersion, info] = await Promise.all([
-          API.getDeviceStatus(),
-          API.getVersion(),
-          API.getSystemInfo(),
-        ]);
-
-        setDevice(baseDevice);
-        setVersion(nextVersion);
-        setSystemInfo(info);
-        hasLoaded = true;
-      } catch {
-        uiStore.showToast(
-          uiStore.L.status.loadError ?? "Failed to load system status",
-          "error",
-        );
-      } finally {
-        setLoading(false);
-        pendingLoad = null;
-      }
-    })();
-
+async function loadStatus() {
+  if (pendingLoad) {
     return pendingLoad;
   }
 
-  function ensureStatusLoaded() {
-    if (hasLoaded) {
-      return Promise.resolve();
-    }
-
-    return loadStatus();
-  }
-
-  async function rebootDevice() {
+  loading.value = true;
+  pendingLoad = (async () => {
     try {
-      await API.reboot();
+      const [baseDevice, nextVersion, info] = await Promise.all([
+        API.getDeviceStatus(),
+        API.getVersion(),
+        API.getSystemInfo(),
+      ]);
+
+      device.value = baseDevice;
+      version.value = nextVersion;
+      systemInfo.value = info;
+      hasLoaded = true;
     } catch {
       uiStore.showToast(
-        uiStore.L.common.rebootFailed ?? "Reboot failed",
+        "Failed to load system status",
         "error",
       );
+    } finally {
+      loading.value = false;
+      pendingLoad = null;
     }
-  }
+  })();
 
-  return {
-    get device() {
-      return device();
-    },
-    get version() {
-      return version();
-    },
-    get systemInfo() {
-      return systemInfo();
-    },
-    get loading() {
-      return loading();
-    },
-    get hasLoaded() {
-      return hasLoaded;
-    },
-    ensureStatusLoaded,
-    loadStatus,
-    rebootDevice,
-  };
+  return pendingLoad;
 }
 
-export const sysStore = createRoot(createSysStore);
+function ensureStatusLoaded() {
+  if (hasLoaded) {
+    return Promise.resolve();
+  }
+
+  return loadStatus();
+}
+
+async function rebootDevice() {
+  try {
+    await API.reboot();
+  } catch {
+    uiStore.showToast(
+      "Reboot failed",
+      "error",
+    );
+  }
+}
+
+export const sysStore = {
+  get device() {
+    return device.value;
+  },
+  get version() {
+    return version.value;
+  },
+  get systemInfo() {
+    return systemInfo.value;
+  },
+  get loading() {
+    return loading.value;
+  },
+  get hasLoaded() {
+    return hasLoaded;
+  },
+  ensureStatusLoaded,
+  loadStatus,
+  rebootDevice,
+};
