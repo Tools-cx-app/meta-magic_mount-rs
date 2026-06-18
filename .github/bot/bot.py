@@ -12,6 +12,7 @@ New push to Github
 See commit detail <a href="{commit_url}">here</a>
 <a href="https://github.com/{github_repository}/actions/runs/{run_id}">#ci_{run_no}</a>
 """.strip()
+TG_MSG_EXPECTED_PARSE_MODE_CI = "html"
 TG_MSG_TEMPLATE_RELEASE = '''
 New release available
 
@@ -21,6 +22,7 @@ New release available
 
 [Detail]({url})
 '''
+TG_MSG_EXPECTED_PARSE_MODE_RELEASE = "markdown"
 GH_BASE_URL = "https://api.github.com/repos/"
 GH_CI_DIST_PATTERN = "./output/*.zip"
 COMMIT_TITLE_MAX_LEN: int = 64
@@ -191,11 +193,9 @@ def parse_commit_message(msg: str) -> str:
     title, body = msg.split("\n\n", 1)
     title = shorten(title, COMMIT_TITLE_MAX_LEN, placeholder="...")
     body = shorten(body, COMMIT_BODY_MAX_LEN, placeholder="...")
-    if not body:
-        logger.info("Commit message has no body, returning title only")
-        return title
-    logger.info("Parsed commit message with title and body")
-    return f"{title}\n\n{body}"
+    parsed = f"{title}\n\n{body}".strip()
+    logger.info(f"Parsed message: {parsed}")
+    return parsed
 
 
 async def generate_history(base: str, head: str) -> tuple[str, str]:
@@ -297,7 +297,7 @@ def get_dist() -> list[str]:
     return files
 
 
-async def post(msg: str, files: list[str] = []):
+async def post(msg: str, files: list[str], parse_mode: str):
     logger.info(f"Posting to Telegram (files: {len(files)})")
     bot: TelegramClient = await cast(
         Awaitable,
@@ -313,13 +313,13 @@ async def post(msg: str, files: list[str] = []):
             await persist_tg_session(bot.session.save())  # type: ignore
         if not files:
             logger.info("No files to post, sending message only")
-            await bot.send_message(settings.chat_id, msg, parse_mode="html")
+            await bot.send_message(settings.chat_id, msg, parse_mode=parse_mode)
         else:
             logger.info(f"Sending {len(files)} files with caption: {msg}")
             caption = [""] * len(files)
             caption[-1] = msg
             await bot.send_file(
-                settings.chat_id, files, caption=caption, parse_mode="html"
+                settings.chat_id, files, caption=caption, parse_mode=parse_mode
             )
     logger.info("Successfully posted to Telegram")
 
@@ -328,10 +328,12 @@ async def main():
     logger.info("Starting main function")
     if settings.is_release:
         msg = await generate_msg_release()
+        parse_mode = TG_MSG_EXPECTED_PARSE_MODE_RELEASE
     else:
         msg = await generate_msg_ci()
+        parse_mode = TG_MSG_EXPECTED_PARSE_MODE_CI
     files = get_dist()
-    await post(msg, files)
+    await post(msg, files, parse_mode)
     logger.info("Post done successfully")
 
 
