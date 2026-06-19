@@ -12,6 +12,25 @@ export KSU_METAMODULE="mmrs"
 # Main installation flow
 ui_print "- Using mmrs metainstall"
 
+# Define the module IDs that are not allowed to install (separated by spaces)
+BLOCKLIST="scene_swap_controller"
+
+# Fallback mechanism to fetch the current module ID from available environment variables
+CURRENT_MODULE="${KSU_MODULE:-$AP_MODULE}"
+
+# Check if the current module is inside the blocklist
+if [ -n "$CURRENT_MODULE" ]; then
+  for blocked_id in $BLOCKLIST; do
+    if [ "$CURRENT_MODULE" = "$blocked_id" ]; then
+      ui_print "**********************************************"
+      ui_print "! Module '$CURRENT_MODULE' already has self-mounting logic!"
+      ui_print "! Marking skip mount"
+      ui_print "**********************************************"
+      touch "$MODPATH/skip_mount"
+    fi
+  done
+fi
+
 # we no-op handle_partition
 # this way we can support normal hierarchy that ksu changes
 handle_partition() {
@@ -76,10 +95,11 @@ metamodule_hot_install() {
 
   # we do this dance to satisfy kernelsu's ensure_file_exists
   mkdir -p "$MODPATH_INTERNAL"
-  cat "$MODDIR_INTERNAL/module.prop" > "$MODPATH_INTERNAL/module.prop"
+  cat "$MODDIR_INTERNAL/module.prop" >"$MODPATH_INTERNAL/module.prop"
 
-  ( sleep 3 ; 
-    rm -rf "$MODDIR_INTERNAL/update" ; 
+  (
+    sleep 3
+    rm -rf "$MODDIR_INTERNAL/update"
     rm -rf "$MODPATH_INTERNAL"
   ) & # fork in background
 
@@ -91,4 +111,3 @@ metamodule_hot_install() {
 if [ "$MODULE_HOT_INSTALL_REQUEST" = true ]; then
   metamodule_hot_install
 fi
-
