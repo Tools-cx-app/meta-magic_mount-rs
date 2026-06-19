@@ -14,9 +14,7 @@ See commit detail <a href="{commit_url}">here</a>
 """.strip()
 TG_MSG_EXPECTED_PARSE_MODE_CI = "html"
 TG_MSG_TEMPLATE_RELEASE = """
-New release available
-
-## {name}
+New release available: **{name}**
 
 {body}
 
@@ -173,13 +171,22 @@ async def get_latest_release() -> dict:
     logger.info(f"Got latest release: {data.get('tag_name', 'unknown')}")
     return data
 
+def parse_release_body(body: str) -> str:
+    logger.info("Parsing release body")
+    lines = list(map(str.strip, body.split("\n")))
+    for line in lines:
+        if line.startswith("##"):
+            line = f'**{line[2:]}**'
+    parsed = shorten("\n".join(lines), RELEASE_NOTE_MAX_LEN, placeholder="...")
+    logger.info(f"Parsed body: {parsed}")
+    return parsed
 
 async def generate_msg_release() -> str:
     logger.info("Generating Telegram release message")
     release = await get_latest_release()
     message = TG_MSG_TEMPLATE_RELEASE.format(
         name=release["name"],
-        body=shorten(release["body"], RELEASE_NOTE_MAX_LEN, placeholder="..."),
+        body=parse_release_body(release["body"]),
         url=release["html_url"],
     )
     logger.info("Generated Telegram release message")
