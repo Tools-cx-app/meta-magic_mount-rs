@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Constants
-TG_API_ID = 611335
-TG_API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
+TG_API_ID = 30232030
+TG_API_HASH = "9272d8aa731deacaa93a7906c7f9b44c"
 TG_MSG_TEMPLATE_CI = """
 New push to Github
 <pre>
