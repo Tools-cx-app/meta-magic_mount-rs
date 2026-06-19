@@ -82,16 +82,18 @@ onMounted(async () => {
             <template #end>
               <Label
                 v-if="module.is_mounted"
-                text="MOUNTED"
                 bgColor="var(--m-color-tertiary-container)"
                 textColor="var(--m-color-on-tertiary-container)"
-              />
+              >
+                MOUNTED
+              </Label>
               <Label
                 v-else
-                text="UNMOUNTED"
                 bgColor="var(--m-color-secondary-container)"
                 textColor="var(--m-color-on-secondary-container)"
-              />
+              >
+                UNMOUNTED
+              </Label>
             </template>
           </MiuixBasicComponent>
           <MiuixText

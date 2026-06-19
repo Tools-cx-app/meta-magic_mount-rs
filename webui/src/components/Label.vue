@@ -8,7 +8,6 @@
 import { MiuixText } from "miuix-vue";
 
 interface Props {
-  text: string;
   bgColor?: string;
   textColor?: string;
   borderRadius?: string;
@@ -33,7 +32,7 @@ withDefaults(defineProps<Props>(), {
       padding: padding,
     }"
   >
-    <MiuixText type="body2" weight="normal" size="6">{{ text }}</MiuixText>
+    <MiuixText type="body2" weight="normal" size="6"><slot /></MiuixText>
   </div>
 </template>
 
