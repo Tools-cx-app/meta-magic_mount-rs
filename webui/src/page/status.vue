@@ -56,7 +56,11 @@ onMounted(async () => {
       <div class="ex-basic-row ex-grow">
         <MiuixBasicComponent :title="t('status.moduleActive')">
           <template #end>
-            <MiuixText>{{ moduleStore.modules.filter((module) => module.is_mounted).length }}</MiuixText>
+            <MiuixText>
+              {{
+                moduleStore.modules.filter((module) => module.is_mounted).length
+              }}
+            </MiuixText>
           </template>
         </MiuixBasicComponent>
         <MiuixBasicComponent :title="t('config.mountSource')">

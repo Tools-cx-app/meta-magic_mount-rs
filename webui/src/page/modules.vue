@@ -21,8 +21,6 @@ const { t } = useI18n();
 const searchQuery = ref("");
 const searchexpanded = ref(false);
 
-const expandSpring = { type: "spring" as const, stiffness: 400, damping: 40 };
-
 const filterModules = computed(() => {
   if (searchQuery.value.trim() === "") {
     return moduleStore.modules;
@@ -67,15 +65,33 @@ onMounted(async () => {
     </div>
 
     <div v-else>
-      <div v-for="module in filterModules.slice().sort((a, b) => (b.is_mounted === true ? 1 : 0) - (a.is_mounted === true ? 1 : 0))" :key="module.id">
+      <div
+        v-for="module in filterModules
+          .slice()
+          .sort(
+            (a, b) =>
+              (b.is_mounted === true ? 1 : 0) - (a.is_mounted === true ? 1 : 0),
+          )"
+        :key="module.id"
+      >
         <MiuixCard class="ex-card">
           <MiuixBasicComponent
             :title="module.name"
             :summary="module.author + ' ' + module.version"
           >
             <template #end>
-              <Label v-if="module.is_mounted" text="MOUNTED" bgColor="var(--m-color-tertiary-container)" textColor="var(--m-color-on-tertiary-container)" />  
-              <Label v-else text="UNMOUNTED" bgColor="var(--m-color-secondary-container)" textColor="var(--m-color-on-secondary-container)" />
+              <Label
+                v-if="module.is_mounted"
+                text="MOUNTED"
+                bgColor="var(--m-color-tertiary-container)"
+                textColor="var(--m-color-on-tertiary-container)"
+              />
+              <Label
+                v-else
+                text="UNMOUNTED"
+                bgColor="var(--m-color-secondary-container)"
+                textColor="var(--m-color-on-secondary-container)"
+              />
             </template>
           </MiuixBasicComponent>
           <MiuixText
