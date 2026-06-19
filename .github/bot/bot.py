@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Constants
+TG_API_ID = 30232030
+TG_API_HASH = "9272d8aa731deacaa93a7906c7f9b44c"
 TG_MSG_TEMPLATE_CI = """
 New push to Github
 <pre>
@@ -58,8 +60,6 @@ class Settings(BaseSettings):
     chat_id: int
     run_no: int
     run_id: int
-    api_id: int
-    api_hash: str
     bot_ci_session: str | None = None
     github_repository: str
     github_token: str
@@ -314,8 +314,8 @@ async def post(msg: str, files: list[str], parse_mode: str):
         Awaitable,
         TelegramClient(
             StringSession(cast(str, settings.bot_ci_session)),
-            settings.api_id,
-            settings.api_hash,
+            TG_API_ID,
+            TG_API_HASH,
         ).start(bot_token=settings.bot_token),
     )
     async with bot:

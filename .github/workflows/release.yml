@@ -81,8 +81,6 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-          TG_API_ID: ${{ secrets.TG_API_ID }}
-          TG_API_HASH: ${{ secrets.TG_API_HASH }}
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PERSIST_TOKEN: ${{ secrets.PERSIST_TOKEN }}
@@ -92,7 +90,7 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           IS_RELEASE: true
         run: |
-          if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ] || [ -z "${TG_API_ID:-}" ] || [ -z "${TG_API_HASH:-}" ] || [ -z "${BOT_CI_SESSION:-}" ]; then
+          if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ] || [ -z "${BOT_CI_SESSION:-}" ]; then
             exit 0
           fi
           pip3 install -r .github/bot/requirements.txt
