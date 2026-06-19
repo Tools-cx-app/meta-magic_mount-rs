@@ -67,8 +67,14 @@ export async function loadLocale(locale: string) {
   i18n.global.setLocaleMessage(locale, module.default);
 }
 
+// 预加载 fallback 语言包
+export async function preloadFallbackLocale() {
+  await loadLocale("en");
+}
+
 // 切换语言
 export async function switchLocale(locale: string) {
+  await preloadFallbackLocale();
   await loadLocale(locale);
   i18n.global.locale.value = locale;
   localStorage.setItem("locale", locale);
@@ -81,6 +87,8 @@ export async function initI18n(preferred?: string) {
     console.error("No locale files found!");
     return;
   }
+
+  await preloadFallbackLocale();
 
   const savedLocale = localStorage.getItem("locale");
   let defaultLocale = preferred || savedLocale || locales[0].code;
