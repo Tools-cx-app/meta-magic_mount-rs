@@ -15,3 +15,4 @@ pub const LIBRARY: &str = "/data/adb/modules/magic_mount_rs/libs/armeabi-v7a/lib
 #[cfg(target_arch = "aarch64")]
 pub const LIBRARY: &str = "/data/adb/modules/magic_mount_rs/libs/arm64-v8a/libchecker.so";
 pub const SELF_MODULE_PATH: &str = "/data/adb/modules/magic_mount_rs";
+pub const MODULE_PROP: &str = "/data/adb/modules/magic_mount_rs/module.prop";
