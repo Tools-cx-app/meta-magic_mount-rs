@@ -49,6 +49,10 @@ const lang_dropdown_index = ref(0);
 const partition = ref("");
 const ignorepath = ref("");
 
+const current_lang = ref(0);
+
+getCurrentLangIndex().then((index) => (current_lang.value = index));
+
 const customMountDraft = ref<CustomMount>({ source: "", target: "" });
 const editingCustomMountIndex = ref<number | null>(null);
 const dialogVisible = ref(false);
@@ -211,8 +215,12 @@ function saveCustomMountDialog() {
         :items="display_list"
       />
       <div style="padding: 12px">
-        <MiuixButton type="primary" @click="handleChange(lang_dropdown_index)">
-          {{ t("status.refresh") }}
+        <MiuixButton
+          type="primary"
+          :disabled="lang_dropdown_index === current_lang"
+          @click="handleChange(lang_dropdown_index)"
+        >
+          {{ t("config.apply") }}
         </MiuixButton>
       </div>
     </MiuixCard>

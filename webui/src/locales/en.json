@@ -60,6 +60,7 @@
     "reload": "Reload",
     "save": "Save Config",
     "reset": "Reset",
+    "apply": "Apply",
     "loadSuccess": "Config loaded successfully",
     "loadError": "Failed to load config",
     "loadDefault": "Loaded default config",
