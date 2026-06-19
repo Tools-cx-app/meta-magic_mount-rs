@@ -13,7 +13,7 @@ import {
   MiuixText,
   MiuixBasicComponent,
 } from "miuix-vue";
-import { Motion, AnimatePresence } from "motion-v";
+import Label from "../components/Label.vue";
 import { moduleStore } from "../lib/stores/moduleStore";
 
 const { t } = useI18n();
@@ -67,42 +67,24 @@ onMounted(async () => {
     </div>
 
     <div v-else>
-      <div v-for="module in filterModules" :key="module.id">
+      <div v-for="module in filterModules.slice().sort((a, b) => (b.is_mounted === true ? 1 : 0) - (a.is_mounted === true ? 1 : 0))" :key="module.id">
         <MiuixCard class="ex-card">
           <MiuixBasicComponent
             :title="module.name"
-            :summary="module.id + ' ' + module.version"
-            :clickable="true"
-            @click="module.bottomopen = !module.bottomopen"
+            :summary="module.author + ' ' + module.version"
           >
             <template #end>
-              <MiuixText
-                type="body2"
-                color="var(--m-color-on-surface-variant-actions)"
-              >
-                {{ module.is_mounted ? "MOUNTED" : "UNMOUNTED" }}
-              </MiuixText>
+              <Label v-if="module.is_mounted" text="MOUNTED" bgColor="var(--m-color-tertiary-container)" textColor="var(--m-color-on-tertiary-container)" />  
+              <Label v-else text="UNMOUNTED" bgColor="var(--m-color-secondary-container)" textColor="var(--m-color-on-secondary-container)" />
             </template>
           </MiuixBasicComponent>
-          <AnimatePresence :initial="false">
-            <Motion
-              v-if="module.bottomopen"
-              class="ex-expand"
-              :initial="{ height: 0, opacity: 0 }"
-              :animate="{ height: 'auto', opacity: 1 }"
-              :exit="{ height: 0, opacity: 0 }"
-              :transition="expandSpring"
-            >
-              <MiuixBasicComponent
-                :title="t('modules.descriptionLabel')"
-                :summary="module.description"
-              />
-              <MiuixBasicComponent
-                :title="t('modules.authorLabel')"
-                :summary="module.author"
-              />
-            </Motion>
-          </AnimatePresence>
+          <MiuixText
+            type="body2"
+            color="var(--m-color-on-surface-variant-actions)"
+            style="margin: 0 16px 12px"
+          >
+            {{ module.description }}
+          </MiuixText>
         </MiuixCard>
       </div>
     </div>

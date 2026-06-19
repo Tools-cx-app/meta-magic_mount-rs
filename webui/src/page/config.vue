@@ -333,7 +333,9 @@ function saveCustomMountDialog() {
         <BindCard
           v-for="(mount, index) in configStore.config.customMounts"
           :key="index"
+          :source-label="t('config.customMountSource')"
           :source="mount.source"
+          :target-label="t('config.customMountTarget')"
           :target="mount.target"
           @edit="openEditCustomMountDialog(index)"
         />
