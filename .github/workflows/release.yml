@@ -93,5 +93,7 @@ jobs:
           if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ] || [ -z "${BOT_CI_SESSION:-}" ]; then
             exit 0
           fi
-          pip3 install -r .github/bot/requirements.txt
-          python3 .github/bot/bot.py
+          cd .github/bot
+          pip3 install -e .
+          cd ../..
+          python3 -m bot

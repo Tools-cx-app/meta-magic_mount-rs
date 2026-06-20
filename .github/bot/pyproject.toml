@@ -1,0 +1,16 @@
+# Copyright (C) 2026 meta-magic_mount-rs developers
+# SPDX-License-Identifier: Apache-2.0
+
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bot"
+version = "0.1.0"
+dependencies = [
+    "telethon>=1.43,<2",
+    "httpx>=0.28,<1",
+    "PyNaCl>=1.6,<2",
+    "pydantic-settings>=2.14,<3",
+]
