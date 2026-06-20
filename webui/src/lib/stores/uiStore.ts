@@ -3,17 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ref, computed } from "vue";
-import type { ToastMessage } from "../types";
+import { ref } from "vue";
+import { showSnackbar } from "miuix-vue";
 import { getSupportedLocales, loadLocale, switchLocale } from "../../locales";
 
 const lang = ref("en");
-const toast = ref<ToastMessage>({
-  id: "init",
-  text: "",
-  type: "info",
-  visible: false,
-});
 const isReady = ref(false);
 
 const availableLanguages = ref<{ code: string; display: string }[]>([]);
@@ -22,14 +16,8 @@ async function fetchAvailableLanguages() {
   availableLanguages.value = await getSupportedLocales();
 }
 
-function showToast(text: string, type: ToastMessage["type"] = "info"): void {
-  const id = Date.now().toString();
-  toast.value = { id, text, type, visible: true };
-  setTimeout(() => {
-    if (toast.value.id === id) {
-      toast.value.visible = false;
-    }
-  }, 3000);
+function showToast(text: string): void {
+  showSnackbar({ message: text });
 }
 
 async function setLang(code: string) {
@@ -46,20 +34,12 @@ async function init() {
   isReady.value = true;
 }
 
-const toasts = computed(() => {
-  const t = toast.value;
-  return t.visible ? [t] : [];
-});
-
 export const uiStore = {
   get lang() {
     return lang.value;
   },
   get availableLanguages() {
     return availableLanguages.value;
-  },
-  get toasts() {
-    return toasts.value;
   },
   get isReady() {
     return isReady.value;

@@ -23,7 +23,7 @@ async function loadConfig() {
     const data = await API.loadConfig();
     config.value = { ...data };
   } catch {
-    uiStore.showToast("Failed to load config", "error");
+    uiStore.showToast("Failed to load config");
   }
   loading.value = false;
 }

@@ -35,15 +35,6 @@ export interface DeviceInfo {
   model: string;
 }
 
-export type ToastType = "info" | "success" | "error";
-
-export interface ToastMessage {
-  id: string;
-  text: string;
-  type: ToastType;
-  visible: boolean;
-}
-
 export interface LanguageOption {
   code: string;
   name: string;
