@@ -39,7 +39,7 @@ API.getVersion().then((ver) => {
 
 axios
   .get<Contributor[]>(
-    "https://api.github.com/repos/tools-cx-app/meta-magic_mount-rs/contributors",
+    "https://api.github.com/repos/Tools-cx-app/meta-magic_mount-rs/contributors",
   )
   .then(function (response) {
     console.info(response.data);
@@ -74,7 +74,7 @@ axios
 
 console.info(contributors.value);
 function open_github_repo() {
-  API.openLink("https://github.com/tools-cx-app/meta-magic_mount-rs");
+  API.openLink("https://github.com/Tools-cx-app/meta-magic_mount-rs");
 }
 </script>
 
@@ -89,7 +89,7 @@ function open_github_repo() {
     <MiuixCard class="ex-card">
       <MiuixArrowPreference
         :title="t('info.projectLink')"
-        summary="github.com/tools-cx-app/meta-magic_mount-rs"
+        summary="github.com/Tools-cx-app/meta-magic_mount-rs"
         @click="open_github_repo"
       />
     </MiuixCard>
