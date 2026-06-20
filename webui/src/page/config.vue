@@ -141,7 +141,6 @@ async function saveConfig() {
 
 function resetConfig() {
   configStore.setConfig({ ...DEFAULT_CONFIG });
-  initialConfigStr.value = JSON.stringify(DEFAULT_CONFIG);
   showSnackbar({
     message: t("config.loadDefault"),
   });
