@@ -1,1 +1,2 @@
-.env
+.venv
+.mypy_cache

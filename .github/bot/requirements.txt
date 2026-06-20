@@ -1,4 +1,0 @@
-telethon
-httpx
-pynacl
-pydantic_settings
