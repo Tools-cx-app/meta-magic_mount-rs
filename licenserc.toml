@@ -1,8 +1,8 @@
-# Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
+# Copyright (C) 2026 meta-magic_mount-rs developers
 # SPDX-License-Identifier: Apache-2.0
 
 inlineHeader = """
-Copyright (C) {{props["year"]}} {{props["owner"]}}
+Copyright (C) {{props["year"]}} meta-magic_mount-rs developers
 SPDX-License-Identifier: Apache-2.0
 """
 excludes = [
@@ -14,4 +14,3 @@ excludes = [
 
 [properties]
 year = 2026
-owner = "Tools-cx-app <localhost.hutao@gmail.com>"
