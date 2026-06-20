@@ -5,9 +5,8 @@
 
 -->
 <script setup lang="ts">
-import { MiuixText } from "miuix-vue";
+import { MiuixText, MiuixIcon, MiuixIconButton } from "miuix-vue";
 import { Settings } from "miuix-vue/icons";
-import CustomIconButton from "./CustomIconButton.vue";
 
 interface Props {
   source: string;
@@ -38,7 +37,9 @@ const emit = defineEmits<{
         <MiuixText class="custom-mount-value">{{ target }}</MiuixText>
       </div>
     </div>
-    <CustomIconButton :icon="Settings" :size="24" @click="emit('edit')" />
+    <MiuixIconButton @click="emit('edit')">
+      <MiuixIcon :icon="Settings" :size="24" />
+    </MiuixIconButton>
   </div>
 </template>
 

@@ -22,6 +22,7 @@ import {
   MiuixInput,
   MiuixBasicComponent,
   MiuixIcon,
+  MiuixIconButton,
   showSnackbar,
 } from "miuix-vue";
 import {
@@ -34,7 +35,6 @@ import {
 } from "miuix-vue/icons";
 
 import RemoveableLabel from "../components/RemoveableLabel.vue";
-import CustomIconButton from "../components/CustomIconButton.vue";
 import BindCard from "../components/BindCard.vue";
 
 import { configStore } from "../lib/stores/configStore";
@@ -280,12 +280,9 @@ function saveCustomMountDialog() {
           label="e.g. product,system_ext..."
           single-line
         />
-        <CustomIconButton
-          v-if="partition"
-          :icon="Add"
-          :size="24"
-          @click="handle_add_partition()"
-        />
+        <MiuixIconButton v-if="partition" @click="handle_add_partition()">
+          <MiuixIcon :icon="Add" :size="24" />
+        </MiuixIconButton>
       </div>
     </MiuixCard>
     <MiuixCard class="ex-card">
@@ -312,12 +309,9 @@ function saveCustomMountDialog() {
           label="/data/adb/modules/..."
           single-line
         />
-        <CustomIconButton
-          v-if="ignorepath"
-          :icon="Add"
-          :size="24"
-          @click="handle_add_ignorepath()"
-        />
+        <MiuixIconButton v-if="ignorepath" @click="handle_add_ignorepath()">
+          <MiuixIcon :icon="Add" :size="24" />
+        </MiuixIconButton>
       </div>
     </MiuixCard>
     <MiuixCard class="ex-card">
@@ -329,9 +323,9 @@ function saveCustomMountDialog() {
           <MiuixIcon :icon="MoveFile" />
         </template>
         <template #end>
-          <CustomIconButton :icon="Add" @click="openAddCustomMountDialog">
-            {{ t("config.addCustomMount") }}
-          </CustomIconButton>
+          <MiuixIconButton @click="openAddCustomMountDialog">
+            <MiuixIcon :icon="Add" />
+          </MiuixIconButton>
         </template>
       </MiuixBasicComponent>
       <div
@@ -395,12 +389,9 @@ function saveCustomMountDialog() {
           v-if="editingCustomMountIndex !== null"
           class="dialog-actions-left"
         >
-          <CustomIconButton
-            :icon="Delete"
-            :size="24"
-            color="var(--m-color-error)"
-            @click="deleteCustomMountDialog"
-          />
+          <MiuixIconButton @click="deleteCustomMountDialog">
+            <MiuixIcon :icon="Delete" :size="24" color="var(--m-color-error)" />
+          </MiuixIconButton>
         </div>
         <div class="dialog-actions-right">
           <MiuixButton style="flex: 1" @click="closeCustomMountDialog">
