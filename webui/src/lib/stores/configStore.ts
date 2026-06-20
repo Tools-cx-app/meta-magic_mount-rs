@@ -28,15 +28,16 @@ async function loadConfig() {
   loading.value = false;
 }
 
-async function saveConfig() {
+async function saveConfig(): Promise<boolean> {
   saving.value = true;
   try {
     await API.saveConfig(config.value);
-    uiStore.showToast("Configuration saved", "success");
+    return true;
   } catch {
-    uiStore.showToast("Failed to save configuration", "error");
+    return false;
+  } finally {
+    saving.value = false;
   }
-  saving.value = false;
 }
 
 export const configStore = {

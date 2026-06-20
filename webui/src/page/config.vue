@@ -102,8 +102,8 @@ onMounted(async () => {
   await configStore.loadConfig();
 });
 
-function handleChange(value: number) {
-  switchLocale(lang_code.value[value]);
+async function handleChange(value: number) {
+  await switchLocale(lang_code.value[value]);
   window.location.reload();
 }
 
@@ -130,16 +130,18 @@ function removeIgnorepath(index: number) {
 }
 
 async function saveConfig() {
-  await configStore.saveConfig();
-  initialConfigStr.value = JSON.stringify(configStore.config);
+  const success = await configStore.saveConfig();
+  if (success) {
+    initialConfigStr.value = JSON.stringify(configStore.config);
+  }
   showSnackbar({
-    message: t("config.saveSuccess"),
+    message: success ? t("config.saveSuccess") : t("config.saveFailed"),
   });
 }
 
 function resetConfig() {
   configStore.setConfig({ ...DEFAULT_CONFIG });
-  configStore.loadConfig();
+  initialConfigStr.value = JSON.stringify(DEFAULT_CONFIG);
   showSnackbar({
     message: t("config.loadDefault"),
   });
