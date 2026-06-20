@@ -60,6 +60,7 @@
     "reload": "重載配置",
     "save": "保存配置",
     "reset": "重置",
+    "apply": "應用",
     "loadSuccess": "配置已加載",
     "loadError": "加載配置失敗",
     "loadDefault": "已加載默認配置",

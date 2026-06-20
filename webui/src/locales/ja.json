@@ -60,6 +60,7 @@
     "reload": "再読み込み",
     "save": "設定を保存",
     "reset": "リセット",
+    "apply": "適用",
     "loadSuccess": "設定を読み込みました",
     "loadError": "設定の読み込みに失敗しました",
     "loadDefault": "デフォルト設定を読み込みました",
