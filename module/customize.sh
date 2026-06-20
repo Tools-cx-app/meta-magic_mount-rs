@@ -1,5 +1,5 @@
 #!/system/bin/sh
-# Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
+# Copyright (C) 2026 meta-magic_mount-rs developers
 # SPDX-License-Identifier: Apache-2.0
 
 if [ -z "$APATCH" ] && [ -z "$KSU" ]; then
