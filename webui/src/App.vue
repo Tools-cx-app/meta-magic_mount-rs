@@ -104,9 +104,9 @@ onBeforeUnmount(() => {
 <template>
   <div class="app">
     <MiuixScrollArea ref="scrollerRef" class="app__body">
-      <MiuixTopAppBar :large="false" :title="Apptitle">
+      <MiuixTopAppBar :large="false" :title="Apptitle" class="app__top-app-bar">
         <template #actions>
-          <MiuixIconButton aria-label="Toggle" @click="rebootreq_click = true">
+          <MiuixIconButton aria-label="Reboot" @click="rebootreq_click = true">
             <MiuixIcon :icon="Close2" :size="24" />
           </MiuixIconButton>
         </template>
@@ -162,10 +162,13 @@ onBeforeUnmount(() => {
   overflow: hidden;
   --m-scroll-area-inset-top: 52px;
 }
-
+.app__top-app-bar {
+  padding-top: var(--top-inset);
+}
 .app__bottom {
   flex: none;
   z-index: 10;
+  padding-bottom: var(--bottom-inset);
 }
 
 .page-enter-active,

@@ -2,8 +2,11 @@
  * Copyright (C) 2026 Tools-cx-app <localhost.hutao@gmail.com>
  * SPDX-License-Identifier: Apache-2.0
  */
+ @import url("https://mui.kernelsu.org/internal/insets.css");
 
 :root {
+  --top-inset: var(--window-inset-top, 0px);
+  --bottom-inset: var(--window-inset-bottom, 0px);
   font-family:
     "MiSans VF",
     system-ui,
