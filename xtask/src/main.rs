@@ -267,7 +267,7 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
     let entries = machikado_rs::load_folder_files(
         &temp_dir,
         &[],
-        &["customize.sh", "mazoku", "module.prop"],
+        &["customize.sh", "mazoku"],
         None,
     )?;
     let machikado = machikado_rs::sign_file_entries(&entries, &priv_key)?;

@@ -803,8 +803,8 @@ dependencies = [
 
 [[package]]
 name = "machikado-rs"
-version = "0.0.2"
-source = "git+https://github.com/VeryBaaad/machikado-rs.git#5135c8ee95538a80d074204e0a757d4f7aad327f"
+version = "0.0.3"
+source = "git+https://github.com/VeryBaaad/machikado-rs.git#6b2619d2dac870de67e6de1b7976170ec98ceafd"
 dependencies = [
  "ed25519-dalek",
  "rand",
@@ -1232,7 +1232,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.4.3",
+ "getrandom 0.3.4",
  "once_cell",
  "rustix",
  "windows-sys",

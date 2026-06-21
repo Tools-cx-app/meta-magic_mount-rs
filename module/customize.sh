@@ -51,5 +51,7 @@ if [ ! -f "/data/adb/magic_mount/config.toml" ]; then
 
 fi
 
+cp "$MODPATH/module.prop" "$MODPATH/module.prop.orig"
+
 ui_print "- Installation complete"
 ui_print "- Welcome to mmrs!"
