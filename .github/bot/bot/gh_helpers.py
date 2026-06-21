@@ -125,6 +125,8 @@ async def get_git_log(base: str, head: str) -> str:
         data = await compare_commit(base, head, page=page)
         total = data["total_commits"]
         for commit in data["commits"]:
-            msgs.append(commit['sha'][:7] + ' ' + commit["commit"]["message"].split('\n', 1)[0])
+            msgs.append(
+                commit["sha"][:7] + " " + commit["commit"]["message"].split("\n", 1)[0]
+            )
         page += 1
-    return '\n'.join(reversed(msgs))
+    return "\n".join(reversed(msgs))
