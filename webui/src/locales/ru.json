@@ -26,6 +26,8 @@
     "deviceTitle": "Устройство",
     "moduleTitle": "Модули",
     "moduleActive": "Активные модули",
+    "mountSource": "Источник монтирования",
+
     "modelLabel": "Модель",
     "androidLabel": "Android",
     "kernelLabel": "Ядро",

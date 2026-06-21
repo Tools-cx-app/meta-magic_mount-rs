@@ -52,25 +52,26 @@ onMounted(async () => {
         </template>
       </MiuixBasicComponent>
     </MiuixCard>
-    <MiuixCard class="ex-card">
-      <div class="ex-basic-row ex-grow">
-        <MiuixBasicComponent :title="t('status.moduleActive')">
-          <template #end>
-            <MiuixText>
-              {{
-                moduleStore.modules.filter((module) => module.is_mounted).length
-              }}
-            </MiuixText>
-          </template>
-        </MiuixBasicComponent>
-        <MiuixBasicComponent :title="t('config.mountSource')">
-          <template #end>
-            <MiuixText>{{ configStore.config.mountsource }}</MiuixText>
-          </template>
-        </MiuixBasicComponent>
-      </div>
-    </MiuixCard>
-
+    <div class="ex-card-row">
+    <MiuixCard class="ex-card--pad ex-grow">
+          <MiuixBasicComponent :title="t('status.moduleActive')">
+            <template #end>
+              <MiuixText>
+                {{
+                  moduleStore.modules.filter((module) => module.is_mounted).length
+                }}
+              </MiuixText>
+            </template>
+          </MiuixBasicComponent>
+      </MiuixCard>
+      <MiuixCard class="ex-card--pad ex-grow">
+          <MiuixBasicComponent :title="t('status.mountSource')">
+            <template #end>
+              <MiuixText>{{ configStore.config.mountsource }}</MiuixText>
+            </template>
+          </MiuixBasicComponent>
+      </MiuixCard>
+</div>
     <MiuixSmallTitle :text="t('status.sysInfoTitle')" />
     <MiuixCard class="ex-card">
       <MiuixBasicComponent

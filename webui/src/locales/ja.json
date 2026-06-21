@@ -26,6 +26,7 @@
     "deviceTitle": "デバイス情報",
     "moduleTitle": "モジュール",
     "moduleActive": "アクティブモジュール",
+    "mountSource": "マウントソース",
     "modelLabel": "モデル",
     "androidLabel": "Android",
     "kernelLabel": "カーネル",

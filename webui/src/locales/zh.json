@@ -26,6 +26,7 @@
     "deviceTitle": "设备信息",
     "moduleTitle": "模块概览",
     "moduleActive": "挂载模块",
+    "mountSource": "挂载源",
     "modelLabel": "机型",
     "androidLabel": "Android版本",
     "kernelLabel": "内核版本",
