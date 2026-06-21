@@ -1,3 +1,6 @@
+# Copyright (C) 2026 meta-magic_mount-rs developers
+# SPDX-License-Identifier: Apache-2.0
+
 [package]
 name = "verification"
 version = "0.1.0"
