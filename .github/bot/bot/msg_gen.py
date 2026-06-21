@@ -23,12 +23,18 @@ async def generate_msg_release() -> str:
 
 async def generate_msg_ci() -> str:
     logger.info("Generating Telegram message")
-    base_hash = await get_last_success_commit()
-    if base_hash is None:
-        logger.warning("No last success CI commit found, cannot generate message")
-        return "No last success CI commit found???"
-    # commit_url, history_msg = # await generate_history(base_hash, settings.github_sha)
-    history_msg = parse_git_log(await get_git_log(base_hash))
+    base_hash = settings.github_sha
+    while True:
+        base_hash = await get_last_success_commit(base_hash)
+        if base_hash:
+            git_log_raw = await get_git_log(base_hash)
+            if not git_log_raw:
+                continue
+            history_msg = parse_git_log(git_log_raw)
+        else:
+            logger.warning("No last success CI commit found, cannot generate message")
+            history_msg = "No commit found"
+        break
     commit_url = f"https://github.com/{settings.github_repository}/compare/{base_hash}...{settings.github_sha}"
     message = TG_MSG_TEMPLATE_CI.format(
         commit_message=history_msg.strip(),
