@@ -6,7 +6,7 @@ import re
 from . import logger
 from .config import (
     PARSING_MAX_LEN,
-)  # COMMIT_TITLE_MAX_LEN, COMMIT_BODY_MAX_LEN
+)
 
 
 def titles_to_bold(markdown_text: str) -> str:
@@ -33,17 +33,6 @@ def parse_release_body(body: str) -> str:
     return body
 
 
-# def parse_commit_message(msg: str) -> str:
-#     logger.info("Parsing commit message")
-#     msg = msg.replace("<", "&lt;").replace(">", "&gt;") + "\n\n"
-#     title, body = msg.split("\n\n", 1)
-#     title = shorten(title, COMMIT_TITLE_MAX_LEN, placeholder="...")
-#     body = shorten(body, COMMIT_BODY_MAX_LEN, placeholder="...")
-#     parsed = f"{title}\n\n{body}".strip()
-#     logger.info(f"Parsed message: {parsed}")
-#     return parsed
-
-
 def parse_git_log(log: str) -> str:
     logger.info("Parsing git log")
     lines = log.split("\n")
@@ -55,8 +44,8 @@ def parse_git_log(log: str) -> str:
             parsed.append(line)
         else:
             break
-    parsed = f"...{len(lines)-len(parsed)} more commits...\n" + "\n".join(
+    parsed_str = f"...{len(lines)-len(parsed)} more commits...\n" + "\n".join(
         reversed(parsed)
     ).replace("<", "&lt;").replace(">", "&gt;")
-    logger.info(f"Parsed log: {parsed}")
-    return parsed
+    logger.info(f"Parsed log: {parsed_str}")
+    return parsed_str

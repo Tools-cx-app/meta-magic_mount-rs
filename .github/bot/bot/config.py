@@ -1,9 +1,6 @@
 # Copyright (C) 2026 meta-magic_mount-rs developers
 # SPDX-License-Identifier: Apache-2.0
 
-TG_API_ID = 611335
-TG_API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
-TG_SESSION_SECRET_KEY = "BOT_CI_SESSION"
 PARSING_MAX_LEN = 800
 
 TG_MSG_TEMPLATE_CI = """

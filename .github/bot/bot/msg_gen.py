@@ -5,7 +5,7 @@ from . import logger, settings
 from .config import TG_MSG_TEMPLATE_RELEASE, TG_MSG_TEMPLATE_CI
 from .parsing import parse_release_body, parse_git_log
 from .github import get_latest_release
-from .gh_helpers import get_last_success_commit  # , generate_history
+from .gh_helpers import get_last_success_commit
 from .history import get_git_log
 
 
@@ -23,12 +23,13 @@ async def generate_msg_release() -> str:
 
 async def generate_msg_ci() -> str:
     logger.info("Generating Telegram message")
-    base_hash = settings.github_sha
+    before_commit = settings.github_sha
     while True:
-        base_hash = await get_last_success_commit(base_hash)
+        base_hash = await get_last_success_commit(before_commit)
         if base_hash:
             git_log_raw = await get_git_log(base_hash)
             if not git_log_raw:
+                before_commit = base_hash
                 continue
             history_msg = parse_git_log(git_log_raw)
         else:

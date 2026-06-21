@@ -11,12 +11,9 @@ class Settings(BaseSettings):
     chat_id: int
     run_no: int
     run_id: int
-    bot_ci_session: str | None = None
     github_repository: str
     github_token: str
     github_sha: str
-    persist_token: str | None = None
-    export_session: bool = False
     is_release: bool = False
 
 
@@ -25,7 +22,7 @@ class _Cache:
     workflow_file: str | None = None
 
 
-settings = Settings()  # pyright: ignore[reportCallIssue]
+settings = Settings()   # type: ignore
 cache = _Cache()
 logger = getLogger(__name__)
 

@@ -9,8 +9,7 @@ build-backend = "setuptools.build_meta"
 name = "bot"
 version = "0.1.0"
 dependencies = [
-    "telethon>=1.43,<2",
+    "python-telegram-bot>=22.0,<23",
     "httpx>=0.28,<1",
-    "PyNaCl>=1.6,<2",
     "pydantic-settings>=2.14,<3",
 ]
