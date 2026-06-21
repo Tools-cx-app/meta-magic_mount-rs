@@ -42,7 +42,7 @@ fn verify_module_safety() -> Result<()> {
     if file.is_err() && cfg!(test) {
         return Ok(());
     }
-    file?.read(&mut buf)?;
+    file?.read_exact(&mut buf)?;
 
     let key = ed25519_dalek::VerifyingKey::from_bytes(&buf)?;
     if verification::verify(&key, defs::SELF_MODULE_PATH).is_err() {
