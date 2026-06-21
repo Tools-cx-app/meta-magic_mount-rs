@@ -84,7 +84,7 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           IS_RELEASE: true
         run: |
-          if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ] || [ -z "${BOT_CI_SESSION:-}" ]; then
+          if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ]; then
             exit 0
           fi
           cd .github/bot
