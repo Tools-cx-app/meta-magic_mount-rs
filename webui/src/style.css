@@ -5,6 +5,18 @@
 
 @import url("https://mui.kernelsu.org/internal/insets.css");
 
+/* Additional color tokens */
+:root,
+.m-theme-light {
+  --m-color-working-status-card: #dcfce7;
+  --m-color-working-status-icon: #22c55e;
+}
+
+.m-theme-dark {
+  --m-color-working-status-card: #1b3826;
+  --m-color-working-status-icon: #38d167;
+}
+
 :root {
   --top-inset: var(--window-inset-top, 0px);
   --bottom-inset: var(--window-inset-bottom, 0px);

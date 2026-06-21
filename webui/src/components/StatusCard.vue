@@ -28,8 +28,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const statusConfig = {
   running: {
-    bgColor: "#dcfce7",
-    iconColor: "#22c55e",
+    bgColor: "var(--m-color-working-status-card)",
+    iconColor: "var(--m-color-working-status-icon)",
   },
   stopped: {
     bgColor: "var(--m-color-secondary-container)",
@@ -79,13 +79,6 @@ const statusConfig = {
   padding: 0;
   overflow: visible;
   position: relative;
-}
-
-.status-card__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
 }
 .status-card__icon {
   position: absolute;
