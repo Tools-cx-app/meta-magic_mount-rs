@@ -5,7 +5,7 @@ from typing import cast
 from asyncio import sleep
 
 from . import cache, logger, settings
-from .github import get_workflow_run, list_workflow_runs
+from .github import get_workflow_run, list_workflow_runs, compare_commit
 
 
 async def get_workflow_file() -> str:
@@ -114,3 +114,17 @@ async def get_last_success_commit(before_commit: str | None = None) -> str | Non
         logger.error("No last success CI run found, giving up")
         return None
     return last_ci_run["head_sha"]
+
+
+async def get_git_log(base: str, head: str) -> str:
+    logger.info(f"Getting commit messages between {base} and {head}")
+    total = float("inf")
+    msgs: list[str] = []
+    page = 1
+    while len(msgs) < total:
+        data = await compare_commit(base, head, page=page)
+        total = data["total_commits"]
+        for commit in data["commits"]:
+            msgs.append(commit['sha'][:7] + ' ' + commit["commit"]["message"].split('\n', 1)[0])
+        page += 1
+    return '\n'.join(reversed(msgs))

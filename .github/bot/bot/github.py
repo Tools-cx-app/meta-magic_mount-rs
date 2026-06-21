@@ -50,3 +50,11 @@ async def get_latest_release() -> dict:
     data = await github_api(endpoint="/releases/latest")
     logger.info(f"Got latest release: {data.get('tag_name', 'unknown')}")
     return data
+
+
+async def compare_commit(base: str, head: str, page: int = 1) -> dict:
+    logger.info(f"Getting commits between {base} and {head}")
+    return await github_api(
+        endpoint=f"/compare/{base}...{head}",
+        params={"page": page},
+    )

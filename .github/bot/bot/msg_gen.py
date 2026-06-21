@@ -5,8 +5,7 @@ from . import logger, settings
 from .config import TG_MSG_TEMPLATE_RELEASE, TG_MSG_TEMPLATE_CI
 from .parsing import parse_release_body, parse_git_log
 from .github import get_latest_release
-from .gh_helpers import get_last_success_commit
-from .history import get_git_log
+from .gh_helpers import get_last_success_commit, get_git_log
 
 
 async def generate_msg_release() -> str:
@@ -27,7 +26,7 @@ async def generate_msg_ci() -> str:
     while True:
         base_hash = await get_last_success_commit(before_commit)
         if base_hash:
-            git_log_raw = await get_git_log(base_hash)
+            git_log_raw = await get_git_log(base_hash, settings.github_sha)
             if not git_log_raw:
                 before_commit = base_hash
                 continue
