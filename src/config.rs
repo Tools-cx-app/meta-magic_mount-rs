@@ -473,4 +473,3 @@ mod tests {
         assert_eq!(api_config.ignore_list[0], "/data/local/tmp");
     }
 }
-

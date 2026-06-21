@@ -1,14 +1,11 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{ffi::CString, path::Path};
+use std::path::Path;
 
-use libloading::{Library, Symbol};
 use rustix::mount::{UnmountFlags, unmount};
 
-use crate::{defs, errors::Result, utils::ksucalls};
-
-type SignFunc = unsafe extern "C" fn(*const i8, *const i8) -> i32;
+use crate::{defs, utils::ksucalls};
 
 fn init_logger() {
     #[cfg(not(target_os = "android"))]
@@ -39,23 +36,6 @@ fn init_logger() {
     }
 }
 
-#[cfg(not(test))]
-fn verify_module_safety() -> Result<()> {
-    let lib = unsafe { Library::new(defs::LIBRARY)? };
-
-    let verify_sign: Symbol<SignFunc> = unsafe { lib.get(b"VerifySign")? };
-
-    let pub_key = CString::new(env!("PUB_KEY"))?;
-    let path = CString::new(defs::SELF_MODULE_PATH)?;
-
-    if unsafe { verify_sign(pub_key.as_ptr().cast::<i8>(), path.as_ptr().cast::<i8>()) } != 1 {
-        log::error!("failed to verify sign");
-        panic!("verify sign is broken!!");
-    }
-
-    Ok(())
-}
-
 fn init_list() {
     super::parser::COMMAND_LIST
         .get_or_init(|| super::parser::parser_custom(defs::CUSTOM_LIST_PATH));
@@ -83,8 +63,6 @@ pub fn pre_init() {
     );
 
     init_logger();
-    #[cfg(not(test))]
-    let _ = verify_module_safety();
     ksucalls::check_ksu();
     init_list();
 }

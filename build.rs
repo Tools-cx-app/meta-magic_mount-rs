@@ -115,9 +115,5 @@ fn gen_module_prop(data: &CargoConfig) -> Result<()> {
     writeln!(file, "metamodule=1")?;
 
     println!("cargo:rustc-env=MODULE_ID={}", id);
-    println!(
-        "cargo:rustc-env=PUB_KEY={}",
-        env::var("PUB_KEY").unwrap_or("test key".to_string())
-    );
     Ok(())
 }

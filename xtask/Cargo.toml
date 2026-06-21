@@ -9,10 +9,7 @@ edition.workspace = true
 [dependencies]
 anyhow.workspace = true
 clap = { version = "4.6.1", features = ["derive"] }
-ed25519-dalek = { version = "2.2.0", features = ["signature"] }
 fs_extra = "1.3.0"
-getrandom = "0.4.2"
-libloading.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 toml.workspace = true
