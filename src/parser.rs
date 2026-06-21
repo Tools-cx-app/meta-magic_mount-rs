@@ -12,7 +12,7 @@ impl fmt::Display for MountType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Mount { source, target } => f.write_str(&format!("{source} -> {target}")),
-            Self::Ignore { source } => f.write_str(&format!("missing {}", &source)),
+            Self::Ignore { source } => f.write_str(&format!("missing {source}")),
         }
     }
 }
