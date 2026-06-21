@@ -20,7 +20,8 @@ async def post(msg: str, files: list[str], parse_mode: str):
         else:
             logger.info(f"Sending {len(files)} files with {parse_mode} caption:\n{msg}")
             medias = [telegram.InputMediaDocument(open(f, "rb")) for f in files]
-            medias[-1].caption = msg
-            medias[-1].parse_mode = parse_mode
+            medias[-1] = telegram.InputMediaDocument(
+                open(files[-1], "rb"), msg, parse_mode
+            )
             await bot.send_media_group(settings.chat_id, medias)
     logger.info("Successfully posted to Telegram")
