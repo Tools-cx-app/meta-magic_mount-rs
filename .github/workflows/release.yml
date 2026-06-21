@@ -77,9 +77,7 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
-          BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PERSIST_TOKEN: ${{ secrets.PERSIST_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_SHA: ${{ github.sha }}
           RUN_NO: ${{ github.run_number }}
