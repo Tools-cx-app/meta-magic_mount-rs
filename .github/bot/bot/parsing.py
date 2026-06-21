@@ -44,8 +44,10 @@ def parse_git_log(log: str) -> str:
             parsed.append(line)
         else:
             break
-    parsed_str = f"...{len(lines)-len(parsed)} more commits...\n" + "\n".join(
+    parsed_str = "\n".join(
         reversed(parsed)
     ).replace("<", "&lt;").replace(">", "&gt;")
+    if len(lines) > len(parsed):
+        parsed_str = f"...{len(lines)-len(parsed)} more commits...\n" + parsed_str
     logger.info(f"Parsed log: {parsed_str}")
     return parsed_str

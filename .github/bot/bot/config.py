@@ -5,9 +5,7 @@ PARSING_MAX_LEN = 800
 
 TG_MSG_TEMPLATE_CI = """
 New push to Github
-<pre>
-{commit_message}
-</pre>
+<pre><code class="language-git">{commit_message}</code></pre>
 See commit detail <a href="{commit_url}">here</a>
 <a href="https://github.com/{github_repository}/actions/runs/{run_id}">#ci_{run_no}</a>
 """.strip()
