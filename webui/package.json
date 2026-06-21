@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@rayxiom/prettier-config": "^4.5.1",
+    "@remixicon/vue": "^4.9.0",
     "@types/node": "^26.0.0",
     "@typescript-eslint/eslint-plugin": "^8.61.1",
     "@typescript-eslint/parser": "^8.61.1",

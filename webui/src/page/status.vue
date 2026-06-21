@@ -7,13 +7,8 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import {
-  MiuixCard,
-  MiuixSmallTitle,
-  MiuixBasicComponent,
-  MiuixIcon,
-} from "miuix-vue";
-import { Info } from "miuix-vue/icons";
+import { MiuixCard, MiuixSmallTitle, MiuixBasicComponent } from "miuix-vue";
+import StatusCard from "../components/StatusCard.vue";
 import { sysStore } from "../lib/stores/sysStore";
 import { moduleStore } from "../lib/stores/moduleStore";
 import { configStore } from "../lib/stores/configStore";
@@ -31,47 +26,33 @@ onMounted(async () => {
 
 <template>
   <div class="page">
-    <MiuixCard
-      class="ex-card ex-card--pad"
-      show-indication
-      style="--m-card-color: var(--m-color-primary-variant)"
-    >
-      <MiuixBasicComponent
-        :title="t('content.welcome')"
-        titleColor="var(--m-color-on-primary-variant)"
-        :summary="sysStore.device.model"
-        summaryColor="var(--m-color-on-primary-variant)"
-      >
-        <template #start>
-          <MiuixIcon color="var(--m-color-on-primary-variant)" :icon="Info" />
-        </template>
-        <template #end>
-          <MiuixText style="color: var(--m-color-on-primary-variant)">
-            <b>{{ t("content.mmrs") }}</b>
-          </MiuixText>
-        </template>
-      </MiuixBasicComponent>
-    </MiuixCard>
+    <StatusCard
+      class="ex-card"
+      status="running"
+      :label="t('content.welcome')"
+      :description="t('content.mmrs')"
+      :summary="sysStore.device.model"
+    />
     <div class="ex-card-row">
-    <MiuixCard class="ex-card--pad ex-grow">
-          <MiuixBasicComponent :title="t('status.moduleActive')">
-            <template #end>
-              <MiuixText>
-                {{
-                  moduleStore.modules.filter((module) => module.is_mounted).length
-                }}
-              </MiuixText>
-            </template>
-          </MiuixBasicComponent>
+      <MiuixCard class="ex-card--pad ex-grow">
+        <MiuixBasicComponent :title="t('status.moduleActive')">
+          <template #end>
+            <MiuixText>
+              {{
+                moduleStore.modules.filter((module) => module.is_mounted).length
+              }}
+            </MiuixText>
+          </template>
+        </MiuixBasicComponent>
       </MiuixCard>
       <MiuixCard class="ex-card--pad ex-grow">
-          <MiuixBasicComponent :title="t('status.mountSource')">
-            <template #end>
-              <MiuixText>{{ configStore.config.mountsource }}</MiuixText>
-            </template>
-          </MiuixBasicComponent>
+        <MiuixBasicComponent :title="t('status.mountSource')">
+          <template #end>
+            <MiuixText>{{ configStore.config.mountsource }}</MiuixText>
+          </template>
+        </MiuixBasicComponent>
       </MiuixCard>
-</div>
+    </div>
     <MiuixSmallTitle :text="t('status.sysInfoTitle')" />
     <MiuixCard class="ex-card">
       <MiuixBasicComponent
