@@ -1,3 +1,6 @@
+// Copyright (C) 2026 meta-magic_mount-rs developers
+// SPDX-License-Identifier: Apache-2.0
+
 use std::{fmt, fs, path::Path, sync::OnceLock};
 
 pub static COMMAND_LIST: OnceLock<Vec<MountType>> = OnceLock::new();
@@ -11,7 +14,7 @@ pub enum MountType {
 impl fmt::Display for MountType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Mount { source, target } => f.write_str(&format!("{} -> {}", source, target)),
+            Self::Mount { source, target } => f.write_str(&format!("{source} -> {target}")),
             Self::Ignore { source } => f.write_str(&format!("missing {}", &source)),
         }
     }
@@ -29,28 +32,28 @@ fn parse(content: &str) -> Vec<MountType> {
     for line in content.lines() {
         let line = line.trim();
 
-        if line.starts_with("#") || line.is_empty() {
+        if line.starts_with('#') || line.is_empty() {
             continue;
         }
 
         if line.starts_with("bind") {
             match parse_bind(line) {
                 Some(s) => {
-                    log::debug!("new bind command: {}", s);
+                    log::debug!("new bind command: {s}");
                     types.push(s);
                 }
                 None => {
-                    log::debug!("failed to parse {}", line);
+                    log::debug!("failed to parse {line}");
                 }
             }
         } else if line.starts_with("ignore") {
             match parse_ignore(line) {
                 Some(s) => {
-                    log::debug!("new bind command: {}", s);
+                    log::debug!("new bind command: {s}");
                     types.push(s);
                 }
                 None => {
-                    log::debug!("failed to parse {}", line);
+                    log::debug!("failed to parse {line}");
                 }
             }
         }
