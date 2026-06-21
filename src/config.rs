@@ -10,7 +10,7 @@ use serde_json::json;
 use crate::{
     defs,
     errors::{Error, Result},
-    parser::{COMMAND_LIST, Command, parser_custom},
+    parser::{COMMAND_LIST, MountType, parser_custom},
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -133,8 +133,8 @@ impl Config {
             (Vec::new(), Vec::new()),
             |(mut ignore_list, mut custom_mounts), command| {
                 match command {
-                    Command::Ignore { source } => ignore_list.push(source),
-                    Command::Mount { source, target } => {
+                    MountType::Ignore { source } => ignore_list.push(source),
+                    MountType::Mount { source, target } => {
                         custom_mounts.push(ApiCustomMount { source, target });
                     }
                 }
@@ -250,8 +250,8 @@ pub fn handle_show_config() -> Result<()> {
                 (Vec::new(), Vec::new()),
                 |(mut ignore_list, mut custom_mounts), command| {
                     match command {
-                        Command::Ignore { source } => ignore_list.push(source),
-                        Command::Mount { source, target } => {
+                        MountType::Ignore { source } => ignore_list.push(source),
+                        MountType::Mount { source, target } => {
                             custom_mounts.push(ApiCustomMount { source, target });
                         }
                     }

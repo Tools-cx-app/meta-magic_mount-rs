@@ -16,7 +16,7 @@ pub fn bind_mount(umount: bool) -> Result<()> {
         .unwrap()
         .iter()
         .filter_map(|s| {
-            if let crate::parser::Command::Mount { source, target } = s {
+            if let crate::parser::MountType::Mount { source, target } = s {
                 Some((source.clone(), target.clone()))
             } else {
                 None
