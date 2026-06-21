@@ -36,7 +36,5 @@ pub enum Error {
     #[error(transparent)]
     Regex(#[from] regex_lite::Error),
     #[error(transparent)]
-    Library(#[from] libloading::Error),
-    #[error(transparent)]
-    CString(#[from] std::ffi::NulError),
+    ED25519(#[from] ed25519_dalek::SignatureError),
 }

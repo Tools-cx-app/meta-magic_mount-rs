@@ -4,8 +4,6 @@
 mod zip_ext;
 
 use std::{
-    env,
-    ffi::CString,
     fs,
     path::{Path, PathBuf},
     process::Command,
@@ -13,15 +11,11 @@ use std::{
 
 use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
-use ed25519_dalek::SigningKey;
 use fs_extra::{dir, file};
-use libloading::{Library, Symbol};
 use serde::{Deserialize, Serialize};
 use zip::{CompressionMethod, write::FileOptions};
 
 use crate::zip_ext::zip_create_from_directory_with_options;
-
-type SignFunc = unsafe extern "C" fn(*const i8, *const i8) -> i32;
 
 #[derive(Deserialize)]
 struct Package {
@@ -249,11 +243,9 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
     let bin_path = temp_dir.join("bin");
     let toml = fs::read_to_string("Cargo.toml")?;
     let data: CargoConfig = toml::from_str(&toml)?;
-    let (priv_key, pub_key) = generate_key()?;
+    let (priv_key, pub_key) = verification::generate_key()?;
 
-    unsafe {
-        env::set_var("PUB_KEY", pub_key.to_string_lossy().to_string());
-    }
+    fs::write(".key", pub_key.to_bytes())?;
 
     let _ = fs::remove_dir_all(&temp_dir);
     let _ = fs::create_dir_all(&temp_dir);
@@ -270,7 +262,6 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
                 &arm64_v8a,
                 &file::CopyOptions::new().overwrite(true),
             )?;
-            fs::remove_dir_all(temp_dir.join("libs").join("armeabi-v7a"))?;
         }
         Targets::Armv7 => {
             let armeabi_v7a = bin_path.join("armeabi-v7a").join("magic_mount_rs");
@@ -282,14 +273,10 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
                 &armeabi_v7a,
                 &file::CopyOptions::new().overwrite(true),
             )?;
-            fs::remove_dir_all(temp_dir.join("libs").join("arm64-v8a"))?;
         }
         Targets::Universal => {
             let arm64_v8a = bin_path.join("arm64-v8a").join("magic_mount_rs");
             let armeabi_v7a = bin_path.join("armeabi-v7a").join("magic_mount_rs");
-
-            let _ = fs::create_dir_all(&arm64_v8a.parent().unwrap());
-            let _ = fs::create_dir_all(&armeabi_v7a.parent().unwrap());
 
             file::copy(
                 armv7_bin_path(),
@@ -304,7 +291,7 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
         }
     }
 
-    generate_sign(priv_key)?;
+    verification::sign(&priv_key, &temp_dir)?;
 
     let options: FileOptions<'_, ()> = FileOptions::default()
         .compression_method(CompressionMethod::Deflated)
@@ -360,50 +347,14 @@ fn build(verbose: bool, target: Targets) -> Result<()> {
     if temp_dir.join(".gitignore").exists() {
         fs::remove_file(temp_dir.join(".gitignore")).unwrap();
     }
-    if temp_dir.join("signature").exists() {
-        fs::remove_file(temp_dir.join("signature")).unwrap();
+    if temp_dir.join("verification").exists() {
+        fs::remove_file(temp_dir.join("verification")).unwrap();
     }
     Ok(())
 }
 
 fn module_dir() -> PathBuf {
     Path::new("module").to_path_buf()
-}
-
-fn generate_key() -> Result<(CString, CString)> {
-    let mut seed = [0u8; 32];
-
-    getrandom::fill(&mut seed)?;
-    let priv_key = SigningKey::from_bytes(&seed);
-    let pub_key = priv_key.verifying_key();
-
-    let hex_cstring = |bytes: &[u8]| -> CString {
-        let hex_string: String = bytes.iter().map(|b| format!("{:02x}", b)).collect();
-        CString::new(hex_string).unwrap()
-    };
-    let priv_key = hex_cstring(&priv_key.to_keypair_bytes());
-    let pub_key = hex_cstring(&pub_key.to_bytes());
-
-    Ok((priv_key, pub_key))
-}
-
-fn generate_sign(key: CString) -> Result<()> {
-    #[cfg(target_arch = "x86_64")]
-    let lib = unsafe { Library::new("libs/x86_64/libchecker.so")? };
-    #[cfg(target_arch = "aarch64")]
-    let lib = unsafe { Library::new("libs/arm64-v8a/libchecker.so")? };
-    #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
-    compile_error!("unsupported host arch, please use arm64-v8a/x86_64");
-
-    let generate_sign: Symbol<SignFunc> = unsafe { lib.get(b"GenerateSign")? };
-
-    let path = CString::new(temp_dir().to_string_lossy().to_string())?;
-
-    if unsafe { generate_sign(key.as_ptr() as *const i8, path.as_ptr() as *const i8) } < 0 {
-        eprintln!("failed to generate sign");
-    }
-
-    Ok(())
 }
 
 fn temp_dir() -> PathBuf {

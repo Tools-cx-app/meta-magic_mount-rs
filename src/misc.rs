@@ -1,14 +1,11 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{ffi::CString, path::Path};
+use std::{fs, io::Read, path::Path};
 
-use libloading::{Library, Symbol};
 use rustix::mount::{UnmountFlags, unmount};
 
 use crate::{defs, errors::Result, utils::ksucalls};
-
-type SignFunc = unsafe extern "C" fn(*const i8, *const i8) -> i32;
 
 fn init_logger() {
     #[cfg(not(target_os = "android"))]
@@ -39,20 +36,19 @@ fn init_logger() {
     }
 }
 
-#[cfg(not(test))]
 fn verify_module_safety() -> Result<()> {
-    let lib = unsafe { Library::new(defs::LIBRARY)? };
-
-    let verify_sign: Symbol<SignFunc> = unsafe { lib.get(b"VerifySign")? };
-
-    let pub_key = CString::new(env!("PUB_KEY"))?;
-    let path = CString::new(defs::SELF_MODULE_PATH)?;
-
-    if unsafe { verify_sign(pub_key.as_ptr().cast::<i8>(), path.as_ptr().cast::<i8>()) } != 1 {
-        log::error!("failed to verify sign");
-        panic!("verify sign is broken!!");
+    let mut buf = [0u8; ed25519_dalek::PUBLIC_KEY_LENGTH];
+    let file = fs::OpenOptions::new().read(true).open(".key");
+    if file.is_err() && cfg!(test) {
+        return Ok(());
     }
+    file?.read(&mut buf)?;
 
+    let key = ed25519_dalek::VerifyingKey::from_bytes(&buf)?;
+    if verification::verify(&key, defs::SELF_MODULE_PATH).is_err() {
+        log::error!("verify is broken!!");
+        panic!("broken!!");
+    }
     Ok(())
 }
 

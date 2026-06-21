@@ -1,0 +1,13 @@
+[package]
+name = "verification"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+ed25519-dalek = "2.2.0"
+getrandom = "0.4.3"
+sha2 = "0.11.0"
+
+[dev-dependencies]
+tempfile = "3.27.0"

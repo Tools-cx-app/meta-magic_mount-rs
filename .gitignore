@@ -1,6 +1,7 @@
 /target
 /output
 *.bak
+.key
 .idea/
 .venv/
 .vscode/

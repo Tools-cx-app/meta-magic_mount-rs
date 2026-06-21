@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [workspace]
-members = ["xtask"]
+members = ["crates/verification","xtask"]
 
 [package]
 name = "magic_mount_rs"
@@ -26,7 +26,7 @@ anyhow = "1"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.150"
 toml = "1.1.2"
-libloading = "0.9.0"
+verification = { version = "0.1.0", path = "crates/verification" }
 
 [dependencies]
 anyhow.workspace = true
@@ -46,7 +46,8 @@ glob = "0.3.3"
 thiserror = "2.0.18"
 rustc-hash = "2.1.2"
 nom = "8.0.0"
-libloading.workspace = true
+verification.workspace = true
+ed25519-dalek = "2.2.0"
 
 [build-dependencies]
 anyhow.workspace = true
