@@ -21,7 +21,6 @@ async def github_api(
         "X-GitHub-Api-Version": "2026-03-10",
     }
     url = GH_BASE_URL + settings.github_repository + endpoint
-    logger.info(f"Making {method} request to {url}")
     async with AsyncClient() as client:
         response = await client.request(
             method=method, url=url, headers=headers, params=params, json=json

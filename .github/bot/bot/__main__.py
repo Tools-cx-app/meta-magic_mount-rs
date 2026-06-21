@@ -7,7 +7,7 @@ from . import main
 
 basicConfig(
     level="INFO",
-    format="%(levelname)s - %(message)s",
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
 run(main())

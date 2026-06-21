@@ -24,7 +24,7 @@ async def get_workflow_file() -> str:
 
 async def get_last_ci_run(before_run_id: int | None = None, before_commit: str | None = None) -> tuple[dict, bool] | None:
     before = before_run_id or settings.run_id
-    logger.info(f"Getting last CI run ID before {before}")
+    logger.info(f"Getting last CI run ID before id {before} and commit {before_commit}")
     page = 1
     read = 0
     total = float("inf")
