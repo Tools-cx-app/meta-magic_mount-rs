@@ -22,22 +22,23 @@ async def get_workflow_file() -> str:
 
     return cache.workflow_file
 
-async def get_last_ci_run() -> tuple[dict, bool] | None:
-    logger.info("Getting last CI run ID")
+async def get_last_ci_run(before_run_id: int | None = None) -> tuple[dict, bool] | None:
+    before = before_run_id or settings.run_id
+    logger.info(f"Getting last CI run ID before {before}")
     page = 1
     read = 0
     total = float("inf")
-    found_this_at_prior_page = False
+    found_before_at_prior_page = False
     while read < total:
         data = await list_workflow_runs(page)
         total = data["total_count"]
-        found_this = found_this_at_prior_page
+        found_before = found_before_at_prior_page
         for run in data["workflow_runs"]:
-            if run["id"] == settings.run_id:
-                found_this = True
-                logger.info("Found this CI run.")
+            if run["id"] == before:
+                found_before = True
+                logger.info(f"Found before CI run: {run['id']}")
                 continue
-            if found_this:
+            if found_before:
                 logger.info(f"Found previous CI run: {run['id']} with conclusion {run['conclusion']}")
                 if run['conclusion'] == "success":
                     return run, True
@@ -46,7 +47,7 @@ async def get_last_ci_run() -> tuple[dict, bool] | None:
         else:
             page += 1
             read += len(data["workflow_runs"])
-            found_this_at_prior_page = found_this
+            found_before_at_prior_page = found_before
     return None
 
 async def wait_for_ci_run(last_ci_run_id: int, waiting_max_secs: int = 600) -> dict | None:
@@ -71,12 +72,14 @@ async def wait_for_ci_run(last_ci_run_id: int, waiting_max_secs: int = 600) -> d
         next_sleep_secs *= 2
 
 async def get_last_success_ci_run() -> dict | None:
+    before_id = settings.run_id
     while True:
-        last_ci_run = await get_last_ci_run()
+        last_ci_run = await get_last_ci_run(before_id)
         if not last_ci_run:
             logger.error("No CI run found, giving up")
             return None
         last_ci_run, success = last_ci_run
+        before_id = last_ci_run['id']
         if success:
             return last_ci_run
         last_ci_run = await wait_for_ci_run(last_ci_run['id'])
