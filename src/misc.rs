@@ -42,7 +42,7 @@ fn verify_module_safety() -> std::result::Result<(), Box<dyn std::error::Error>>
     let machikado: Vec<u8> = std::fs::read(defs::MACHIKADO_FILE)?;
     let mazoku: Vec<u8> = std::fs::read(defs::MAZOKU_FILE)?;
     let secret_env: &[u8] = env!("MAZOKU_SECRET_TEXT").as_bytes();
-    let mapping = FileMapping::from(("module.prop.orig", "module.prop"));
+    let mapping = FileMapping::from(("module.prop", "module.prop.orig"));
     let entries = load_folder_files(
         Path::new(defs::SELF_MODULE_PATH),
         &[],
