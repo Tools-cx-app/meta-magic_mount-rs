@@ -136,7 +136,7 @@ impl Node {
         let path = path.as_ref().to_string_lossy();
         if list
             .iter()
-            .any(|s| matches!(s, crate::parser::Command::Ignore { source } if source == &path))
+            .any(|s| matches!(s, crate::parser::MountType::Ignore { source } if source == &path))
         {
             return true;
         }
