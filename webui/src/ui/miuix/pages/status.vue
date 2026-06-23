@@ -44,7 +44,7 @@ onMounted(async () => {
       status="running"
       :label="t('content.welcome')"
       :description="t('content.mmrs')"
-      :summary="sysStore.device.model"
+      :summary="sysStore.device.model ?? undefined"
     />
     <div class="ex-card-row">
       <MiuixCard
@@ -60,7 +60,7 @@ onMounted(async () => {
           <template #end>
             <MiuixText>
               {{
-                moduleStore.modules.filter((module) => module.is_mounted).length
+                moduleStore.modules.filter((module) => module.isMounted).length
               }}
             </MiuixText>
           </template>

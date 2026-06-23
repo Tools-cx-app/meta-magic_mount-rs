@@ -73,6 +73,8 @@ add /data/adb/magic_mount/more.rules
 
 ## 开发
 
+Daemon 的 discovery、鉴权、端点和错误格式见 [Daemon API](daemon-api.md)。
+
 依赖：
 
 * Rust nightly toolchain

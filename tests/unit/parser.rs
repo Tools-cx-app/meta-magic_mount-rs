@@ -16,14 +16,19 @@ fn parse_path_single_quotes() {
 }
 
 #[test]
+fn parse_path_single_quote_does_not_panic() {
+    assert_eq!(parse_path("'"), "'");
+}
+
+#[test]
 fn parse_path_double_quotes() {
     assert_eq!(parse_path("\"/another/path\""), "/another/path");
 }
 
 #[test]
 fn parse_path_mixed_quotes_removed() {
-    assert!(parse_path("'/mixed\"").is_empty());
-    assert!(parse_path("\"/mixed'").is_empty());
+    assert_eq!(parse_path("'/mixed\""), "");
+    assert_eq!(parse_path("\"/mixed'"), "");
 }
 
 #[test]
@@ -135,7 +140,7 @@ fn parse_multiple_commands() {
 
 #[test]
 fn parse_empty_content() {
-    assert!(parse("").is_empty());
+    assert_eq!(parse(""), Vec::new());
 }
 
 #[test]
@@ -161,7 +166,7 @@ fn parser_custom_file_valid() {
 
 #[test]
 fn parser_custom_file_not_found() {
-    assert!(parser_custom("/nonexistent/path/to/file").is_empty());
+    assert_eq!(parser_custom("/nonexistent/path/to/file"), Vec::new());
 }
 
 #[test]
@@ -212,26 +217,28 @@ fn parse_file_with_quoted_path_for_add() {
 }
 
 #[test]
-fn parse_file_command_inclusion() {
+fn parse_file_and_add_command_inclusion() {
     let mut temp = tempfile::Builder::new().tempfile().unwrap();
     temp.write_all(b"bind /a /b\nignore /c\n").unwrap();
-    let main_content = format!("file {}", temp.path().to_str().unwrap());
-    FILES.lock().clear();
-    let result = parse(&main_content);
-    assert_eq!(result.len(), 2);
-    assert_eq!(
-        result[0],
-        MountType::Mount {
-            source: "/a".to_string(),
-            target: "/b".to_string(),
-        }
-    );
-    assert_eq!(
-        result[1],
-        MountType::Ignore {
-            source: "/c".to_string(),
-        }
-    );
+    for command in ["file", "add"] {
+        let main_content = format!("{command} {}", temp.path().to_str().unwrap());
+        FILES.lock().clear();
+        let result = parse(&main_content);
+        assert_eq!(result.len(), 2);
+        assert_eq!(
+            result[0],
+            MountType::Mount {
+                source: "/a".to_string(),
+                target: "/b".to_string(),
+            }
+        );
+        assert_eq!(
+            result[1],
+            MountType::Ignore {
+                source: "/c".to_string(),
+            }
+        );
+    }
 }
 
 #[test]
@@ -240,7 +247,7 @@ fn mount_type_display() {
         source: "s".into(),
         target: "t".into(),
     };
-    assert_eq!(format!("{}", mount), "s -> t");
+    assert_eq!(format!("{mount}"), "s -> t");
     assert_eq!(
         format!("{}", MountType::Ignore { source: "x".into() }),
         "missing x"

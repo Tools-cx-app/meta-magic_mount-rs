@@ -18,7 +18,7 @@ use rustix::mount::{MountFlags, mount};
 
 use crate::{
     bind_mount::bind_mount,
-    config::{Config, handle_gen_config, handle_save_config, handle_show_config},
+    config::Config,
     defs::MODULE_PATH,
     errors::Result,
     misc::{cleanup, emulated_soft_reboot},
@@ -31,33 +31,17 @@ fn main() -> Result<()> {
 
     misc::pre_init();
 
-    let args: Vec<_> = std::env::args().collect();
     let config = Config::load(defs::CONFIG_FILE)?;
-
-    if let Some(arg) = args.get(1) {
-        match arg.as_str() {
-            "show-config" => {
-                handle_show_config()?;
-            }
-            "emulated-soft-reboot" => {
-                emulated_soft_reboot(&config.mountsource)?;
-            }
-            "save-config" => {
-                handle_save_config(&args[2..])?;
-            }
-            "gen-config" => {
-                handle_gen_config()?;
-            }
-            "modules" => {
-                println!("{}", std::fs::read_to_string(defs::SCANNED_LIST)?);
-            }
-            "version" => {
-                println!("{{ \"version\": \"{}\" }}", env!("CARGO_PKG_VERSION"));
-            }
-            _ => {}
+    if let Some(command) = std::env::args().nth(1) {
+        if command == "emulated-soft-reboot" {
+            emulated_soft_reboot(&config.mountsource)?;
+            return Ok(());
         }
-
-        return Ok(());
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            format!("unknown command: {command}"),
+        )
+        .into());
     }
 
     let modules = scanner::list_modules(MODULE_PATH, &config.partitions);

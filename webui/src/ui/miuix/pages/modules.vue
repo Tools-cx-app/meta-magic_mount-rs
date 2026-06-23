@@ -89,7 +89,7 @@ onMounted(async () => {
           .slice()
           .sort(
             (a, b) =>
-              (b.is_mounted === true ? 1 : 0) - (a.is_mounted === true ? 1 : 0),
+              (b.isMounted === true ? 1 : 0) - (a.isMounted === true ? 1 : 0),
           )"
         :key="module.id"
       >
@@ -100,7 +100,7 @@ onMounted(async () => {
           >
             <template #end>
               <Label
-                v-if="module.is_mounted"
+                v-if="module.isMounted"
                 bgColor="var(--m-color-tertiary-container)"
                 textColor="var(--m-color-on-tertiary-container)"
               >

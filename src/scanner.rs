@@ -1,12 +1,11 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: GPL-v3
 
-use std::{collections::BTreeMap, fs, io::Cursor, path::Path};
+use std::{fs, io::Cursor, path::Path};
 
 use anyhow::Result;
 use java_properties::PropertiesIter;
 use rustc_hash::{FxHashMap, FxHashSet};
-use serde::Serialize;
 
 use crate::{defs, utils::validate_module_id};
 
@@ -20,27 +19,6 @@ struct ModuleRecord {
     disabled: bool,
     skip_mount: bool,
     has_mount_files: bool,
-    source_path: String,
-}
-
-#[derive(Debug, Serialize)]
-pub struct ModuleRules {
-    default_mode: String,
-    paths: BTreeMap<String, String>,
-}
-
-#[derive(Debug, Serialize)]
-pub struct AppModule {
-    pub id: String,
-    name: String,
-    version: String,
-    author: String,
-    description: String,
-    mode: String,
-    is_mounted: bool,
-    enabled: bool,
-    source_path: String,
-    rules: ModuleRules,
 }
 
 fn read_prop<P>(path: P) -> Result<FxHashMap<String, String>>
@@ -128,7 +106,6 @@ where
                     disabled,
                     skip_mount,
                     has_mount_files: modified,
-                    source_path: path.to_str().unwrap_or_default().to_string(),
                 });
             }
         }
@@ -138,32 +115,19 @@ where
     modules
 }
 
-pub fn list_modules<P>(module_dir: P, extra: &[String]) -> Vec<AppModule>
+pub fn list_modules<P>(module_dir: P, extra: &[String]) -> Vec<api::Module>
 where
     P: AsRef<Path>,
 {
     collect_modules(module_dir, extra)
         .into_iter()
-        .map(|module| {
-            let is_mounted = module.has_mount_files && !module.disabled && !module.skip_mount;
-            let mode = if is_mounted { "magic" } else { "ignore" }.to_string();
-            let default_mode = mode.clone();
-
-            AppModule {
-                id: module.id,
-                name: module.name,
-                version: module.version,
-                author: module.author,
-                description: module.description,
-                mode,
-                is_mounted,
-                enabled: !module.disabled,
-                source_path: module.source_path,
-                rules: ModuleRules {
-                    default_mode,
-                    paths: BTreeMap::new(),
-                },
-            }
+        .map(|module| api::Module {
+            id: module.id,
+            name: module.name,
+            version: module.version,
+            author: module.author,
+            description: module.description,
+            is_mounted: module.has_mount_files && !module.disabled && !module.skip_mount,
         })
         .collect()
 }

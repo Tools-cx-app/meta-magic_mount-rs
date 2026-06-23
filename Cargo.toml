@@ -4,7 +4,7 @@
 cargo-features = ["codegen-backend"]
 
 [workspace]
-members = ["xtask"]
+members = ["api", "daemon", "xtask"]
 
 [package]
 name = "magic_mount_rs"
@@ -22,14 +22,18 @@ update = "https://github.com/Tools-cx-app/meta-magic_mount-rs/raw/master/update/
 
 [workspace.package]
 edition = "2024"
+version = "4.0.6"
 
 [workspace.dependencies]
 anyhow = "1.0.104"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 toml = "1.1.4"
+rustc-hash = "2.1.2"
+regex-lite = "0.1.9"
 
 [dependencies]
+api = { path = "api" }
 anyhow.workspace = true
 extattr = "1"
 log = "0.4.33"
@@ -46,8 +50,9 @@ glob = "0.3.4"
 thiserror = "2.0.20"
 rustc-hash = "2.1.3"
 const_format = "0.2.36"
-hex = "0.4.3"
 parking_lot = "0.12.5"
+regex-lite.workspace = true
+rustc-hash.workspace = true
 procfs = "0.18.0"
 
 [build-dependencies]

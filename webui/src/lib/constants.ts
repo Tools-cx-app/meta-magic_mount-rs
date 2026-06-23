@@ -11,10 +11,10 @@ export const DEFAULT_CONFIG = {
   customMounts: [],
 };
 
-export const module_id = import.meta.env.MODULE_ID;
+export const module_id = import.meta.env?.MODULE_ID ?? "test";
 
 export const PATHS = {
-  BINARY: "/data/adb/modules/" + module_id + "/meta-mm",
+  CONNECTION: "/data/adb/magic_mount/daemon.json",
 };
 
 export const BUILTIN_PARTITIONS = [

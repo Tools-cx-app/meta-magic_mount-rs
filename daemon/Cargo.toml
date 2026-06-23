@@ -1,0 +1,38 @@
+# Copyright (C) 2026 meta-magic_mount-rs developers
+# SPDX-License-Identifier: GPL-v3
+
+[package]
+name = "daemon"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[dependencies]
+api = { path = "../api" }
+anyhow.workspace = true
+async-trait = "0.1.89"
+axum = "0.8.9"
+encoding_rs = "0.8.35"
+env_logger = "0.11.10"
+fastrand = "2.4.1"
+getrandom = "0.3.4"
+hex = "0.4.3"
+java-properties = "2.0.0"
+log = "0.4.33"
+regex-lite.workspace = true
+rustc-hash.workspace = true
+rustix = { version = "1.1", features = ["fs"] }
+serde.workspace = true
+serde_json.workspace = true
+tempfile = "3.27.0"
+thiserror = "2.0.18"
+tokio = { version = "1.52.3", features = ["io-util", "macros", "fs", "process", "rt-multi-thread", "signal", "sync"] }
+toml.workspace = true
+tower-http = { version = "0.6.8", features = ["cors"] }
+url = "2.5.8"
+
+[dev-dependencies]
+tower = { version = "0.5.3", features = ["util"] }
+
+[lints]
+workspace = true

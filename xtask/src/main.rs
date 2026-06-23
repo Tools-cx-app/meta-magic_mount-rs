@@ -23,12 +23,28 @@ use crate::zip_ext::zip_create_from_directory_with_options;
 #[derive(Deserialize)]
 struct Package {
     name: String,
-    version: String,
 }
 
 #[derive(Deserialize)]
 struct CargoConfig {
     package: Package,
+    workspace: Workspace,
+}
+
+#[derive(Deserialize)]
+struct Workspace {
+    package: WorkspacePackage,
+}
+
+#[derive(Deserialize)]
+struct WorkspacePackage {
+    version: String,
+}
+
+impl CargoConfig {
+    fn version(&self) -> &str {
+        &self.workspace.package.version
+    }
 }
 
 #[derive(Serialize)]
@@ -172,14 +188,15 @@ fn update() -> Result<()> {
 
     //build()?;
 
+    let version = data.version();
     let json = UpdateJson {
-        versioncode: cal_version_code(&data.package.version)?,
+        versioncode: cal_version_code(version)?,
         // Fixed typo here as well
-        version: data.package.version.clone(),
+        version: version.to_owned(),
         zipurl: format!(
             "https://github.com/Tools-cx-app/meta-magic_mount-rs/releases/download/v{}/magic_mount_rs-{}-{}-universal.zip",
-            data.package.version.clone(),
-            data.package.version,
+            version,
+            version,
             cal_git_code()?
         ),
         changelog: String::from(
@@ -196,14 +213,23 @@ fn update() -> Result<()> {
 
 fn check(verbose: bool) -> Result<()> {
     let mut cargo = cargo_ndk(Targets::Universal);
-    cargo.args(["check", "-Z", "build-std", "-Z", "trim-paths"]);
+    cargo.args([
+        "check",
+        "--workspace",
+        "--exclude",
+        "xtask",
+        "-Z",
+        "build-std",
+        "-Z",
+        "trim-paths",
+    ]);
     cargo.env("RUSTFLAGS", "-C default-linker-libraries");
 
     if verbose {
         cargo.arg("--verbose");
     }
 
-    cargo.spawn()?.wait()?;
+    ensure_success(cargo.spawn()?.wait()?, "cargo ndk check")?;
 
     Ok(())
 }
@@ -212,23 +238,36 @@ fn clean() -> Result<()> {
     let temp_dir = temp_dir();
     let _ = fs::remove_dir_all(&temp_dir);
 
-    Command::new("cargo").arg("clean").spawn()?.wait()?;
+    ensure_success(
+        Command::new("cargo").arg("clean").spawn()?.wait()?,
+        "cargo clean",
+    )?;
 
     Ok(())
 }
 
 fn lint(fix: bool) -> Result<()> {
-    let command_builder = |fix: bool| {
+    let command_builder = |fix: bool, release: bool| {
         let mut command = cargo_ndk(Targets::Universal);
-        command.arg("clippy");
+        command.args(["clippy", "--workspace", "--exclude", "xtask"]);
+        if release {
+            command.arg("--release");
+        }
         if fix {
             command.args(["--fix", "--allow-dirty", "--allow-staged", "--all"]);
         }
+        command.args(["--", "-D", "warnings"]);
         command
     };
 
-    command_builder(fix).spawn()?.wait()?;
-    command_builder(fix).arg("--release").spawn()?.wait()?;
+    ensure_success(
+        command_builder(fix, false).spawn()?.wait()?,
+        "cargo ndk clippy",
+    )?;
+    ensure_success(
+        command_builder(fix, true).spawn()?.wait()?,
+        "cargo ndk clippy --release",
+    )?;
 
     Ok(())
 }
@@ -239,7 +278,7 @@ fn format(verbose: bool) -> Result<()> {
     if verbose {
         command.arg("--verbose");
     }
-    command.spawn()?.wait()?;
+    ensure_success(command.spawn()?.wait()?, "cargo fmt")?;
 
     Ok(())
 }
@@ -250,66 +289,30 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
     let toml = fs::read_to_string("Cargo.toml")?;
     let data: CargoConfig = toml::from_str(&toml)?;
 
-    let _ = fs::remove_dir_all(&temp_dir);
-    let _ = fs::create_dir_all(&temp_dir);
-    let _ = fs::create_dir_all(&bin_path);
-    build(verbose, target, data.package.name)?;
-    match target {
-        Targets::Arm64 => {
-            let arm64_v8a = bin_path.join("arm64-v8a").join("magic_mount_rs");
-
-            let _ = fs::create_dir_all(arm64_v8a.parent().unwrap());
-
+    if let Err(error) = fs::remove_dir_all(&temp_dir)
+        && error.kind() != std::io::ErrorKind::NotFound
+    {
+        return Err(error.into());
+    }
+    fs::create_dir_all(&bin_path)?;
+    build(verbose, target, data.package.name.clone())?;
+    let targets: &[(&str, &str)] = match target {
+        Targets::Arm64 => &[("arm64-v8a", "aarch64-linux-android")],
+        Targets::Armv7 => &[("armeabi-v7a", "armv7-linux-androideabi")],
+        Targets::X86_64 => &[("x86_64", "x86_64-linux-android")],
+        Targets::Universal => &[
+            ("arm64-v8a", "aarch64-linux-android"),
+            ("armeabi-v7a", "armv7-linux-androideabi"),
+            ("x86_64", "x86_64-linux-android"),
+        ],
+    };
+    for (abi, rust_target) in targets {
+        let abi_dir = bin_path.join(abi);
+        fs::create_dir_all(&abi_dir)?;
+        for binary in ["magic_mount_rs", "daemon"] {
             file::copy(
-                aarch64_bin_path(),
-                &arm64_v8a,
-                &file::CopyOptions::new().overwrite(true),
-            )?;
-        }
-        Targets::Armv7 => {
-            let armeabi_v7a = bin_path.join("armeabi-v7a").join("magic_mount_rs");
-
-            let _ = fs::create_dir_all(armeabi_v7a.parent().unwrap());
-
-            file::copy(
-                armv7_bin_path(),
-                &armeabi_v7a,
-                &file::CopyOptions::new().overwrite(true),
-            )?;
-        }
-        Targets::X86_64 => {
-            let x86_64 = bin_path.join("x86_64").join("magic_mount_rs");
-
-            let _ = fs::create_dir_all(x86_64.parent().unwrap());
-
-            file::copy(
-                x86_64_bin_path(),
-                &x86_64,
-                &file::CopyOptions::new().overwrite(true),
-            )?;
-        }
-        Targets::Universal => {
-            let arm64_v8a = bin_path.join("arm64-v8a").join("magic_mount_rs");
-            let armeabi_v7a = bin_path.join("armeabi-v7a").join("magic_mount_rs");
-            let x86_64 = bin_path.join("x86_64").join("magic_mount_rs");
-
-            let _ = fs::create_dir_all(arm64_v8a.parent().unwrap());
-            let _ = fs::create_dir_all(armeabi_v7a.parent().unwrap());
-            let _ = fs::create_dir_all(x86_64.parent().unwrap());
-
-            file::copy(
-                armv7_bin_path(),
-                &armeabi_v7a,
-                &file::CopyOptions::new().overwrite(true),
-            )?;
-            file::copy(
-                aarch64_bin_path(),
-                &arm64_v8a,
-                &file::CopyOptions::new().overwrite(true),
-            )?;
-            file::copy(
-                x86_64_bin_path(),
-                &x86_64,
+                target_bin_path(rust_target, binary),
+                abi_dir.join(binary),
                 &file::CopyOptions::new().overwrite(true),
             )?;
         }
@@ -352,14 +355,13 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
     zip_create_from_directory_with_options(
         &Path::new("output").join(format!(
             "magic_mount_rs-{}-{}-{}.zip",
-            data.package.version,
+            data.version(),
             cal_git_code()?,
             target.to_str()
         )),
         &temp_dir,
         |_| options,
-    )
-    .unwrap();
+    )?;
 
     Ok(())
 }
@@ -385,6 +387,10 @@ fn build(verbose: bool, target: Targets, name: String) -> Result<()> {
         "-Z",
         "trim-paths",
         "-r",
+        "-p",
+        "magic_mount_rs",
+        "-p",
+        "daemon",
     ];
 
     if verbose {
@@ -393,18 +399,17 @@ fn build(verbose: bool, target: Targets, name: String) -> Result<()> {
 
     cargo.args(args);
 
-    cargo.spawn()?.wait()?;
+    ensure_success(cargo.spawn()?.wait()?, "cargo ndk build")?;
 
     let module_dir = module_dir();
     dir::copy(
         &module_dir,
         &temp_dir,
         &dir::CopyOptions::new().overwrite(true).content_only(true),
-    )
-    .unwrap();
+    )?;
 
     if temp_dir.join(".gitignore").exists() {
-        fs::remove_file(temp_dir.join(".gitignore")).unwrap();
+        fs::remove_file(temp_dir.join(".gitignore"))?;
     }
 
     Ok(())
@@ -418,25 +423,16 @@ fn temp_dir() -> PathBuf {
     Path::new("output").join(".temp")
 }
 
-fn aarch64_bin_path() -> PathBuf {
+fn target_bin_path(target: &str, binary: &str) -> PathBuf {
     Path::new("target")
-        .join("aarch64-linux-android")
+        .join(target)
         .join("release")
-        .join("magic_mount_rs")
+        .join(binary)
 }
 
-fn armv7_bin_path() -> PathBuf {
-    Path::new("target")
-        .join("armv7-linux-androideabi")
-        .join("release")
-        .join("magic_mount_rs")
-}
-
-fn x86_64_bin_path() -> PathBuf {
-    Path::new("target")
-        .join("x86_64-linux-android")
-        .join("release")
-        .join("magic_mount_rs")
+fn ensure_success(status: std::process::ExitStatus, command: &str) -> Result<()> {
+    anyhow::ensure!(status.success(), "{command} failed with {status}");
+    Ok(())
 }
 
 fn cargo_ndk(target: Targets) -> Command {
@@ -471,11 +467,36 @@ fn cargo_ndk(target: Targets) -> Command {
 }
 
 fn build_webui() -> Result<()> {
-    let pnpm_name = if cfg!(windows) { "pnpm.cmd" } else { "pnpm" };
-    let mut command = Command::new(pnpm_name);
-    command.current_dir("webui");
-    command.args(["run", "build"]);
-    command.spawn()?.wait()?;
+    let pnpm = || {
+        let mut command = Command::new("pnpm");
+        command.current_dir("webui");
+        command
+    };
+
+    ensure_success(
+        pnpm().args(["run", "build"]).spawn()?.wait()?,
+        "pnpm run build",
+    )?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn daemon_uses_the_same_target_directory_as_mount_binary() {
+        assert_eq!(
+            target_bin_path("aarch64-linux-android", "daemon"),
+            Path::new("target/aarch64-linux-android/release/daemon")
+        );
+    }
+
+    #[test]
+    fn failed_cargo_ndk_status_is_an_error() {
+        let status = Command::new("sh").args(["-c", "exit 7"]).status().unwrap();
+
+        assert!(ensure_success(status, "cargo ndk build").is_err());
+    }
 }

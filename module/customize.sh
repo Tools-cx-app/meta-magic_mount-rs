@@ -49,9 +49,11 @@ extract 'metamount.sh'
 extract 'metauninstall.sh'
 extract 'emulated-soft-reboot.sh'
 extract 'uninstall.sh'
+extract 'service.sh'
 extract 'launcher.png'
 mkdir -p "$MODPATH/bin/$ARCH_BINARY"
 extract "bin/$ARCH_BINARY/magic_mount_rs" "bin/$ARCH_BINARY" "magic_mount_rs"
+extract "bin/$ARCH_BINARY/daemon" "bin/$ARCH_BINARY" "daemon"
 
 # Ensure the binary is executable
 chmod 755 "$MODPATH/bin/$ARCH_BINARY" -R || abort "! Failed to set permissions"

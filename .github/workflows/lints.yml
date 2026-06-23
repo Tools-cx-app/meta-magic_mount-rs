@@ -7,18 +7,28 @@ on:
     branches: ["master"]
     paths:
       - 'src/**'
+      - 'api/**'
+      - 'daemon/**'
+      - 'xtask/**'
+      - 'tests/**'
       - 'Cargo.*'
       - 'webui/**'
       - 'build.rs'
       - 'module/**'
+      - '.github/workflows/lints.yml'
   pull_request:
     branches: ["master"]
     paths:
       - 'webui/**'
       - 'src/**'
+      - 'api/**'
+      - 'daemon/**'
+      - 'xtask/**'
+      - 'tests/**'
       - 'Cargo.*'
       - 'build.rs'
       - 'module/**'
+      - '.github/workflows/lints.yml'
 permissions:
   contents: read
 env:
@@ -43,7 +53,7 @@ jobs:
       - name: Install build dependencies
         run: cargo install cargo-ndk --locked
       - name: Clippy code
-        run: cargo ndk -t arm64-v8a -t armeabi-v7a clippy -- -D warnings
+        run: cargo ndk -t arm64-v8a -t armeabi-v7a clippy --workspace --exclude xtask -- -D warnings
   format:
     runs-on: ubuntu-latest
     steps:
@@ -55,11 +65,11 @@ jobs:
           targets: aarch64-linux-android
           components: rustfmt
       - name: Check style
-        run: cargo fmt --message-format=json --all
+        run: cargo fmt --all -- --check
   webui-check:
     uses: rayxiom/workflows/.github/workflows/conventional-ci.yml@v1
     with:
-      skip-test: true
+      skip-test: false
       working-directory: webui
   shellcheck:
     runs-on: ubuntu-latest

@@ -39,7 +39,7 @@ export const MockAPI: AppAPI = {
         version: "18.20.39",
         author: "ReVanced Team",
         description: "YouTube ReVanced Module",
-        is_mounted: true,
+        isMounted: true,
       },
       {
         id: "pixelfy-gphotos",
@@ -47,7 +47,7 @@ export const MockAPI: AppAPI = {
         version: "2.1",
         author: "PixelProps",
         description: "Unlimited Google Photos backup for Pixel devices.",
-        is_mounted: true,
+        isMounted: true,
       },
       {
         id: "sound-enhancer",
@@ -55,7 +55,7 @@ export const MockAPI: AppAPI = {
         version: "1.0",
         author: "AudioMod",
         description: "Improves system audio quality. Currently disabled.",
-        is_mounted: false,
+        isMounted: false,
       },
     ];
   },

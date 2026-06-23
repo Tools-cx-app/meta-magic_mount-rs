@@ -22,17 +22,42 @@ export interface Module {
   version: string;
   author: string;
   description: string;
-  is_mounted: boolean;
+  isMounted: boolean;
   bottomopen?: boolean;
 }
 
 export interface SystemInfo {
-  kernel: string;
-  selinux: string;
+  kernel: string | null;
+  selinux: string | null;
 }
 
 export interface DeviceInfo {
-  model: string;
+  model: string | null;
+}
+
+export interface Status {
+  version: string;
+  device: DeviceInfo;
+  system: SystemInfo;
+}
+
+export interface ConnectionInfo {
+  port: number;
+  token: string;
+}
+
+export interface ErrorResponse {
+  error: {
+    code:
+      | "invalidRequest"
+      | "invalidConfig"
+      | "unauthorized"
+      | "notFound"
+      | "conflict"
+      | "internal"
+      | "unavailable";
+    message: string;
+  };
 }
 
 export interface LanguageOption {

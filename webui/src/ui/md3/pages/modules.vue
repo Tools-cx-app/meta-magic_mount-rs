@@ -66,14 +66,14 @@ function getModeLabel(isMounted: boolean) {
               .slice()
               .sort(
                 (a, b) =>
-                  (b.is_mounted === true ? 1 : 0) -
-                  (a.is_mounted === true ? 1 : 0),
+                  (b.isMounted === true ? 1 : 0) -
+                  (a.isMounted === true ? 1 : 0),
               )"
             :key="module.id"
             class="module-card"
             :class="{
               expanded: expandedId === module.id,
-              unmounted: !module.is_mounted,
+              unmounted: !module.isMounted,
             }"
           >
             <div
@@ -97,11 +97,11 @@ function getModeLabel(isMounted: boolean) {
               <div
                 class="mode-indicator"
                 :class="{
-                  'mode-mounted': module.is_mounted,
-                  'mode-unmounted': !module.is_mounted,
+                  'mode-mounted': module.isMounted,
+                  'mode-unmounted': !module.isMounted,
                 }"
               >
-                {{ getModeLabel(module.is_mounted) }}
+                {{ getModeLabel(module.isMounted) }}
               </div>
             </div>
 

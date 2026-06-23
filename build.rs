@@ -10,7 +10,6 @@ use serde::Deserialize;
 struct Package {
     authors: Vec<String>,
     name: String,
-    version: String,
     description: String,
     metadata: Metadata,
 }
@@ -18,6 +17,17 @@ struct Package {
 #[derive(Deserialize)]
 struct CargoConfig {
     package: Package,
+    workspace: Workspace,
+}
+
+#[derive(Deserialize)]
+struct Workspace {
+    package: WorkspacePackage,
+}
+
+#[derive(Deserialize)]
+struct WorkspacePackage {
+    version: String,
 }
 
 #[derive(Deserialize)]
@@ -78,8 +88,9 @@ fn cal_git_code() -> Result<i32> {
 
 fn gen_module_prop(data: &CargoConfig) -> Result<()> {
     let package = &data.package;
+    let version = &data.workspace.package.version;
     let id = package.name.replace('-', "_");
-    let version_code = cal_version_code(&package.version)?;
+    let version_code = cal_version_code(version)?;
     let authors = &package.authors;
     let mut author = String::new();
     let mut conut = 0;
@@ -92,7 +103,7 @@ fn gen_module_prop(data: &CargoConfig) -> Result<()> {
         }
     }
     let author = author.trim();
-    let version = format!("{}-{}", package.version, cal_git_code()?);
+    let version = format!("{version}-{}", cal_git_code()?);
 
     let mut file = fs::OpenOptions::new()
         .create(true)

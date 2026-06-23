@@ -59,7 +59,7 @@ fn parse(content: &str) -> Vec<MountType> {
                     log::debug!("failed to parse {line}");
                 }
             }
-        } else if line.starts_with("file") {
+        } else if line.starts_with("file") || line.starts_with("add") {
             match parse_file(line) {
                 Some(s) => {
                     if FILES.lock().contains(&s) {
@@ -84,13 +84,16 @@ fn parse(content: &str) -> Vec<MountType> {
 }
 
 fn parse_path(input: &str) -> String {
+    if input.is_empty() {
+        return String::new();
+    }
     let first = input.as_bytes()[0] as char;
     let last = input.as_bytes()[input.len() - 1] as char;
 
     let strings = if (first == '\'' && last == '"') || (first == '"' && last == '\'') {
         log::error!("mixed quotes detected in path: {input}");
         String::new()
-    } else if (first == '\'' || first == '"') && first == last {
+    } else if input.len() > 1 && (first == '\'' || first == '"') && first == last {
         input[1..input.len() - 1].to_string()
     } else {
         input.to_string()

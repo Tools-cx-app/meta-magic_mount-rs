@@ -8,6 +8,8 @@ on:
     branches: ["master"]
     paths:
       - "src/**"
+      - "api/**"
+      - "daemon/**"
       - "Cargo.*"
       - "module/**"
       - "webui/**"
@@ -20,6 +22,8 @@ on:
     branches: ["master"]
     paths:
       - "src/**"
+      - "api/**"
+      - "daemon/**"
       - "Cargo.*"
       - "module/**"
       - "webui/**"

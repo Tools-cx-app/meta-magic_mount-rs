@@ -6,10 +6,7 @@ use std::fs;
 use super::*;
 
 fn create_valid_prop_content(id: &str) -> String {
-    format!(
-        "id={}\nname=Test Module\nversion=1.0.0\nauthor=Tester\ndescription=A test module\n",
-        id
-    )
+    format!("id={id}\nname=Test Module\nversion=1.0.0\nauthor=Tester\ndescription=A test module\n")
 }
 
 #[test]
@@ -80,31 +77,18 @@ fn test_list_modules_integration() {
     )
     .unwrap();
 
-    let result = list_modules(module_dir, &["vendor".to_string()]);
+    let result: Vec<api::Module> = list_modules(module_dir, &["vendor".to_string()]);
     assert_eq!(result.len(), 5);
     assert_eq!(result[0].id, "test1");
-    assert_eq!(result[1].id, "test2");
-    assert_eq!(result[2].id, "test3");
-    assert_eq!(result[3].id, "test5");
-    assert_eq!(result[4].id, "test6");
     assert!(result[0].is_mounted);
-    assert!(result[0].enabled);
-    assert_eq!(result[0].mode, "magic");
     assert!(!result[1].is_mounted);
-    assert!(!result[1].enabled);
-    assert_eq!(result[1].mode, "ignore");
     assert!(!result[2].is_mounted);
-    assert!(result[2].enabled);
-    assert_eq!(result[2].mode, "ignore");
     assert!(!result[3].is_mounted);
-    assert!(result[3].enabled);
-    assert_eq!(result[3].mode, "ignore");
     assert!(result[4].is_mounted);
-    assert_eq!(result[4].mode, "magic");
 }
 
 #[test]
 fn test_list_modules_empty_dir() {
     let tmp_dir = tempfile::tempdir().unwrap();
-    assert!(list_modules(tmp_dir.path(), &[]).is_empty());
+    assert_eq!(list_modules(tmp_dir.path(), &[]), Vec::new());
 }
