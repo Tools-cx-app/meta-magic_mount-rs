@@ -14,3 +14,4 @@ serde.workspace = true
 serde_json.workspace = true
 toml.workspace = true
 zip = "8.6.0"
+sha2 = "0.11.0"
