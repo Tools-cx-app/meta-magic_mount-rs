@@ -1,6 +1,8 @@
 # Copyright (C) 2026 meta-magic_mount-rs developers
 # SPDX-License-Identifier: Apache-2.0
 
+cargo-features = ["codegen-backend"]
+
 [workspace]
 members = ["xtask"]
 
@@ -58,6 +60,9 @@ codegen-units = 1
 lto = "fat"
 opt-level = 3
 strip = true
+
+[profile.dev]
+codegen-backend = "cranelift"
 
 [target.'cfg(target_os = "android")'.dependencies]
 android_logger = "0.15.1"
