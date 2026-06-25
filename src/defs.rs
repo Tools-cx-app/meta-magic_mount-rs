@@ -13,4 +13,4 @@ pub const SKIP_MOUNT_FILE_NAME: &str = "skip_mount";
 pub const REPLACE_DIR_XATTR: &str = "trusted.overlay.opaque";
 pub const REPLACE_DIR_FILE_NAME: &str = ".replace";
 pub const CONFIG_FILE: &str = concatcp!(MAGIC_MOUNT, "/config.toml");
-pub const MODULE_PROP: &str = concatcp!(MODULE_PATH, "/magic_mount_rs/module.prop");
+pub const MODULE_PROP: &str = concatcp!(MODULE_PATH, "/", env!("MODULE_ID"), "/module.prop");
