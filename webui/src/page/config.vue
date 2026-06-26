@@ -36,6 +36,7 @@ import {
 
 import RemoveableLabel from "../components/RemoveableLabel.vue";
 import BindCard from "../components/BindCard.vue";
+import IgnoredCard from "../components/IgnoredCard.vue";
 
 import { configStore } from "../lib/stores/configStore";
 import { DEFAULT_CONFIG } from "../lib/constants";
@@ -296,11 +297,10 @@ function saveCustomMountDialog() {
         </template>
       </MiuixBasicComponent>
       <div v-if="configStore.config.ignoreList.length > 0" class="chip-list">
-        <RemoveableLabel
+        <IgnoredCard
           v-for="(path, index) in configStore.config.ignoreList"
           :key="index"
-          :text="path"
-          buttonalign="start"
+          :path="path"
           @remove="removeIgnorepath(index)"
         />
       </div>
