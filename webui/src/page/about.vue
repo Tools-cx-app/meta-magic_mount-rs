@@ -43,7 +43,10 @@ const cached = localStorage.getItem(STORAGE_KEY);
 if (cached) {
   try {
     const parsed = JSON.parse(cached);
-    if (parsed.timestamp && Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+    if (
+      parsed.timestamp &&
+      Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000
+    ) {
       contributors.value = parsed.data;
     } else {
       localStorage.removeItem(STORAGE_KEY);
@@ -83,14 +86,17 @@ if (!contributors.value.length) {
       return Promise.all(detailPromises);
     })
     .then(function (result) {
-      contributors.value = result.map(item => ({
+      contributors.value = result.map((item) => ({
         ...item,
         bio: item.bio ?? null,
       }));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        timestamp: Date.now(),
-        data: result,
-      }));
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          timestamp: Date.now(),
+          data: result,
+        }),
+      );
     })
     .catch(function (error) {
       console.error(error);
@@ -100,7 +106,7 @@ if (!contributors.value.length) {
 
 function getDisplayBio(bio: string | null) {
   return bio ?? t("info.noBio");
-};
+}
 
 function open_github_repo() {
   API.openLink("https://github.com/Tools-cx-app/meta-magic_mount-rs");
@@ -173,5 +179,4 @@ function open_github_repo() {
 .ex-card {
   margin: 0 12px 12px;
 }
-
 </style>

@@ -101,7 +101,11 @@ onMounted(async () => {
             color="var(--m-color-on-surface-variant-actions)"
             style="margin: 0 16px 12px"
           >
-            {{ module.description ? module.description : t('modules.noDescriptionLabel')}}
+            {{
+              module.description
+                ? module.description
+                : t("modules.noDescriptionLabel")
+            }}
           </MiuixText>
         </MiuixCard>
       </div>
