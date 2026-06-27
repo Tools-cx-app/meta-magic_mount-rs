@@ -31,6 +31,22 @@ if [ -n "$CURRENT_MODULE" ]; then
   done
 fi
 
+# If executing externally, change this to the absolute path of the target module.
+# Target partitions to check
+
+for part in vendor product system_ext; do
+    # Check if the system partition is a symlink and the module uses the old layout
+    if [ -L "/system/$part" ] && [ -d "$MODPATH/system/$part" ]; then
+        if [ -d "$MODPATH/$part" ]; then
+            # Safe merge if root directory already exists
+            cp -a "$MODPATH/system/$part/." "$MODPATH/$part/" && rm -rf "$MODPATH/system/$part"
+        else
+            # Standard move operation
+            mv "$MODPATH/system/$part" "$MODPATH/$part"
+        fi
+    fi
+done
+
 # we no-op handle_partition
 # this way we can support normal hierarchy that ksu changes
 handle_partition() {
