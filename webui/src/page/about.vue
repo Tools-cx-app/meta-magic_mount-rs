@@ -124,7 +124,7 @@ function open_github_repo() {
     </MiuixCard>
 
     <MiuixSmallTitle :text="t('info.contributors')" />
-    <MiuixCard class="ex-card" :title="contributors.length">
+    <MiuixCard class="ex-card">
       <div
         v-if="contributors.length > 0"
         v-for="contributor in contributors"
@@ -174,22 +174,4 @@ function open_github_repo() {
   margin: 0 12px 12px;
 }
 
-.ex-mb12 {
-  margin-bottom: 12px;
-}
-
-.fade-scale-enter-active,
-.fade-scale-leave-active {
-  transition: all 0.3s ease;
-}
-.fade-scale-enter,
-.fade-scale-leave-to {
-  opacity: 0;
-  transform: scale(0.8);
-}
-.fade-scale-enter-from,
-.fade-scale-leave {
-  opacity: 0;
-  transform: scale(0.8);
-}
 </style>
