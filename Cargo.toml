@@ -47,6 +47,7 @@ glob = "0.3.3"
 thiserror = "2.0.18"
 rustc-hash = "2.1.2"
 const_format = "0.2.36"
+hex = "0.4.3"
 
 [build-dependencies]
 anyhow.workspace = true

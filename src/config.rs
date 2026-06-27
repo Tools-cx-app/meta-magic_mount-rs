@@ -4,6 +4,7 @@
 use std::{fmt, fs, path::Path};
 
 use anyhow::Context;
+use hex::decode;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -216,22 +217,6 @@ impl Config {
     }
 }
 
-pub fn decode_hex(input: &str) -> Result<Vec<u8>> {
-    if !input.len().is_multiple_of(2) {
-        return Err(Error::PayloadContain);
-    }
-
-    let mut bytes = Vec::with_capacity(input.len() / 2);
-    for chunk in input.as_bytes().chunks_exact(2) {
-        let hex = std::str::from_utf8(chunk).context("hex payload is not valid utf-8")?;
-        let byte = u8::from_str_radix(hex, 16)
-            .with_context(|| format!("invalid hex byte '{hex}' in payload"))?;
-        bytes.push(byte);
-    }
-
-    Ok(bytes)
-}
-
 pub fn parse_payload_arg(args: &[String]) -> Result<&str> {
     let payload = args
         .windows(2)
@@ -271,8 +256,8 @@ pub fn handle_show_config() -> Result<()> {
 
 pub fn handle_save_config(args: &[String]) -> Result<()> {
     let payload_hex = parse_payload_arg(args)?;
-    let payload_json = String::from_utf8(decode_hex(payload_hex)?)
-        .context("decoded payload is not valid utf-8")?;
+    let payload_json =
+        String::from_utf8(decode(payload_hex)?).context("decoded payload is not valid utf-8")?;
     let payload: ApiConfigPayload =
         serde_json::from_str(&payload_json).context("failed to parse config payload json")?;
 
@@ -311,11 +296,11 @@ mod tests {
         let input_uppercase = "54455354";
         let input_extremes = "00ff00ff";
 
-        assert_eq!(decode_hex(input_lowercase).unwrap(), b"test".to_vec());
-        assert_eq!(decode_hex(input_uppercase).unwrap(), b"TEST".to_vec());
-        assert_eq!(decode_hex("").unwrap(), Vec::<u8>::new());
+        assert_eq!(decode(input_lowercase).unwrap(), b"test".to_vec());
+        assert_eq!(decode(input_uppercase).unwrap(), b"TEST".to_vec());
+        assert_eq!(decode("").unwrap(), Vec::<u8>::new());
         assert_eq!(
-            decode_hex(input_extremes).unwrap(),
+            decode(input_extremes).unwrap(),
             vec![0x00, 0xFF, 0x00, 0xFF]
         );
     }
@@ -325,14 +310,8 @@ mod tests {
         let input_odd_1 = "a";
         let input_odd_5 = "12345";
 
-        assert!(matches!(
-            decode_hex(input_odd_1),
-            Err(Error::PayloadContain)
-        ));
-        assert!(matches!(
-            decode_hex(input_odd_5),
-            Err(Error::PayloadContain)
-        ));
+        assert!(decode(input_odd_1).is_err());
+        assert!(decode(input_odd_5).is_err());
     }
 
     #[test]

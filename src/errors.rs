@@ -19,8 +19,6 @@ pub enum Error {
     InvalidModuleID { module_id: String },
     #[error("missing required --payload argument")]
     MissingArgment,
-    #[error("hex payload must contain an even number of characters")]
-    PayloadContain,
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error(transparent)]
@@ -35,4 +33,6 @@ pub enum Error {
     Rustix(#[from] rustix::io::Errno),
     #[error(transparent)]
     Regex(#[from] regex_lite::Error),
+    #[error(transparent)]
+    Hex(#[from] hex::FromHexError),
 }
