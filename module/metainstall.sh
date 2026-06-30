@@ -13,7 +13,7 @@ export KSU_METAMODULE="mmrs"
 ui_print "- Using mmrs metainstall"
 
 # Define the module IDs that are not allowed to install (separated by spaces)
-BLOCKLIST="scene_swap_controller"
+BLOCKLIST="scene_swap_controller AAaTempSpoof"
 
 # Fallback mechanism to fetch the current module ID from available environment variables
 CURRENT_MODULE="${KSU_MODULE:-$AP_MODULE}"
@@ -35,16 +35,16 @@ fi
 # Target partitions to check
 
 for part in vendor product system_ext; do
-    # Check if the system partition is a symlink and the module uses the old layout
-    if [ -L "/system/$part" ] && [ -d "$MODPATH/system/$part" ]; then
-        if [ -d "$MODPATH/$part" ]; then
-            # Safe merge if root directory already exists
-            cp -a "$MODPATH/system/$part/." "$MODPATH/$part/" && rm -rf "$MODPATH/system/$part"
-        else
-            # Standard move operation
-            mv "$MODPATH/system/$part" "$MODPATH/$part"
-        fi
+  # Check if the system partition is a symlink and the module uses the old layout
+  if [ -L "/system/$part" ] && [ -d "$MODPATH/system/$part" ]; then
+    if [ -d "$MODPATH/$part" ]; then
+      # Safe merge if root directory already exists
+      cp -a "$MODPATH/system/$part/." "$MODPATH/$part/" && rm -rf "$MODPATH/system/$part"
+    else
+      # Standard move operation
+      mv "$MODPATH/system/$part" "$MODPATH/$part"
     fi
+  fi
 done
 
 # we no-op handle_partition
