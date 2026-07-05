@@ -4,6 +4,7 @@
 allowBuilds:
   "@parcel/watcher": true
   core-js: false
+  esbuild: true
 minimumReleaseAgeExclude:
   - "@typescript-eslint/eslint-plugin@8.62.1"
   - "@typescript-eslint/parser@8.62.1"

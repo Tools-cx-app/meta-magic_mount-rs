@@ -34,13 +34,14 @@ import {
   Link,
 } from "miuix-vue/icons";
 
-import RemoveableLabel from "../components/RemoveableLabel.vue";
-import BindCard from "../components/BindCard.vue";
-import IgnoredCard from "../components/IgnoredCard.vue";
+import RemoveableLabel from "../components/miuix/RemoveableLabel.vue";
+import BindCard from "../components/miuix/BindCard.vue";
+import IgnoredCard from "../components/miuix/IgnoredCard.vue";
 
 import { configStore } from "../lib/stores/configStore";
 import { DEFAULT_CONFIG } from "../lib/constants";
 import type { CustomMount } from "../lib/types";
+import { uiStore } from "../lib/stores/uiStore";
 
 const { t } = useI18n();
 
@@ -52,7 +53,16 @@ const ignorepath = ref("");
 
 const current_lang = ref(0);
 
-getCurrentLangIndex().then((index) => (current_lang.value = index));
+const styleOptions = ["MiuiX", "Material Design 3"];
+const styleslist = ["miuix", "md3"];
+const styles = computed({
+  get: () => styleslist.indexOf(uiStore.uiStyle),
+  set: (val: number) => {
+    uiStore.setUiStyle(styleslist[val]);
+  },
+});
+
+getCurrentLangIndex().then((val) => (current_lang.value = val));
 const language_set = computed({
   get: () => current_lang.value,
   set: (val: number) => {
@@ -216,6 +226,11 @@ function saveCustomMountDialog() {
         :title="t('common.language')"
         v-model="language_set"
         :items="display_list"
+      />
+      <MiuixDropdownPreference
+        :title="t('config.uiStyle')"
+        :items="styleOptions"
+        v-model="styles"
       />
     </MiuixCard>
 

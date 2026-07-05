@@ -74,7 +74,19 @@ const statusConfig = {
   </MiuixCard>
 </template>
 
-<style scoped>
+<style>
+/* Additional color tokens */
+:root,
+.m-theme-light {
+  --m-color-working-status-card: #dcfce7;
+  --m-color-working-status-icon: #22c55e;
+}
+
+.m-theme-dark {
+  --m-color-working-status-card: #1b3826;
+  --m-color-working-status-icon: #38d167;
+}
+
 .status-card {
   padding: 0;
   overflow: visible;

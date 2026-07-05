@@ -5,40 +5,6 @@
 
 @import url("https://mui.kernelsu.org/internal/insets.css");
 
-/* Additional color tokens */
-:root,
-.m-theme-light {
-  --m-color-working-status-card: #dcfce7;
-  --m-color-working-status-icon: #22c55e;
-}
-
-.m-theme-dark {
-  --m-color-working-status-card: #1b3826;
-  --m-color-working-status-icon: #38d167;
-}
-
-:root {
-  --top-inset: var(--window-inset-top, 0px);
-  --bottom-inset: var(--window-inset-bottom, 0px);
-  font-family:
-    "MiSans VF",
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    "Open Sans",
-    "Helvetica Neue",
-    sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 html,
 body {
   margin: 0;
@@ -46,8 +12,8 @@ body {
 }
 
 body {
-  background: var(--m-color-background);
-  color: var(--m-color-on-background);
+  background: var(--color-background);
+  color: var(--color-on-background);
 }
 
 #app {

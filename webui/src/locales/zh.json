@@ -66,7 +66,9 @@
     "loadError": "加载配置失败",
     "loadDefault": "已加载默认配置",
     "saveSuccess": "配置保存成功",
-    "saveFailed": "保存配置失败"
+    "saveFailed": "保存配置失败",
+    "uiStyle": "UI 风格",
+    "styleChanged": "风格已切换"
   },
   "modules": {
     "title": "挂载列表",

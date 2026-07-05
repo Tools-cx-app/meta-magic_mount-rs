@@ -13,7 +13,7 @@ import {
   MiuixBasicComponent,
   MiuixText,
 } from "miuix-vue";
-import magicmount from "../components/logo.vue";
+import magicmount from "../components/miuix/logo.vue";
 import { useI18n } from "vue-i18n";
 import axios from "axios";
 import { API } from "../lib/api";
@@ -137,7 +137,7 @@ function open_github_repo() {
         :key="contributor.id"
       >
         <MiuixBasicComponent
-          :title="contributor.name"
+          :title="contributor.name ?? contributor.login"
           :summary="getDisplayBio(contributor.bio)"
           :clickable="true"
           @click="API.openLink(contributor.html_url)"

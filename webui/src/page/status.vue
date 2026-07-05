@@ -8,7 +8,8 @@
 import { onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { MiuixCard, MiuixSmallTitle, MiuixBasicComponent } from "miuix-vue";
-import StatusCard from "../components/StatusCard.vue";
+import StatusCard from "../components/miuix/StatusCard.vue";
+import { uiStore } from "../lib/stores/uiStore.ts";
 import { sysStore } from "../lib/stores/sysStore";
 import { moduleStore } from "../lib/stores/moduleStore";
 import { configStore } from "../lib/stores/configStore";
@@ -17,6 +18,7 @@ const { t } = useI18n();
 
 onMounted(async () => {
   await Promise.all([
+    uiStore.init(),
     sysStore.loadStatus(),
     moduleStore.loadModules(),
     configStore.loadConfig(),

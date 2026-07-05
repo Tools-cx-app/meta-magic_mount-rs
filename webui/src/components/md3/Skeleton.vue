@@ -1,0 +1,86 @@
+<!--
+
+    Copyright (C) 2026 meta-magic_mount-rs developers
+    SPDX-License-Identifier: GPL-v3
+
+-->
+<script setup lang="ts">
+defineProps<{
+  class?: string;
+}>();
+</script>
+
+<template>
+  <div class="skeleton" :class="$props.class" />
+</template>
+
+<style scoped>
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--md-sys-color-surface-container-highest) 25%,
+    var(--md-sys-color-surface-container-high) 50%,
+    var(--md-sys-color-surface-container-highest) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite linear;
+  width: 100%;
+  height: 20px;
+}
+
+.skeleton-hero-label {
+  width: 40%;
+  height: 24px;
+}
+
+.skeleton-hero-title {
+  width: 72%;
+  height: 48px;
+  border-radius: 16px;
+}
+
+.skeleton-metric {
+  width: 50%;
+  height: 32px;
+}
+
+.skeleton-info-wide {
+  width: 100px;
+  height: 16px;
+}
+
+.skeleton-info-narrow {
+  width: 60px;
+  height: 16px;
+}
+
+.skeleton-module-card {
+  height: 64px;
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeleton-text-title {
+  width: 120px;
+  height: 16px;
+}
+
+.skeleton-text-body {
+  width: 180px;
+  height: 12px;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+</style>

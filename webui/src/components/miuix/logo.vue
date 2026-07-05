@@ -57,9 +57,9 @@
 
 <style>
 .logo-wrapper {
-  --logo-accent: var(--m-color-primary);
-  --logo-flow: var(--m-color-tertiary-container);
-  --logo-satellite: var(--m-color-error);
+  --logo-accent: var(--m-color-primary) !important;
+  --logo-flow: var(--m-color-tertiary-container) !important;
+  --logo-satellite: var(--m-color-error) !important;
   width: 100%;
   height: 100%;
   display: flex;
