@@ -33,10 +33,6 @@ import { sysStore } from "./lib/stores/sysStore";
 
 const { t } = useI18n();
 
-const Apptitle = t("common.appName");
-const Reboottitle = t("common.rebootTitle");
-const RebootSummary = t("common.rebootConfirm");
-
 const rebootreq_click = ref(false);
 
 const pages = [status, config, modules, about];
@@ -104,7 +100,11 @@ onBeforeUnmount(() => {
 <template>
   <div class="app">
     <MiuixScrollArea ref="scrollerRef" class="app__body">
-      <MiuixTopAppBar :large="false" :title="Apptitle" class="app__top-app-bar">
+      <MiuixTopAppBar
+        :large="false"
+        :title="t('common.appName')"
+        class="app__top-app-bar"
+      >
         <template #actions>
           <MiuixIconButton aria-label="Reboot" @click="rebootreq_click = true">
             <MiuixIcon :icon="Close2" :size="24" />
@@ -132,8 +132,8 @@ onBeforeUnmount(() => {
 
   <MiuixDialog
     v-model="rebootreq_click"
-    :title="Reboottitle"
-    :summary="RebootSummary"
+    :title="t('common.rebootTitle')"
+    :summary="t('common.rebootConfirm')"
     @close="rebootreq_click = false"
   >
     <template #default="{ close }">
