@@ -53,6 +53,13 @@ const ignorepath = ref("");
 const current_lang = ref(0);
 
 getCurrentLangIndex().then((index) => (current_lang.value = index));
+const language_set = computed({
+  get: () => current_lang.value,
+  set: (val: number) => {
+    current_lang.value = val;
+    switchLocale(lang_code.value[val]);
+  }
+})
 
 const customMountDraft = ref<CustomMount>({ source: "", target: "" });
 const editingCustomMountIndex = ref<number | null>(null);
@@ -103,10 +110,7 @@ onMounted(async () => {
   await configStore.loadConfig();
 });
 
-async function handleChange(value: number) {
-  await switchLocale(lang_code.value[value]);
-  window.location.reload();
-}
+
 
 function handle_add_partition() {
   configStore.config.partitions.push(partition.value);
@@ -212,19 +216,9 @@ function saveCustomMountDialog() {
     <MiuixCard class="ex-card">
       <MiuixDropdownPreference
         :title="t('common.language')"
-        :summary="lang_code[lang_dropdown_index]"
-        v-model="lang_dropdown_index"
+        v-model="language_set"
         :items="display_list"
       />
-      <div style="padding: 12px">
-        <MiuixButton
-          type="primary"
-          :disabled="lang_dropdown_index === current_lang"
-          @click="handleChange(lang_dropdown_index)"
-        >
-          {{ t("config.apply") }}
-        </MiuixButton>
-      </div>
     </MiuixCard>
 
     <MiuixSmallTitle :text="t('tabs.config')" />

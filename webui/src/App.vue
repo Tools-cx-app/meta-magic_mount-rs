@@ -40,13 +40,13 @@ const RebootSummary = t("common.rebootConfirm");
 const rebootreq_click = ref(false);
 
 const pages = [status, config, modules, about];
-const titles = [
+const titles = computed(() => [
   t("tabs.status"),
   t("tabs.config"),
   t("tabs.modules"),
   t("tabs.info"),
-];
-const navItems = titles.map((label) => ({ label }));
+]);
+const navItems = computed(() => titles.value.map((label) => ({ label })));
 const navicoms = [ScreenMirroring, Settings, Folder, Info];
 
 const navindex = ref(0);
