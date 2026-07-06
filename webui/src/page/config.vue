@@ -58,8 +58,8 @@ const language_set = computed({
   set: (val: number) => {
     current_lang.value = val;
     switchLocale(lang_code.value[val]);
-  }
-})
+  },
+});
 
 const customMountDraft = ref<CustomMount>({ source: "", target: "" });
 const editingCustomMountIndex = ref<number | null>(null);
@@ -109,8 +109,6 @@ onMounted(async () => {
 
   await configStore.loadConfig();
 });
-
-
 
 function handle_add_partition() {
   configStore.config.partitions.push(partition.value);
