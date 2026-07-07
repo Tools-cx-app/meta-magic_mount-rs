@@ -89,13 +89,3 @@ cargo xtask build
 本项目除 `libs/` 和 `module/libs/` 目录下的文件外，其余所有文件均基于 [Apache 2.0 许可证](https://www.apache.org/licenses/LICENSE-2.0) 开源。
 
 > **注意：** `libs/` 与 `module/libs/` 目录内的代码**不进行开源**，不适用上述 Apache 2.0 许可。
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=Tools-cx-app%2Fmeta-magic_mount-rs&type=timeline&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=Tools-cx-app/meta-magic_mount-rs&type=timeline&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=Tools-cx-app/meta-magic_mount-rs&type=timeline&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=Tools-cx-app/meta-magic_mount-rs&type=timeline&legend=top-left" />
- </picture>
-</a>
