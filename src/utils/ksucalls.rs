@@ -1,18 +1,16 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: GPL-v3
 
-use std::{
-    path::Path,
-    sync::{LazyLock, Mutex, atomic::AtomicBool},
-};
+use std::{path::Path, sync::atomic::AtomicBool};
 
 use ksu::{TryUmount, TryUmountFlags};
+use parking_lot::{Mutex, const_mutex};
 
 use crate::errors::Result;
 
 pub static KSU: AtomicBool = AtomicBool::new(false);
 static FLAG: AtomicBool = AtomicBool::new(false);
-static LIST: LazyLock<Mutex<TryUmount>> = LazyLock::new(|| Mutex::new(TryUmount::new()));
+static LIST: Mutex<TryUmount> = const_mutex(TryUmount::new());
 
 pub fn check_ksu() {
     let status = ksu::version().is_some_and(|v| {
@@ -41,12 +39,12 @@ where
         return;
     }
 
-    LIST.lock().unwrap().add(target);
+    LIST.lock().add(target);
 }
 
 pub fn unmount() -> Result<()> {
     if KSU.load(std::sync::atomic::Ordering::Relaxed) {
-        let mut control = LIST.lock().unwrap();
+        let mut control = LIST.lock();
 
         control.flags(TryUmountFlags::MNT_DETACH);
         control.format_msg(|p| format!("umount {p:?} successful"));

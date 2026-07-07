@@ -48,6 +48,7 @@ thiserror = "2.0.18"
 rustc-hash = "2.1.2"
 const_format = "0.2.36"
 hex = "0.4.3"
+parking_lot = "0.12.5"
 
 [build-dependencies]
 anyhow.workspace = true
