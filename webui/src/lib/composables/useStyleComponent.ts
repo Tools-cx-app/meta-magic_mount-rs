@@ -4,7 +4,7 @@
  */
 
 import { computed, type ComputedRef, type Component } from "vue";
-import { uiStore } from "../lib/stores/uiStore";
+import { uiStore } from "../stores/uiStore";
 
 export function useStyleComponent(components: {
   miuix: Component;
