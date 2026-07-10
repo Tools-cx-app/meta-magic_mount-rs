@@ -41,9 +41,10 @@ jobs:
           cache: pnpm
           package-manager-cache: false
           cache-dependency-path: webui/pnpm-lock.yaml
+      - uses: cargo-bins/cargo-binstall@main
       - name: Install build dependencies
         run: |
-          cargo install cargo-ndk --locked
+          cargo binstall cargo-ndk
       - name: Setup Webui deps
         run: |
           cd webui/
@@ -52,6 +53,7 @@ jobs:
         run: |
           cargo xtask build -t arm64
           cargo xtask build -t armv7
+          cargo xtask build -t x86-64
           cargo xtask build -t universal
       - name: Install git-cliff
         run: |
