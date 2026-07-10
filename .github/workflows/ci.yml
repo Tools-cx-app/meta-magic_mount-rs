@@ -60,6 +60,8 @@ jobs:
           node-version: "lts/*"
       - uses: Swatinem/rust-cache@v2
         with:
+          cache-workspace-crates: "true"
+          cache-all-crates: "true"
           save-if: ${{ github.event_name == 'push' }}
       - uses: cargo-bins/cargo-binstall@main
       - name: Install build dependencies
