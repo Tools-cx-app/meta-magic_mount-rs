@@ -22,6 +22,10 @@ arm)
   ui_print "- Selected architecture: armeabi-v7a"
   ARCH_BINARY="armeabi-v7a"
   ;;
+x64)
+  ui_print " - Selected architecture: x86_64"
+  ARCH_BINARY="x86_64"
+  ;;
 *)
   abort "! Unsupported platform: $ABI"
   ;;
@@ -36,7 +40,7 @@ if [ ! -f "$TMPDIR/verify.sh" ]; then
   ui_print "*********************************************************"
   ui_print "! Unable to extract verify.sh!"
   ui_print "! This zip may be corrupted, please try downloading again"
-  abort    "*********************************************************"
+  abort "*********************************************************"
 fi
 # shellcheck disable=SC1091
 . "$TMPDIR/verify.sh"

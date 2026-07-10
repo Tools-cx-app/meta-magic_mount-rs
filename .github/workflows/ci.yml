@@ -72,6 +72,7 @@ jobs:
         run: |
           cargo xtask build -t arm64
           cargo xtask build -t armv7
+          cargo xtask build -t x86-64
       - name: Upload release version
         uses: actions/upload-artifact@v7
         with:

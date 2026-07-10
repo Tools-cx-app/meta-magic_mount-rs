@@ -51,6 +51,7 @@ struct Cli {
 enum Targets {
     Arm64,
     Armv7,
+    X86_64,
     Universal,
 }
 
@@ -99,6 +100,7 @@ impl Targets {
         match self {
             Self::Arm64 => "arm64",
             Self::Armv7 => "armv7",
+            Self::X86_64 => "x86_64",
             Self::Universal => "universal",
         }
     }
@@ -274,12 +276,25 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
                 &file::CopyOptions::new().overwrite(true),
             )?;
         }
+        Targets::X86_64 => {
+            let x86_64 = bin_path.join("x86_64").join("magic_mount_rs");
+
+            let _ = fs::create_dir_all(&x86_64.parent().unwrap());
+
+            file::copy(
+                x86_64_bin_path(),
+                &x86_64,
+                &file::CopyOptions::new().overwrite(true),
+            )?;
+        }
         Targets::Universal => {
             let arm64_v8a = bin_path.join("arm64-v8a").join("magic_mount_rs");
             let armeabi_v7a = bin_path.join("armeabi-v7a").join("magic_mount_rs");
+            let x86_64 = bin_path.join("x86_64").join("magic_mount_rs");
 
             let _ = fs::create_dir_all(&arm64_v8a.parent().unwrap());
             let _ = fs::create_dir_all(&armeabi_v7a.parent().unwrap());
+            let _ = fs::create_dir_all(&x86_64.parent().unwrap());
 
             file::copy(
                 armv7_bin_path(),
@@ -289,6 +304,11 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
             file::copy(
                 aarch64_bin_path(),
                 &arm64_v8a,
+                &file::CopyOptions::new().overwrite(true),
+            )?;
+            file::copy(
+                x86_64_bin_path(),
+                &x86_64,
                 &file::CopyOptions::new().overwrite(true),
             )?;
         }
@@ -405,6 +425,13 @@ fn armv7_bin_path() -> PathBuf {
         .join("magic_mount_rs")
 }
 
+fn x86_64_bin_path() -> PathBuf {
+    Path::new("target")
+        .join("x86_64-linux-android")
+        .join("release")
+        .join("magic_mount_rs")
+}
+
 fn cargo_ndk(target: Targets) -> Command {
     let mut command = Command::new("cargo");
     command
@@ -417,8 +444,11 @@ fn cargo_ndk(target: Targets) -> Command {
         Targets::Armv7 => {
             command.args(["-t", "armeabi-v7a"]);
         }
+        Targets::X86_64 => {
+            command.args(["-t", "x86_64"]);
+        }
         Targets::Universal => {
-            command.args(["-t", "arm64-v8a", "-t", "armeabi-v7a"]);
+            command.args(["-t", "arm64-v8a", "-t", "x86_64", "-t", "armeabi-v7a"]);
         }
     }
     command
