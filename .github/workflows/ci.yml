@@ -61,9 +61,10 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           save-if: ${{ github.event_name == 'push' }}
+      - uses: cargo-bins/cargo-binstall@main
       - name: Install build dependencies
         run: |
-          cargo install cargo-ndk --locked
+          cargo binstall cargo-ndk
       - name: Setup Webui deps
         run: |
           cd webui/
