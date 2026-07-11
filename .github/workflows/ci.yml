@@ -68,6 +68,7 @@ jobs:
       - name: Install build dependencies
         run: |
           cargo binstall cargo-ndk
+          echo "HOME/.cargo/bin" >> $GITHUB_PATH
       - name: Setup Webui deps
         run: |
           cd webui/
