@@ -87,12 +87,14 @@ fn parse_path(input: &str) -> String {
     let first = input.as_bytes()[0] as char;
     let last = input.as_bytes()[input.len() - 1] as char;
 
-    let strings =
-        if (first == '\'' && last == '\"') || (first == '\"' && last == '\'') || first == last {
-            input[1..input.len() - 1].to_string()
-        } else {
-            input.to_string()
-        };
+    let strings = if (first == '\'' && last == '"') || (first == '"' && last == '\'') {
+        log::error!("mixed quotes detected in path: {input}");
+        String::new()
+    } else if (first == '\'' || first == '"') && first == last {
+        input[1..input.len() - 1].to_string()
+    } else {
+        input.to_string()
+    };
 
     strings.chars().filter(|c| !c.is_control()).collect()
 }
@@ -196,8 +198,8 @@ mod tests {
 
     #[test]
     fn parse_path_mixed_quotes_removed() {
-        assert_eq!(parse_path("'/mixed\""), "/mixed");
-        assert_eq!(parse_path("\"/mixed'"), "/mixed");
+        assert!(parse_path("'/mixed\"").is_empty());
+        assert!(parse_path("\"/mixed'").is_empty());
     }
 
     #[test]
