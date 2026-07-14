@@ -3,7 +3,7 @@
 
 use std::{fs, path::Path};
 
-use rustix::mount::mount_bind;
+use rustix::mount::{MountFlags, mount_bind, mount_remount};
 
 use crate::{
     errors::Result, magic_mount::utils::mount_mirror, parser::COMMAND_LIST,
@@ -58,8 +58,10 @@ pub fn bind_mount(umount: bool) -> Result<()> {
             }
 
             mount_bind(source, &mirror_target)?;
+            mount_remount(&mirror_target, MountFlags::BIND | MountFlags::RDONLY, "")?;
         } else {
             mount_bind(source, target)?;
+            mount_remount(target, MountFlags::BIND | MountFlags::RDONLY, "")?;
         }
         if umount {
             send_unmountable(&t);
