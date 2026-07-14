@@ -71,7 +71,7 @@ pub fn bind_mount(umount: bool) -> Result<()> {
             send_unmountable(&target);
         }
 
-        unmount(workdir.path(), UnmountFlags::DETACH)?;
+        let _ = unmount(workdir.path(), UnmountFlags::DETACH);
         drop(workdir);
     }
     Ok(())
