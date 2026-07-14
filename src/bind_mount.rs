@@ -47,7 +47,7 @@ pub fn bind_mount(umount: bool) -> Result<()> {
             continue;
         }
 
-        if need_mirror {
+        let target = if need_mirror {
             // mirror source file to workdir
             let mirror_target = workdir.path().join(target.file_name().unwrap());
             if source.is_dir() {
@@ -59,19 +59,16 @@ pub fn bind_mount(umount: bool) -> Result<()> {
                 fs::File::create(&mirror_target)?;
             }
 
-            mount_bind(source, &mirror_target)?;
-            mount_remount(&mirror_target, MountFlags::BIND | MountFlags::RDONLY, "")?;
-
-            if umount {
-                send_unmountable(&mirror_target);
-            }
+            mirror_target
         } else {
-            mount_bind(source, target)?;
-            mount_remount(target, MountFlags::BIND | MountFlags::RDONLY, "")?;
+            target.to_path_buf()
+        };
 
-            if umount {
-                send_unmountable(target);
-            }
+        mount_bind(source, &target)?;
+        mount_remount(&target, MountFlags::BIND | MountFlags::RDONLY, "")?;
+
+        if umount {
+            send_unmountable(&target);
         }
 
         unmount(workdir.path(), UnmountFlags::DETACH)?;
