@@ -59,12 +59,17 @@ pub fn bind_mount(umount: bool) -> Result<()> {
 
             mount_bind(source, &mirror_target)?;
             mount_remount(&mirror_target, MountFlags::BIND | MountFlags::RDONLY, "")?;
+
+            if umount {
+                send_unmountable(&mirror_target);
+            }
         } else {
             mount_bind(source, target)?;
             mount_remount(target, MountFlags::BIND | MountFlags::RDONLY, "")?;
-        }
-        if umount {
-            send_unmountable(&t);
+
+            if umount {
+                send_unmountable(target);
+            }
         }
 
         unmount(workdir.path(), UnmountFlags::DETACH)?;
