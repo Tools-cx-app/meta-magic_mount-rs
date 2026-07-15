@@ -92,7 +92,11 @@ fn main() -> Result<()> {
         &config.partitions,
         config.umount,
     );
-    let bind_mount_result = bind_mount(config.umount);
+    let bind_mount_result = if magic_mount_result.is_ok() {
+        Some(bind_mount(config.umount))
+    } else {
+        None
+    };
 
     cleanup(tempdir);
     unmount()?;
@@ -112,17 +116,19 @@ fn main() -> Result<()> {
         }
     }
 
-    match bind_mount_result {
-        Ok(()) => {
-            log::info!("Bind mount Completed Successfully");
-        }
-        Err(e) => {
-            log::error!("Bind mount Failed");
-            let e = anyhow::Error::from(e);
-            for cause in e.chain() {
-                log::error!("{cause:#?}");
+    if let Some(bind_mount_result) = bind_mount_result {
+        match bind_mount_result {
+            Ok(()) => {
+                log::info!("Bind mount Completed Successfully");
             }
-            log::error!("{:#?}", e.backtrace());
+            Err(e) => {
+                log::error!("Bind mount Failed");
+                let e = anyhow::Error::from(e);
+                for cause in e.chain() {
+                    log::error!("{cause:#?}");
+                }
+                log::error!("{:#?}", e.backtrace());
+            }
         }
     }
 
