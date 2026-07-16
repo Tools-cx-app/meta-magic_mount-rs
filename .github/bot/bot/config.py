@@ -13,9 +13,6 @@ TG_MSG_EXPECTED_PARSE_MODE_CI = "html"
 
 TG_MSG_TEMPLATE_RELEASE = """
 New release available: **{name}**
-
-{body}
-
 [Detail]({url})
 """
 TG_MSG_EXPECTED_PARSE_MODE_RELEASE = "markdown"

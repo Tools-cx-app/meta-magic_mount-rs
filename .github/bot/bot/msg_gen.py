@@ -13,7 +13,6 @@ async def generate_msg_release() -> str:
     release = await get_latest_release()
     message = TG_MSG_TEMPLATE_RELEASE.format(
         name=release["name"],
-        body=parse_release_body(release["body"]),
         url=release["html_url"],
     )
     logger.info("Generated Telegram release message")

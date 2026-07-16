@@ -8,6 +8,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "bot"
 version = "0.1.0"
+requires-python = ">=3.10,<4"
 dependencies = [
     "python-telegram-bot>=22.0,<23",
     "httpx>=0.28,<1",
