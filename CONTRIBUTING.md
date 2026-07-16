@@ -42,13 +42,13 @@ For larger changes (new behavior, refactors, architecture-impacting work), open 
 
 ## Development setup
 
-Based on `docs/README_en.md`, the typical toolchain is:
+The toolchain used by CI is:
 
 - Rust nightly toolchain
-- Android NDK
+- Android NDK r29
 - `cargo-ndk`
-- Node.js / npm
-- `pnpm` (for `webui`)
+- Node.js 24 or later
+- `pnpm` 11 (for `webui`; the exact version is declared in `webui/package.json`)
 
 Recommended environment variables:
 
@@ -64,12 +64,19 @@ export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
 From the repository root:
 
 ```bash
-cargo xtask b
+cargo xtask build
 ```
 
-Expected artifact:
+To build a specific package variant, use one of the targets exercised by CI:
 
-- `output/magic_mount_rs.zip`
+```bash
+cargo xtask build -t arm64
+cargo xtask build -t armv7
+cargo xtask build -t x86-64
+cargo xtask build -t universal
+```
+
+Build artifacts are written to `output/magic_mount_rs-*.zip`.
 
 ---
 
@@ -93,7 +100,7 @@ Before submitting, run:
 
 ```bash
 cargo fmt --all
-cargo clippy --all-targets --all-features -- -D warnings
+cargo ndk -t arm64-v8a -t armeabi-v7a clippy -- -D warnings
 ```
 
 Guidelines:
@@ -108,8 +115,9 @@ Guidelines:
 In `webui/`:
 
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 pnpm lint
+pnpm typecheck
 pnpm build
 ```
 
@@ -124,8 +132,12 @@ At minimum, validate the paths touched by your change.
 Suggested checks:
 
 ```bash
-cargo check
+cargo test
 ```
+
+Changes to shell scripts under `module/` must also pass ShellCheck. New source and
+configuration files must carry the GPL-v3 license header defined in
+`licenserc.toml` unless they are explicitly excluded there.
 
 When applicable, include:
 
@@ -141,8 +153,22 @@ If fixing a bug, add or document a reproducible regression check whenever possib
 
 ### Commits
 
-- Use clear commit messages that explain intent.
+- Follow the repository's established subject format:
+
+  ```text
+  <type>(<optional-scope>): <imperative description>
+  ```
+
+- Common types in the history include `build`, `ci`, `docs`, `test`, `style`,
+  `chore`, and `deps`. Subsystem names such as `mount`,
+  `parser`, `webui`, `xtask`, `module`, or `metainstall` may also be used as the
+  type when they describe the change more clearly.
+- Use a scope for a distinct area when useful, for example `deps(webui): ...`.
+- Keep the subject concise, start it with a lowercase type, and do not end it
+  with a period.
 - Keep commits atomic and logically grouped.
+- Keep release bookkeeping (`Cargo.toml`, `module/module.prop`, and `update/*`)
+  out of ordinary feature and fix commits unless the change is part of a release.
 
 ### Pull requests
 
@@ -168,4 +194,3 @@ Also:
 - If feedback is unclear, ask for clarification directly in the PR.
 
 Thanks again for helping improve `meta-magic_mount-rs`.
-
