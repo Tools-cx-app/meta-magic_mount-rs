@@ -108,8 +108,6 @@ if (!contributors.value.length) {
     });
 }
 
-
-
 function handleLink(event: MouseEvent, url: string) {
   event.preventDefault();
   void API.openLink(url);

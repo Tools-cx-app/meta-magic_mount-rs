@@ -55,7 +55,7 @@ async function saveConfig() {
   if (success) {
     initialConfigStr.value = JSON.stringify(configStore.config);
   }
-  toast(success ? t("config.saveSuccess") : t("config.saveFailed"))
+  toast(success ? t("config.saveSuccess") : t("config.saveFailed"));
 }
 
 function updateConfig<K extends keyof typeof configStore.config>(

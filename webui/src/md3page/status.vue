@@ -139,8 +139,7 @@ onMounted(async () => {
           <template v-if="!moduleStore.loading">
             <span class="metric-value">
               {{
-                moduleStore.modules.filter((module) => module.is_mounted)
-                  .length
+                moduleStore.modules.filter((module) => module.is_mounted).length
               }}
             </span>
             <span class="metric-label">{{ t("status.moduleActive") }}</span>
