@@ -5,36 +5,28 @@
 
 -->
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import Skeleton from "../components/md3/Skeleton.vue";
 import BottomActions from "../components/md3/BottomActions.vue";
 import { ICONS } from "../lib/constants";
-import { configStore } from "../lib/stores/configStore";
-import { moduleStore } from "../lib/stores/moduleStore";
+import { uiStore } from "../lib/stores/uiStore";
 import { sysStore } from "../lib/stores/sysStore";
-import { API } from "../lib/api";
+import { moduleStore } from "../lib/stores/moduleStore";
+import { configStore } from "../lib/stores/configStore";
+
 
 const { t } = useI18n();
 
-const showRebootConfirm = ref(false);
 
-const mountedCount = computed(
-  () => moduleStore.modules.filter((module) => module.is_mounted).length,
-);
-
-const moduleStatsReady = computed(
-  () => !moduleStore.loading && moduleStore.hasLoaded,
-);
-
-function reboot() {
-  showRebootConfirm.value = false;
-  void API.reboot();
-}
 
 onMounted(async () => {
-  await sysStore.ensureStatusLoaded();
-  await moduleStore.ensureModulesLoaded();
+  await Promise.all([
+    uiStore.init(),
+    sysStore.loadStatus(),
+    moduleStore.loadModules(),
+    configStore.loadConfig(),
+  ]);
 });
 </script>
 
@@ -147,8 +139,13 @@ onMounted(async () => {
 
       <div class="metrics-row">
         <div class="metric-card">
-          <template v-if="moduleStatsReady">
-            <span class="metric-value">{{ mountedCount }}</span>
+          <template v-if="!moduleStore.loading">
+            <span class="metric-value">
+              {{
+                moduleStore.modules.filter((module) => module.is_mounted)
+                  .length
+              }}
+            </span>
             <span class="metric-label">{{ t("status.moduleActive") }}</span>
           </template>
           <Skeleton v-else class="skeleton-metric" />
@@ -213,25 +210,6 @@ onMounted(async () => {
         </svg>
       </button>
     </BottomActions>
-
-    <div
-      v-if="showRebootConfirm"
-      class="dialog-overlay"
-      @click.self="showRebootConfirm = false"
-    >
-      <div class="dialog-content">
-        <div class="dialog-headline">{{ t("common.rebootTitle") }}</div>
-        <div class="dialog-body">{{ t("common.rebootConfirm") }}</div>
-        <div class="dialog-actions">
-          <button class="dialog-btn-text" @click="showRebootConfirm = false">
-            {{ t("common.cancel") }}
-          </button>
-          <button class="dialog-btn-text" @click="reboot">
-            {{ t("common.reboot") }}
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 

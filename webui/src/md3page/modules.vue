@@ -5,7 +5,7 @@
 
 -->
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import BottomActions from "../components/md3/BottomActions.vue";
 import Skeleton from "../components/md3/Skeleton.vue";
@@ -18,15 +18,26 @@ const { t } = useI18n();
 const searchQuery = ref("");
 const expandedId = ref<string | null>(null);
 
-const filteredModules = computed(() =>
-  moduleStore.modules.filter((module) => {
-    const query = searchQuery.value.toLowerCase();
-    return (
+const filteredModules = computed(() => {
+  if (searchQuery.value.trim() === "") {
+    return moduleStore.modules;
+  }
+  const query = searchQuery.value.toLowerCase();
+  return moduleStore.modules.filter(
+    (module) =>
       module.name.toLowerCase().includes(query) ||
-      module.id.toLowerCase().includes(query)
-    );
-  }),
-);
+      module.description.toLowerCase().includes(query) ||
+      module.id.toLowerCase().includes(query),
+  );
+});
+
+onMounted(async () => {
+  await moduleStore.loadModules();
+
+  moduleStore.modules.forEach((module) => {
+    module.bottomopen = false;
+  });
+});
 
 function toggleExpand(id: string) {
   expandedId.value = expandedId.value === id ? null : id;

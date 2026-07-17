@@ -5,126 +5,110 @@
 
 -->
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import Skeleton from "../components/md3/Skeleton.vue";
 import MagicLogo from "../components/md3/logo.vue";
 import { ICONS } from "../lib/constants";
 import { sysStore } from "../lib/stores/sysStore";
+import axios from "axios";
 import { API } from "../lib/api";
-
-const { t } = useI18n();
 
 const REPO_OWNER = "Tools-cx-app";
 const REPO_NAME = "meta-magic_mount-rs";
-const CACHE_KEY = "mmrs_contributors";
-const CACHE_DURATION = 1000 * 60 * 60;
-const DETAIL_FETCH_LIMIT = 12;
 
 interface Contributor {
+  id: number;
   login: string;
-  avatar_url: string;
-  html_url: string;
-  type: string;
+  name: string;
   url: string;
-  name?: string;
-  bio?: string;
+  html_url: string;
+  bio: string | null;
+  type: string;
+  avatar_url: string;
 }
 
-interface ContributorCache {
-  data: Contributor[];
-  timestamp: number;
-}
+const version = ref("");
 
+const { t } = useI18n();
 const contributors = ref<Contributor[]>([]);
 const loading = ref(true);
 const error = ref(false);
-const controller = new AbortController();
 
-onMounted(() => {
-  void fetchContributors();
+API.getVersion().then((ver) => {
+  version.value = ver;
 });
 
-onUnmounted(() => {
-  controller.abort();
-});
+const STORAGE_KEY = "mmrs_contributors";
 
-async function fetchContributors() {
-  const cached = localStorage.getItem(CACHE_KEY);
-
-  if (cached) {
-    try {
-      const { data, timestamp } = JSON.parse(cached) as ContributorCache;
-      if (Date.now() - timestamp < CACHE_DURATION) {
-        contributors.value = data;
-        loading.value = false;
-        return;
-      }
-    } catch {
-      localStorage.removeItem(CACHE_KEY);
-    }
-  }
-
+const cached = localStorage.getItem(STORAGE_KEY);
+if (cached) {
   try {
-    const response = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contributors`,
-      { signal: controller.signal },
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch contributors");
+    const parsed = JSON.parse(cached);
+    if (
+      parsed.timestamp &&
+      Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000
+    ) {
+      contributors.value = parsed.data;
+      loading.value = false;
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
     }
-
-    const basicList = (await response.json()) as Contributor[];
-    const filteredList = basicList.filter((user) => {
-      const isBotType = user.type === "Bot";
-      const hasBotName = user.login.toLowerCase().includes("bot");
-      return !isBotType && !hasBotName;
-    });
-
-    const enriched = [...filteredList];
-    const detailTargets = filteredList.slice(0, DETAIL_FETCH_LIMIT);
-    const detailResults = await Promise.allSettled(
-      detailTargets.map(async (user) => {
-        const detailResponse = await fetch(user.url, {
-          signal: controller.signal,
-        });
-
-        if (!detailResponse.ok) {
-          throw new Error(`Failed to fetch ${user.login}`);
-        }
-
-        const detail = await detailResponse.json();
-        return {
-          ...user,
-          bio: detail.bio ?? user.bio,
-          name: detail.name ?? user.login,
-        } as Contributor;
-      }),
-    );
-
-    for (const [index, result] of detailResults.entries()) {
-      if (result.status === "fulfilled") {
-        enriched[index] = result.value;
-      }
-    }
-
-    contributors.value = enriched;
-    localStorage.setItem(
-      CACHE_KEY,
-      JSON.stringify({
-        data: enriched,
-        timestamp: Date.now(),
-      }),
-    );
-  } catch (err) {
-    if ((err as Error).name !== "AbortError") {
-      error.value = true;
-    }
-  } finally {
-    loading.value = false;
+  } catch {
+    localStorage.removeItem(STORAGE_KEY);
   }
 }
+
+if (!contributors.value.length) {
+  axios
+    .get<Contributor[]>(
+      "https://api.github.com/repos/Tools-cx-app/meta-magic_mount-rs/contributors",
+    )
+    .then(function (response) {
+      const userContributors = response.data.filter(function (contributor) {
+        return contributor.type === "User";
+      });
+      const detailPromises = userContributors.map(function (contributor) {
+        return axios
+          .get(contributor.url)
+          .then(function (detailResponse) {
+            return {
+              ...contributor,
+              bio: detailResponse.data.bio ?? null,
+              name: detailResponse.data.name ?? contributor.login,
+            };
+          })
+          .catch(function () {
+            return {
+              ...contributor,
+              bio: null,
+              name: contributor.login,
+            };
+          });
+      });
+      return Promise.all(detailPromises);
+    })
+    .then(function (result) {
+      contributors.value = result.map((item) => ({
+        ...item,
+        bio: item.bio ?? null,
+      }));
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          timestamp: Date.now(),
+          data: result,
+        }),
+      );
+      loading.value = false;
+    })
+    .catch(function () {
+      error.value = true;
+      loading.value = false;
+    });
+}
+
+
 
 function handleLink(event: MouseEvent, url: string) {
   event.preventDefault();

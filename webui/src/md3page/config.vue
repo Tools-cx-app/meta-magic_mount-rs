@@ -7,22 +7,24 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
+import { toast } from "kernelsu";
 import BottomActions from "../components/md3/BottomActions.vue";
 import ChipInput from "../components/md3/ChipInput.vue";
 import { ICONS } from "../lib/constants";
 import { configStore } from "../lib/stores/configStore";
+import type { CustomMount } from "../lib/types";
 import { uiStore } from "../lib/stores/uiStore";
-import type { AppConfig, CustomMount } from "../lib/types";
 
 const { t } = useI18n();
 
 const currentLocale = ref(uiStore.lang);
 const currentUiStyle = ref<"miuix" | "md3">(uiStore.uiStyle);
 
-const initialConfigStr = ref("");
 const customMountDraft = ref<CustomMount>({ source: "", target: "" });
 const editingCustomMountIndex = ref<number | null>(null);
 const showCustomMountDialog = ref(false);
+
+const initialConfigStr = ref("");
 
 const isDirty = computed(() => {
   if (!initialConfigStr.value) return false;
@@ -43,28 +45,24 @@ watch(
   { deep: true },
 );
 
-function updateConfig<K extends keyof AppConfig>(key: K, value: AppConfig[K]) {
-  configStore.setConfig({ ...configStore.config, [key]: value });
-}
+onMounted(async () => {
+  await uiStore.fetchAvailableLanguages();
+  await configStore.loadConfig();
+});
 
-async function save() {
+async function saveConfig() {
   const success = await configStore.saveConfig();
   if (success) {
     initialConfigStr.value = JSON.stringify(configStore.config);
   }
+  toast(success ? t("config.saveSuccess") : t("config.saveFailed"))
 }
 
-function reload() {
-  void configStore.loadConfig().then(() => {
-    initialConfigStr.value = JSON.stringify(configStore.config);
-  });
-}
-
-function toggleBool(key: keyof AppConfig) {
-  const currentValue = configStore.config[key];
-  if (typeof currentValue === "boolean") {
-    updateConfig(key, !currentValue as AppConfig[typeof key]);
-  }
+function updateConfig<K extends keyof typeof configStore.config>(
+  key: K,
+  value: (typeof configStore.config)[K],
+) {
+  configStore.setConfig({ ...configStore.config, [key]: value });
 }
 
 function openAddCustomMountDialog() {
@@ -83,13 +81,27 @@ function closeCustomMountDialog() {
   showCustomMountDialog.value = false;
 }
 
+function deleteCustomMountDialog() {
+  if (editingCustomMountIndex.value !== null) {
+    updateConfig(
+      "customMounts",
+      configStore.config.customMounts.filter(
+        (_, index) => index !== editingCustomMountIndex.value,
+      ),
+    );
+    closeCustomMountDialog();
+  }
+}
+
 function saveCustomMountDialog() {
   const draft = {
     source: customMountDraft.value.source.trim(),
     target: customMountDraft.value.target.trim(),
   };
 
-  if (!draft.source || !draft.target) return;
+  if (!draft.source || !draft.target) {
+    return;
+  }
 
   if (editingCustomMountIndex.value === null) {
     updateConfig("customMounts", [...configStore.config.customMounts, draft]);
@@ -105,19 +117,6 @@ function saveCustomMountDialog() {
   closeCustomMountDialog();
 }
 
-function deleteCustomMountDialog() {
-  const index = editingCustomMountIndex.value;
-  if (index === null) return;
-
-  updateConfig(
-    "customMounts",
-    configStore.config.customMounts.filter(
-      (_, mountIndex) => mountIndex !== index,
-    ),
-  );
-  closeCustomMountDialog();
-}
-
 async function changeLocale() {
   await uiStore.setLang(currentLocale.value);
 }
@@ -126,12 +125,22 @@ function changeUiStyle() {
   uiStore.setUiStyle(currentUiStyle.value);
 }
 
-onMounted(() => {
-  void uiStore.fetchAvailableLanguages();
+function toggleBool(key: keyof typeof configStore.config) {
+  const currentValue = configStore.config[key];
+  if (typeof currentValue === "boolean") {
+    updateConfig(key, !currentValue as (typeof configStore.config)[typeof key]);
+  }
+}
+
+function reload() {
   void configStore.loadConfig().then(() => {
     initialConfigStr.value = JSON.stringify(configStore.config);
   });
-});
+}
+
+function save() {
+  void saveConfig();
+}
 </script>
 
 <template>
