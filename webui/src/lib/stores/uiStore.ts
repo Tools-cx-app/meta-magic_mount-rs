@@ -4,6 +4,7 @@
  */
 
 import { ref } from "vue";
+import { toast } from "kernelsu";
 import { showSnackbar } from "miuix-vue";
 import { getSupportedLocales, loadLocale, switchLocale } from "../../locales";
 
@@ -18,7 +19,11 @@ async function fetchAvailableLanguages() {
 }
 
 function showToast(text: string): void {
-  showSnackbar({ message: text });
+  if (uiStyle.value === "miuix") {
+    showSnackbar({ message: text });
+  } else {
+    toast(text);
+  }
 }
 
 async function setLang(code: string) {
