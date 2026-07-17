@@ -11,6 +11,7 @@ import { getSupportedLocales, loadLocale, switchLocale } from "../../locales";
 const lang = ref("en");
 const isReady = ref(false);
 const uiStyle = ref<"miuix" | "md3">("miuix");
+const monetEnabled = ref(false);
 
 const availableLanguages = ref<{ code: string; display: string }[]>([]);
 
@@ -36,6 +37,16 @@ function setUiStyle(style: "miuix" | "md3") {
   localStorage.setItem("uiStyle", style);
 }
 
+function setMonetEnabled(enabled: boolean) {
+  monetEnabled.value = enabled;
+  localStorage.setItem("monetEnabled", enabled ? "1" : "0");
+  if (enabled) {
+    document.documentElement.classList.add("miuix-monet");
+  } else {
+    document.documentElement.classList.remove("miuix-monet");
+  }
+}
+
 async function init() {
   const savedLang = localStorage.getItem("locale") ?? "en";
   await loadLocale(savedLang);
@@ -49,6 +60,11 @@ async function init() {
   } else if (savedStyle === "custom") {
     uiStyle.value = "md3";
     localStorage.setItem("uiStyle", "md3");
+  }
+  const savedMonet = localStorage.getItem("monetEnabled");
+  if (savedMonet === "1") {
+    monetEnabled.value = true;
+    document.documentElement.classList.add("miuix-monet");
   }
   console.log(uiStyle.value);
   isReady.value = true;
@@ -67,9 +83,13 @@ export const uiStore = {
   get uiStyle() {
     return uiStyle.value;
   },
+  get monetEnabled() {
+    return monetEnabled.value;
+  },
   showToast,
   setLang,
   setUiStyle,
+  setMonetEnabled,
   init,
   fetchAvailableLanguages,
 };

@@ -4,6 +4,7 @@
  */
 
 @import url("https://mui.kernelsu.org/internal/insets.css");
+@import "./miuix-monet-theme.css";
 
 html,
 body {

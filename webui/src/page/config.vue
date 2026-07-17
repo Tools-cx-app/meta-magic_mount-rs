@@ -32,6 +32,7 @@ import {
   MoveFile,
   Add,
   Link,
+  Photos,
 } from "miuix-vue/icons";
 
 import RemoveableLabel from "../components/miuix/RemoveableLabel.vue";
@@ -107,6 +108,13 @@ const umountEnabled = computed({
   get: () => configStore.config.umount,
   set: (val) => {
     configStore.setConfig({ ...configStore.config, umount: val });
+  },
+});
+
+const monetTheme = computed({
+  get: () => uiStore.monetEnabled,
+  set: (val) => {
+    uiStore.setMonetEnabled(val);
   },
 });
 
@@ -232,6 +240,14 @@ function saveCustomMountDialog() {
         :items="styleOptions"
         v-model="styles"
       />
+      <MiuixBasicComponent title="Enable Monet">
+        <template #start>
+          <MiuixIcon :icon="Photos" />
+        </template>
+        <template #end>
+          <MiuixSwitch v-model="monetTheme" />
+        </template>
+      </MiuixBasicComponent>
     </MiuixCard>
 
     <MiuixSmallTitle :text="t('tabs.config')" />

@@ -1,0 +1,143 @@
+/*
+ * Copyright (C) 2026 meta-magic_mount-rs developers
+ * SPDX-License-Identifier: GPL-v3
+ */
+
+@import url("https://mui.kernelsu.org/internal/colors.css");
+
+:root.miuix-monet,
+.miuix-monet .m-theme-light {
+  --m-color-primary: var(--primary, #6750a4);
+  --m-color-on-primary: var(--onPrimary, #ffffff);
+  --m-color-primary-variant: var(--primary, #6750a4);
+  --m-color-on-primary-variant: var(--primaryContainer, #eaddff);
+  --m-color-primary-container: var(--primaryContainer, #eaddff);
+  --m-color-on-primary-container: var(--onPrimaryContainer, #4f378b);
+
+  --m-color-error: var(--error, #b3261e);
+  --m-color-on-error: var(--onError, #ffffff);
+  --m-color-error-container: var(--errorContainer, #f9dedc);
+  --m-color-on-error-container: var(--onErrorContainer, #8c1d18);
+
+  --m-color-disabled-primary: var(--outline, #79747e);
+  --m-color-disabled-on-primary: var(--surface, #fef7ff);
+  --m-color-disabled-primary-button: var(--outline, #79747e);
+  --m-color-disabled-on-primary-button: var(--surface, #fef7ff);
+  --m-color-disabled-primary-slider: var(--outlineVariant, #cac4d0);
+
+  --m-color-secondary: var(--surfaceVariant, #e7e0ec);
+  --m-color-on-secondary: var(--onSurface, #1d1b20);
+  --m-color-secondary-variant: var(--surfaceContainerHigh, #ece6f0);
+  --m-color-on-secondary-variant: var(--onSurface, #1d1b20);
+  --m-color-disabled-secondary: var(--surfaceContainerLow, #f7f2fa);
+  --m-color-disabled-on-secondary: var(--surface, #fef7ff);
+  --m-color-disabled-secondary-variant: var(--surfaceContainer, #f3edf7);
+  --m-color-disabled-on-secondary-variant: var(--outline, #79747e);
+  --m-color-secondary-container: var(--surfaceContainer, #f3edf7);
+  --m-color-on-secondary-container: var(--onSurfaceVariant, #49454f);
+  --m-color-secondary-container-variant: var(--surfaceContainer, #f3edf7);
+  --m-color-on-secondary-container-variant: var(--onSurfaceVariant, #49454f);
+
+  --m-color-tertiary-container: var(--tertiaryContainer, #ffd8e4);
+  --m-color-on-tertiary-container: var(--onTertiaryContainer, #633b48);
+  --m-color-tertiary-container-variant: var(--tertiaryContainer, #ffd8e4);
+
+  --m-color-background: var(--background, #fef7ff);
+  --m-color-on-background: var(--onBackground, #1d1b20);
+  --m-color-on-background-variant: var(--onSurfaceVariant, #49454f);
+
+  --m-color-surface: var(--surface, #fef7ff);
+  --m-color-on-surface: var(--onSurface, #1d1b20);
+  --m-color-surface-variant: var(--surfaceContainer, #f3edf7);
+  --m-color-on-surface-secondary: var(--onSurfaceVariant, #49454f);
+  --m-color-on-surface-variant-summary: var(--onSurfaceVariant, #49454f);
+  --m-color-on-surface-variant-actions: var(--onSurfaceVariant, #49454f);
+  --m-color-disabled-on-surface: var(--outline, #79747e);
+
+  --m-color-surface-container: var(--surfaceContainer, #f3edf7);
+  --m-color-on-surface-container: var(--onSurface, #1d1b20);
+  --m-color-on-surface-container-variant: var(--onSurfaceVariant, #49454f);
+  --m-color-surface-container-high: var(--surfaceContainerHigh, #ece6f0);
+  --m-color-on-surface-container-high: var(--onSurfaceVariant, #49454f);
+  --m-color-surface-container-highest: var(--surfaceContainerHighest, #e6e0e9);
+  --m-color-on-surface-container-highest: var(--onSurface, #1d1b20);
+
+  --m-color-outline: var(--outline, #79747e);
+  --m-color-divider-line: var(--outlineVariant, #cac4d0);
+  --m-color-window-dimming: #0000004d;
+
+  --m-color-slider-key-point: var(--outlineVariant, #cac4d0);
+  --m-color-slider-key-point-foreground: var(--primary, #6750a4);
+  --m-color-slider-background: var(--surfaceContainerHigh, #ece6f0);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root.miuix-monet,
+  .miuix-monet .m-theme-dark {
+    --m-color-primary: var(--primary, #d0bcff);
+    --m-color-on-primary: var(--onPrimary, #381e72);
+    --m-color-primary-variant: var(--primary, #d0bcff);
+    --m-color-on-primary-variant: var(--primaryContainer, #4f378b);
+    --m-color-primary-container: var(--primaryContainer, #4f378b);
+    --m-color-on-primary-container: var(--onPrimaryContainer, #eaddff);
+
+    --m-color-error: var(--error, #f2b8b5);
+    --m-color-on-error: var(--onError, #601410);
+    --m-color-error-container: var(--errorContainer, #8c1d18);
+    --m-color-on-error-container: var(--onErrorContainer, #f9dedc);
+
+    --m-color-disabled-primary: var(--outline, #938f99);
+    --m-color-disabled-on-primary: var(--surface, #141218);
+    --m-color-disabled-primary-button: var(--outline, #938f99);
+    --m-color-disabled-on-primary-button: var(--surface, #141218);
+    --m-color-disabled-primary-slider: var(--outlineVariant, #49454f);
+
+    --m-color-secondary: var(--surfaceVariant, #49454f);
+    --m-color-on-secondary: var(--onSurface, #e6e0e9);
+    --m-color-secondary-variant: var(--surfaceContainerHigh, #2b2930);
+    --m-color-on-secondary-variant: var(--onSurface, #e6e0e9);
+    --m-color-disabled-secondary: var(--surfaceContainerLow, #1d1b20);
+    --m-color-disabled-on-secondary: var(--surface, #141218);
+    --m-color-disabled-secondary-variant: var(--surfaceContainer, #211f26);
+    --m-color-disabled-on-secondary-variant: var(--outline, #938f99);
+    --m-color-secondary-container: var(--surfaceContainer, #211f26);
+    --m-color-on-secondary-container: var(--onSurfaceVariant, #cac4d0);
+    --m-color-secondary-container-variant: var(--surfaceContainer, #211f26);
+    --m-color-on-secondary-container-variant: var(--onSurfaceVariant, #cac4d0);
+
+    --m-color-tertiary-container: var(--tertiaryContainer, #633b48);
+    --m-color-on-tertiary-container: var(--onTertiaryContainer, #ffd8e4);
+    --m-color-tertiary-container-variant: var(--tertiaryContainer, #633b48);
+
+    --m-color-background: var(--background, #141218);
+    --m-color-on-background: var(--onBackground, #e6e0e9);
+    --m-color-on-background-variant: var(--onSurfaceVariant, #cac4d0);
+
+    --m-color-surface: var(--surface, #141218);
+    --m-color-on-surface: var(--onSurface, #e6e0e9);
+    --m-color-surface-variant: var(--surfaceContainer, #211f26);
+    --m-color-on-surface-secondary: var(--onSurfaceVariant, #cac4d0);
+    --m-color-on-surface-variant-summary: var(--onSurfaceVariant, #cac4d0);
+    --m-color-on-surface-variant-actions: var(--onSurfaceVariant, #cac4d0);
+    --m-color-disabled-on-surface: var(--outline, #938f99);
+
+    --m-color-surface-container: var(--surfaceContainer, #211f26);
+    --m-color-on-surface-container: var(--onSurface, #e6e0e9);
+    --m-color-on-surface-container-variant: var(--onSurfaceVariant, #cac4d0);
+    --m-color-surface-container-high: var(--surfaceContainerHigh, #2b2930);
+    --m-color-on-surface-container-high: var(--onSurfaceVariant, #cac4d0);
+    --m-color-surface-container-highest: var(
+      --surfaceContainerHighest,
+      #36343b
+    );
+    --m-color-on-surface-container-highest: var(--onSurface, #e6e0e9);
+
+    --m-color-outline: var(--outline, #938f99);
+    --m-color-divider-line: var(--outlineVariant, #49454f);
+    --m-color-window-dimming: #00000080;
+
+    --m-color-slider-key-point: var(--outlineVariant, #49454f);
+    --m-color-slider-key-point-foreground: var(--primary, #d0bcff);
+    --m-color-slider-background: var(--surfaceContainerHigh, #2b2930);
+  }
+}
