@@ -5,7 +5,7 @@
 
 -->
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import Skeleton from "../components/md3/Skeleton.vue";
 import BottomActions from "../components/md3/BottomActions.vue";
@@ -15,10 +15,7 @@ import { sysStore } from "../lib/stores/sysStore";
 import { moduleStore } from "../lib/stores/moduleStore";
 import { configStore } from "../lib/stores/configStore";
 
-
 const { t } = useI18n();
-
-
 
 onMounted(async () => {
   await Promise.all([
