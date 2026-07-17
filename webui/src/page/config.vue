@@ -54,7 +54,7 @@ const ignorepath = ref("");
 const current_lang = ref(0);
 
 const styleOptions = ["MiuiX", "Material Design 3"];
-const styleslist = ["miuix", "md3"];
+const styleslist: ("miuix" | "md3")[] = ["miuix", "md3"];
 const styles = computed({
   get: () => styleslist.indexOf(uiStore.uiStyle),
   set: (val: number) => {
