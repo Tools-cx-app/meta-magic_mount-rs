@@ -116,12 +116,12 @@ onMounted(async () => {
 <style>
 :root,
 .m-theme-light {
-  --m-color-umount-label-bg: rgba(0,0,0,0.3);
-  --m-color-umount-label-text: rgba(255,255,255,0.8);
+  --m-color-umount-label-bg: rgba(0, 0, 0, 0.3);
+  --m-color-umount-label-text: rgba(255, 255, 255, 0.8);
 }
 .m-theme-dark {
-  --m-color-umount-label-bg: rgba(255,255,255,0.3);
-  --m-color-umount-label-text: rgba(0,0,0,0.4);
+  --m-color-umount-label-bg: rgba(255, 255, 255, 0.3);
+  --m-color-umount-label-text: rgba(0, 0, 0, 0.4);
 }
 
 .icon-search {
