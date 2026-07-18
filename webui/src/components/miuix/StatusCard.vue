@@ -89,12 +89,12 @@ const statusConfig = {
 
 :root.miuix-monet,
 .miuix-monet .m-theme-light {
-  --m-color-working-status-card: var(--m-color-primary-container);
+  --m-color-working-status-card: var(--m-color-secondary-container);
   --m-color-working-status-icon: var(--m-color-primary);
 }
 
 .miuix-monet .m-theme-dark {
-  --m-color-working-status-card: var(--m-color-primary-container);
+  --m-color-working-status-card: var(--m-color-secondary-container);
   --m-color-working-status-icon: var(--m-color-primary);
 }
 
