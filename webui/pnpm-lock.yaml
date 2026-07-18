@@ -21,9 +21,6 @@ importers:
       '@rayxiom/prettier-config':
         specifier: ^4.5.1
         version: 4.5.1(prettier@3.9.5)
-      '@remixicon/vue':
-        specifier: ^4.9.0
-        version: 4.9.0(vue@3.5.39(typescript@6.0.3))
       '@types/node':
         specifier: ^26.1.1
         version: 26.1.1
@@ -305,11 +302,6 @@ packages:
     resolution: {integrity: sha512-MuQDpdUUp9lyIX/jZye7Zr8cgffPHik8F024qqBxGVZon2Ufp2AXz0WNuIN63nNM4BJctcDIeOKYaUPV49C4uA==}
     peerDependencies:
       prettier: ^3.8.1
-
-  '@remixicon/vue@4.9.0':
-    resolution: {integrity: sha512-4P0MY5ScL+MRLnHu1iT3xHAsliBwOGDIgSgHCZhSj2wkLa5NzqiQ4SGD/04VoHM+BRr8+xjmF7ZemkOUlMDJ3A==}
-    peerDependencies:
-      vue: '>= 3'
 
   '@rolldown/binding-android-arm64@1.1.5':
     resolution: {integrity: sha512-lZg8fqIv2v7FF237bwMgzGZEJvGL79/s5knJ/i6FmsGF4XXlzccZ4jb+TrFIxtSSxFtIpdsgrPZeMk1I9AFcyQ==}
@@ -1718,10 +1710,6 @@ snapshots:
       prettier-plugin-toml: 2.0.6(prettier@3.9.5)
     transitivePeerDependencies:
       - supports-color
-
-  '@remixicon/vue@4.9.0(vue@3.5.39(typescript@6.0.3))':
-    dependencies:
-      vue: 3.5.39(typescript@6.0.3)
 
   '@rolldown/binding-android-arm64@1.1.5':
     optional: true

@@ -24,7 +24,6 @@
     "@material/material-color-utilities": "^0.4.0",
     "@material/web": "^2.4.1",
     "@rayxiom/prettier-config": "^4.5.1",
-    "@remixicon/vue": "^4.9.0",
     "@types/node": "^26.1.1",
     "@typescript-eslint/eslint-plugin": "^8.64.0",
     "@typescript-eslint/parser": "^8.64.0",
