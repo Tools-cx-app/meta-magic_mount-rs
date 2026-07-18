@@ -36,7 +36,10 @@
   --m-color-secondary-container: var(--secondaryContainer, #e8def8);
   --m-color-on-secondary-container: var(--onSecondaryContainer, #1d192b);
   --m-color-secondary-container-variant: var(--secondaryContainer, #e8def8);
-  --m-color-on-secondary-container-variant: var(--onSecondaryContainer, #1d192b);
+  --m-color-on-secondary-container-variant: var(
+    --onSecondaryContainer,
+    #1d192b
+  );
 
   --m-color-tertiary-container: var(--tertiaryContainer, #ffd8e4);
   --m-color-on-tertiary-container: var(--onTertiaryContainer, #633b48);
@@ -103,7 +106,10 @@
     --m-color-secondary-container: var(--secondaryContainer, #4a4458);
     --m-color-on-secondary-container: var(--onSecondaryContainer, #1d192b);
     --m-color-secondary-container-variant: var(--secondaryContainer, #4a4458);
-    --m-color-on-secondary-container-variant: var(--onSecondaryContainer, #e8def8);
+    --m-color-on-secondary-container-variant: var(
+      --onSecondaryContainer,
+      #e8def8
+    );
 
     --m-color-tertiary-container: var(--tertiaryContainer, #633b48);
     --m-color-on-tertiary-container: var(--onTertiaryContainer, #ffd8e4);
@@ -134,7 +140,7 @@
 
     --m-color-outline: var(--outline, #938f99);
     --m-color-divider-line: var(--outlineVariant, #49454f);
-    --m-color-window-dimming: var(--scrim, #00000080);;
+    --m-color-window-dimming: var(--scrim, #00000080);
 
     --m-color-slider-key-point: var(--outlineVariant, #49454f);
     --m-color-slider-key-point-foreground: var(--primary, #d0bcff);
