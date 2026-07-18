@@ -89,8 +89,8 @@ onMounted(async () => {
               </Label>
               <Label
                 v-else
-                bgColor="var(--m-color-divider-line)"
-                textColor="var(--m-color-on-primary)"
+                bgColor="var(--m-color-umount-label-bg)"
+                textColor="var(--m-color-umount-label-text)"
               >
                 UNMOUNTED
               </Label>
@@ -113,9 +113,19 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
+<style>
+:root,
+.m-theme-light {
+  --m-color-umount-label-bg: rgba(0,0,0,0.3);
+  --m-color-umount-label-text: rgba(255,255,255,0.8);
+}
+.m-theme-dark {
+  --m-color-umount-label-bg: rgba(255,255,255,0.3);
+  --m-color-umount-label-text: rgba(0,0,0,0.4);
+}
+
 .icon-search {
-  padding: 0 0 6px;
+  padding: 0 0 12px;
 }
 .ex-card {
   margin: 0 12px 12px;
