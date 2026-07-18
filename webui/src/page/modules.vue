@@ -89,8 +89,8 @@ onMounted(async () => {
               </Label>
               <Label
                 v-else
-                bgColor="var(--m-color-secondary-container)"
-                textColor="var(--m-color-on-secondary-container)"
+                bgColor="var(--m-color-divider-line)"
+                textColor="var(--m-color-on-primary)"
               >
                 UNMOUNTED
               </Label>

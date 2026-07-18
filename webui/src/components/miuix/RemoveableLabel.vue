@@ -43,7 +43,7 @@ const emit = defineEmits<{
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background-color: var(--m-color-secondary-container);
+  background-color: var(--m-color-divider-line);
   border-radius: 16px;
   margin-right: 8px;
   margin-bottom: 8px;

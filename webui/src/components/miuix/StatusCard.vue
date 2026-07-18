@@ -87,6 +87,17 @@ const statusConfig = {
   --m-color-working-status-icon: #38d167;
 }
 
+:root.miuix-monet,
+.miuix-monet .m-theme-light {
+  --m-color-working-status-card: var(--m-color-primary-container);
+  --m-color-working-status-icon: var(--m-color-primary);
+}
+
+.miuix-monet .m-theme-dark {
+  --m-color-working-status-card: var(--m-color-primary-container);
+  --m-color-working-status-icon: var(--m-color-primary);
+}
+
 .status-card {
   padding: 0;
   overflow: visible;
