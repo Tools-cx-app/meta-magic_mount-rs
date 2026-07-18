@@ -68,7 +68,8 @@
     "saveSuccess": "配置保存成功",
     "saveFailed": "保存配置失败",
     "uiStyle": "UI 风格",
-    "styleChanged": "风格已切换"
+    "styleChanged": "风格已切换",
+    "monetTheme": "启用 Monet 颜色"
   },
   "modules": {
     "title": "挂载列表",

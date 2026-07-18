@@ -240,7 +240,7 @@ function saveCustomMountDialog() {
         :items="styleOptions"
         v-model="styles"
       />
-      <MiuixBasicComponent title="Enable Monet">
+      <MiuixBasicComponent :title="t('config.monetTheme')">
         <template #start>
           <MiuixIcon :icon="Photos" />
         </template>

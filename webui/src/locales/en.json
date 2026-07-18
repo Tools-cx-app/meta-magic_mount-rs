@@ -68,7 +68,8 @@
     "saveSuccess": "Configuration saved",
     "saveFailed": "Failed to save configuration",
     "uiStyle": "UI Style",
-    "styleChanged": "Style changed"
+    "styleChanged": "Style changed",
+    "monetTheme": "Enable Monet"
   },
   "modules": {
     "title": "Active Modules",
