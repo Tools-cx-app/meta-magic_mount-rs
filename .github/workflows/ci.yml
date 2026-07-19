@@ -93,10 +93,9 @@ jobs:
       - name: Upload build output
         uses: actions/upload-artifact@v7
         with:
-          name: build-${{ matrix.target }}
+          archive: false
           path: output/*.zip
           if-no-files-found: error
-          retention-days: 1
 
   publish:
     name: Collect artifacts
@@ -110,7 +109,7 @@ jobs:
       - name: Download build outputs
         uses: actions/download-artifact@v7
         with:
-          pattern: build-*
+          pattern: magic_mount_rs-*
           path: output
           merge-multiple: true
       - name: Upload release version
