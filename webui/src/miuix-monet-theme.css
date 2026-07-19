@@ -25,12 +25,12 @@
   --m-color-disabled-on-primary-button: var(--surface, #fef7ff);
   --m-color-disabled-primary-slider: var(--outlineVariant, #cac4d0);
 
-  --m-color-secondary: var(--secondary, #ccc2dc);
-  --m-color-on-secondary: var(--onSecondary, #332d41);
+  --m-color-secondary: var(--surfaceVariant, #e7e0ec);
+  --m-color-on-secondary: var(--onSurface, #1d1b20);
   --m-color-secondary-variant: var(--surfaceContainerHigh, #ece6f0);
-  --m-color-on-secondary-variant: var(--onSecondary, #332d41);
+  --m-color-on-secondary-variant: var(--onSurface, #1d1b20);
   --m-color-disabled-secondary: var(--surfaceContainerLow, #f7f2fa);
-  --m-color-disabled-on-secondary: var(--surface, #fef7ff);
+  --m-color-disabled-on-secondary: var(--outline, #79747e);
   --m-color-disabled-secondary-variant: var(--surfaceContainer, #f3edf7);
   --m-color-disabled-on-secondary-variant: var(--outline, #79747e);
   --m-color-secondary-container: var(--secondaryContainer, #e8def8);
@@ -67,7 +67,7 @@
 
   --m-color-outline: var(--outline, #79747e);
   --m-color-divider-line: var(--outlineVariant, #cac4d0);
-  --m-color-window-dimming: var(--scrim, #0000004d);
+  --m-color-window-dimming: rgba(0, 0, 0, 0.3);
 
   --m-color-slider-key-point: var(--outlineVariant, #cac4d0);
   --m-color-slider-key-point-foreground: var(--primary, #6750a4);
@@ -95,12 +95,12 @@
     --m-color-disabled-on-primary-button: var(--surface, #141218);
     --m-color-disabled-primary-slider: var(--outlineVariant, #49454f);
 
-    --m-color-secondary: var(--secondary, #ccc2dc);
-    --m-color-on-secondary: var(--onSecondary, #332d41);
+    --m-color-secondary: var(--surfaceVariant, #49454f);
+    --m-color-on-secondary: var(--onSurface, #e6e0e9);
     --m-color-secondary-variant: var(--surfaceContainerHigh, #2b2930);
-    --m-color-on-secondary-variant: var(--onSecondary, #332d41);
+    --m-color-on-secondary-variant: var(--onSurface, #e6e0e9);
     --m-color-disabled-secondary: var(--surfaceContainerLow, #1d1b20);
-    --m-color-disabled-on-secondary: var(--surface, #141218);
+    --m-color-disabled-on-secondary: var(--outline, #938f99);
     --m-color-disabled-secondary-variant: var(--surfaceContainer, #211f26);
     --m-color-disabled-on-secondary-variant: var(--outline, #938f99);
     --m-color-secondary-container: var(--secondaryContainer, #4a4458);
@@ -140,7 +140,7 @@
 
     --m-color-outline: var(--outline, #938f99);
     --m-color-divider-line: var(--outlineVariant, #49454f);
-    --m-color-window-dimming: var(--scrim, #00000080);
+    --m-color-window-dimming: rgba(0, 0, 0, 0.6);
 
     --m-color-slider-key-point: var(--outlineVariant, #49454f);
     --m-color-slider-key-point-foreground: var(--primary, #d0bcff);

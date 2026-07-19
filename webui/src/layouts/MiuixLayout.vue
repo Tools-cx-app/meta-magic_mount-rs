@@ -6,6 +6,7 @@
 -->
 <script setup lang="ts">
 import "miuix-vue/style.css";
+import "../miuix-monet-theme.css";
 import { ref, watch, onMounted, onBeforeUnmount, type Component } from "vue";
 import { useI18n } from "vue-i18n";
 import {
