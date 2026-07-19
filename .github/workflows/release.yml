@@ -3,6 +3,8 @@
 
 name: release-build
 on:
+  workflow_dispatch: 
+    #test only
   push:
     tags:
       - "v*.*.*"
@@ -71,9 +73,44 @@ jobs:
           path: output/*.zip
           if-no-files-found: error
 
+  metadata:
+    name: Generate update.json and changelog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+          components: rustc-codegen-cranelift-preview
+      - name: Install git-cliff
+        uses: taiki-e/install-action@v2
+        with:
+          tool: git-cliff
+      - name: Generate Changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            git-cliff "$PREV_TAG..HEAD" -o update/changelog.md
+          else
+            git-cliff -o update/changelog.md
+          fi
+      - name: Generate update.json
+        run: cargo xtask update
+      - name: Upload metadata
+        uses: actions/upload-artifact@v7
+        with:
+          name: metadata
+          path: |
+            update/update.json
+            update/changelog.md
+          if-no-files-found: error
+
   release:
     name: Publish release
-    needs: build
+    needs: [build, metadata]
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -89,24 +126,19 @@ jobs:
           path: output
           merge-multiple: true
           skip-decompress: true
-      - name: Install git-cliff
-        uses: taiki-e/install-action@v2
+      - name: Download metadata
+        uses: actions/download-artifact@v8
         with:
-          tool: git-cliff
-      - name: Generate Changelog
-        run: |
-          PROP_FILE="module/module.prop"
-          VERSION=$(grep "^version=" "$PROP_FILE" | cut -d= -f2 | sed 's/-.*//')
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          git-cliff "$PREV_TAG".."$VERSION" -o /tmp/changelog.md
+          name: metadata
+          path: metadata
       - name: Create Release with GitHub CLI
         run: |
           gh release create ${{ github.ref_name }} \
             --title "${{ github.ref_name }}" \
-            --notes-file /tmp/changelog.md \
+            --notes-file metadata/changelog.md \
             --draft=false \
             --prerelease=false \
-            output/*.zip
+            output/*.zip metadata/update.json metadata/changelog.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Push Telegram Notice
