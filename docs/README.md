@@ -86,4 +86,4 @@ cargo xtask build
 
 ## 许可证
 
-[Apache 2.0 许可证](https://www.apache.org/licenses/LICENSE-2.0)
+[GPL-v3 许可证](http://www.gnu.org/licenses/gpl.html)

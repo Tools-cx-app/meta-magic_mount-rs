@@ -74,4 +74,4 @@ cargo xtask b
 
 ## Лицензия
 
-[Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0)
+[GPL-v3L icense](http://www.gnu.org/licenses/gpl.html)

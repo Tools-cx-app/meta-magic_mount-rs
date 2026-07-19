@@ -76,4 +76,4 @@ Build artifacts will be located at:
 
 ## License
 
-[Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0).
+[GPL-v3License](http://www.gnu.org/licenses/gpl.html)
