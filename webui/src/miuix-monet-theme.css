@@ -100,7 +100,7 @@
     --m-color-secondary-variant: var(--surfaceContainerHigh, #2b2930);
     --m-color-on-secondary-variant: var(--onSurface, #e6e0e9);
     --m-color-disabled-secondary: var(--surfaceContainerLow, #1d1b20);
-    --m-color-disabled-on-secondary:  var(--outline, #938f99);
+    --m-color-disabled-on-secondary: var(--outline, #938f99);
     --m-color-disabled-secondary-variant: var(--surfaceContainer, #211f26);
     --m-color-disabled-on-secondary-variant: var(--outline, #938f99);
     --m-color-secondary-container: var(--secondaryContainer, #4a4458);
