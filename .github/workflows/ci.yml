@@ -111,6 +111,7 @@ jobs:
           pattern: magic_mount_rs-*
           path: output
           merge-multiple: true
+          skip-decompress: true
       - name: Upload release version
         uses: actions/upload-artifact@v7
         with:
