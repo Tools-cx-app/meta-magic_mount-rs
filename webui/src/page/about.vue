@@ -118,7 +118,7 @@ function open_github_repo() {
     <div class="hero">
       <magicmount />
       <h1>{{ t("common.appName") }}</h1>
-      <MiuixText>{{ version }}</MiuixText>
+      <MiuixText color="var(--m-color-on-background)">{{ version }}</MiuixText>
     </div>
 
     <MiuixCard class="ex-card">
