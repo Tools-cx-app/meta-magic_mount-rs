@@ -9,10 +9,6 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
-
 permissions:
   contents: read
 
@@ -87,11 +83,12 @@ jobs:
         with:
           fetch-depth: 0
       - name: Download build outputs
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: magic_mount_rs-*
           path: output
           merge-multiple: true
+          skip-decompress: true
       - name: Install git-cliff
         uses: taiki-e/install-action@v2
         with:
