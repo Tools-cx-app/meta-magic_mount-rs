@@ -30,9 +30,25 @@ on:
       - ".github/bot/**"
 env:
   CARGO_TERM_COLOR: always
+
+permissions:
+  actions: read
+  contents: read
+
 jobs:
-  ci:
+  build:
+    name: Build ${{ matrix.target }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: arm64
+            rust-target: aarch64-linux-android
+          - target: armv7
+            rust-target: armv7-linux-androideabi
+          - target: x86-64
+            rust-target: x86_64-linux-android
     steps:
       - uses: actions/checkout@v7
         with:
@@ -42,48 +58,67 @@ jobs:
         with:
           ndk-version: r29
           add-to-path: true
-          local-cache: ${{ github.event_name == 'push' }}
+          local-cache: true
       - name: Setup Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: nightly
-          targets: aarch64-linux-android, x86_64-linux-android, armv7-linux-androideabi
+          targets: ${{ matrix.rust-target }}
           components: rust-src, rustc-codegen-cranelift-preview
       - name: Install pnpm
         uses: pnpm/action-setup@v6.0.9
         with:
-          cache: ${{ github.event_name == 'push' }}
-          cache_dependency_path: webui/pnpm-lock.yaml
           run_install: false
           package_json_file: webui/package.json
       - name: Setup node
         uses: actions/setup-node@v7.0.0
         with:
           node-version: "lts/*"
-          package-manager-cache: ${{ github.event_name == 'push' }}
+          cache: pnpm
+          cache-dependency-path: webui/pnpm-lock.yaml
       - uses: Swatinem/rust-cache@v2
         with:
+          shared-key: android-${{ matrix.rust-target }}
           cache-workspace-crates: "true"
-          cache-all-crates: "true"
-          save-if: ${{ github.event_name == 'push' }}
-      - uses: cargo-bins/cargo-binstall@main
-      - name: Install build dependencies
-        run: |
-          cargo binstall cargo-ndk --force
+          save-if: ${{ github.event_name != 'pull_request' }}
+      - name: Install cargo-ndk
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-ndk
       - name: Setup Webui deps
-        run: |
-          cd webui/
-          pnpm install --frozen-lockfile
+        working-directory: webui
+        run: pnpm install --frozen-lockfile
       - name: Build
-        run: |
-          cargo xtask build -t arm64
-          cargo xtask build -t armv7
-          cargo xtask build -t x86-64
+        run: cargo xtask build -t ${{ matrix.target }}
+      - name: Upload build output
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-${{ matrix.target }}
+          path: output/*.zip
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    name: Collect artifacts
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        with:
+          fetch-depth: 0
+      - name: Download build outputs
+        uses: actions/download-artifact@v7
+        with:
+          pattern: build-*
+          path: output
+          merge-multiple: true
       - name: Upload release version
         uses: actions/upload-artifact@v7
         with:
           name: meta-mm-${{ github.run_number }}
           path: output/*.zip
+          if-no-files-found: error
       - name: Upload
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         env:
