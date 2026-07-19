@@ -8,11 +8,26 @@ on:
       - "v*.*.*"
 env:
   CARGO_TERM_COLOR: always
+
+permissions:
+  contents: read
+
 jobs:
-  release-build:
+  build:
+    name: Build ${{ matrix.target }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: arm64
+            rust-target: aarch64-linux-android
+          - target: armv7
+            rust-target: armv7-linux-androideabi
+          - target: x86-64
+            rust-target: x86_64-linux-android
+          - target: universal
+            rust-target: x86_64-linux-android, aarch64-linux-android, armv7-linux-androideabi
     steps:
       - uses: actions/checkout@v7
         with:
@@ -27,7 +42,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: nightly
-          targets: aarch64-linux-android, x86_64-linux-android, armv7-linux-androideabi
+          targets: ${{ matrix.rust-target }}
           components: rust-src, rustc-codegen-cranelift-preview
       - name: Install pnpm
         uses: pnpm/action-setup@v6.0.9
@@ -39,25 +54,45 @@ jobs:
         with:
           node-version: "lts/*"
           cache: pnpm
-          package-manager-cache: false
           cache-dependency-path: webui/pnpm-lock.yaml
-      - uses: cargo-bins/cargo-binstall@main
-      - name: Install build dependencies
-        run: |
-          cargo binstall cargo-ndk
+      - name: Install cargo-ndk
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-ndk
       - name: Setup Webui deps
-        run: |
-          cd webui/
-          pnpm install --frozen-lockfile
+        working-directory: webui
+        run: pnpm install --frozen-lockfile
       - name: Build
-        run: |
-          cargo xtask build -t arm64
-          cargo xtask build -t armv7
-          cargo xtask build -t x86-64
-          cargo xtask build -t universal
+        run: cargo xtask build -t ${{ matrix.target }}
+      - name: Upload build output
+        uses: actions/upload-artifact@v7
+        with:
+          archive: false
+          path: output/*.zip
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Download build outputs
+        uses: actions/download-artifact@v8
+        with:
+          pattern: magic_mount_rs-*
+          path: output
+          merge-multiple: true
+          skip-decompress: true
       - name: Install git-cliff
-        run: |
-          cargo install --git https://github.com/orhun/git-cliff
+        uses: taiki-e/install-action@v2
+        with:
+          tool: git-cliff
       - name: Generate Changelog
         run: |
           PROP_FILE="module/module.prop"
@@ -65,7 +100,6 @@ jobs:
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           git-cliff "$PREV_TAG".."$VERSION" -o /tmp/changelog.md
       - name: Create Release with GitHub CLI
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
           gh release create ${{ github.ref_name }} \
             --title "${{ github.ref_name }}" \

@@ -6,11 +6,13 @@ on:
   push:
     branches: ["master"]
     paths:
-      - 'src/**'
+      - "src/**"
+      - "tests/**"
   pull_request:
     branches: ["master"]
     paths:
-      - 'src/**'
+      - "src/**"
+      - "tests/**"
 permissions:
   contents: read
 env:
