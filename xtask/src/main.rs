@@ -96,7 +96,7 @@ enum Commands {
 }
 
 impl Targets {
-    fn to_str(&self) -> &'static str {
+    fn to_str(self) -> &'static str {
         match self {
             Self::Arm64 => "arm64",
             Self::Armv7 => "armv7",
@@ -178,8 +178,8 @@ fn update() -> Result<()> {
         zipurl: format!(
             "https://github.com/Tools-cx-app/meta-magic_mount-rs/releases/download/v{}/magic_mount_rs-{}-{}-universal.zip",
             data.package.version.clone(),
-            &data.package.version,
-            &cal_git_code()?
+            data.package.version,
+            cal_git_code()?
         ),
         changelog: String::from(
             "https://github.com/Tools-cx-app/meta-magic_mount-rs/raw/master/update/changelog.md",
@@ -257,7 +257,7 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
         Targets::Arm64 => {
             let arm64_v8a = bin_path.join("arm64-v8a").join("magic_mount_rs");
 
-            let _ = fs::create_dir_all(&arm64_v8a.parent().unwrap());
+            let _ = fs::create_dir_all(arm64_v8a.parent().unwrap());
 
             file::copy(
                 aarch64_bin_path(),
@@ -268,7 +268,7 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
         Targets::Armv7 => {
             let armeabi_v7a = bin_path.join("armeabi-v7a").join("magic_mount_rs");
 
-            let _ = fs::create_dir_all(&armeabi_v7a.parent().unwrap());
+            let _ = fs::create_dir_all(armeabi_v7a.parent().unwrap());
 
             file::copy(
                 armv7_bin_path(),
@@ -279,7 +279,7 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
         Targets::X86_64 => {
             let x86_64 = bin_path.join("x86_64").join("magic_mount_rs");
 
-            let _ = fs::create_dir_all(&x86_64.parent().unwrap());
+            let _ = fs::create_dir_all(x86_64.parent().unwrap());
 
             file::copy(
                 x86_64_bin_path(),
@@ -292,9 +292,9 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
             let armeabi_v7a = bin_path.join("armeabi-v7a").join("magic_mount_rs");
             let x86_64 = bin_path.join("x86_64").join("magic_mount_rs");
 
-            let _ = fs::create_dir_all(&arm64_v8a.parent().unwrap());
-            let _ = fs::create_dir_all(&armeabi_v7a.parent().unwrap());
-            let _ = fs::create_dir_all(&x86_64.parent().unwrap());
+            let _ = fs::create_dir_all(arm64_v8a.parent().unwrap());
+            let _ = fs::create_dir_all(armeabi_v7a.parent().unwrap());
+            let _ = fs::create_dir_all(x86_64.parent().unwrap());
 
             file::copy(
                 armv7_bin_path(),
@@ -351,8 +351,8 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
     zip_create_from_directory_with_options(
         &Path::new("output").join(format!(
             "magic_mount_rs-{}-{}-{}.zip",
-            &data.package.version,
-            &cal_git_code()?,
+            data.package.version,
+            cal_git_code()?,
             target.to_str()
         )),
         &temp_dir,
