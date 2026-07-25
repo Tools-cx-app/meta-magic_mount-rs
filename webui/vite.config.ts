@@ -6,12 +6,21 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
+let moduleid = process.env.MODULE_ID
+
+if (!moduleid) {
+  moduleid = "magic_mount_rs"
+}
+
 export default defineConfig({
   base: "./",
   build: {
     outDir: "../module/webroot",
     target: "esnext",
     chunkSizeWarningLimit: 1000,
+  },
+  define: {
+    'import.meta.env.MODULE_ID': JSON.stringify(moduleid)
   },
   plugins: [vue()],
 });
