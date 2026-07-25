@@ -10,6 +10,7 @@ import { uiStore } from "./uiStore";
 
 const modules = ref<Module[]>([]);
 const loading = ref(false);
+const mmrs_id = "magic_mount_rs";
 let pendingLoad: Promise<void> | null = null;
 let hasLoaded = false;
 
@@ -45,7 +46,7 @@ function ensureModulesLoaded() {
 
 export const moduleStore = {
   get modules() {
-    return modules.value;
+    return modules.value.filter((module) => module.id != mmrs_id);
   },
   get loading() {
     return loading.value;
