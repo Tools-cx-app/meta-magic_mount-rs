@@ -6,10 +6,10 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 
-let moduleid = process.env.MODULE_ID
+let moduleid = process.env.MODULE_ID;
 
 if (!moduleid) {
-  moduleid = "magic_mount_rs"
+  moduleid = "magic_mount_rs";
 }
 
 export default defineConfig({
@@ -20,7 +20,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
   },
   define: {
-    'import.meta.env.MODULE_ID': JSON.stringify(moduleid)
+    "import.meta.env.MODULE_ID": JSON.stringify(moduleid),
   },
   plugins: [vue()],
 });
