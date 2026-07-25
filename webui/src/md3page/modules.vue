@@ -62,7 +62,13 @@ function getModeLabel(isMounted: boolean) {
       <template v-else>
         <template v-if="filteredModules.length > 0">
           <div
-            v-for="module in filteredModules"
+            v-for="module in filteredModules
+              .slice()
+              .sort(
+                (a, b) =>
+                  (b.is_mounted === true ? 1 : 0) -
+                  (a.is_mounted === true ? 1 : 0),
+              )"
             :key="module.id"
             class="module-card"
             :class="{
