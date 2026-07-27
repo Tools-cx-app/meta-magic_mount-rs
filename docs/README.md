@@ -49,6 +49,28 @@ partitions = []
 
 ---
 
+## 自定义规则
+
+规则文件：`/data/adb/magic_mount/custom`
+
+```text
+# 忽略某个模块来源文件
+ignore /data/adb/modules/example/system/app/Example.apk
+
+# 将来源只读 bind 到目标
+bind "/data/local/tmp/source file" "/system/etc/target file"
+
+# 递归包含其他规则文件；add 与 file 语义相同
+file /data/adb/magic_mount/extra.rules
+add /data/adb/magic_mount/more.rules
+```
+
+规则支持单引号、双引号、包含空白的路径和行尾注释。控制字符会被过滤；递归 include
+使用独立 visited 集合，因此循环引用不会无限递归。
+
+自定义 bind 的目标必须是绝对路径，不能包含 `..`。目标不存在时，程序会从最近存在的
+非根祖先构造临时镜像；任意 remount 或登记失败都会 detach 回滚。
+
 ## 开发
 
 依赖：

@@ -17,6 +17,30 @@ The author will update this project less frequently due to academic commitments.
 
 ---
 
+## Custom rules
+
+Rules file: `/data/adb/magic_mount/custom`
+
+```text
+# Ignore a source file from a module
+ignore /data/adb/modules/example/system/app/Example.apk
+
+# Read-only bind a source to a target
+bind "/data/local/tmp/source file" "/system/etc/target file"
+
+# Recursively include other rule files; add and file are equivalent
+file /data/adb/magic_mount/extra.rules
+add /data/adb/magic_mount/more.rules
+```
+
+Rules support single quotes, double quotes, paths containing whitespace, and trailing comments.
+Control characters are removed. Recursive includes use a per-parse visited set, so include cycles do
+not recurse indefinitely.
+
+A custom bind target must be absolute and cannot contain `..`. When the target is missing, the tool
+builds a temporary mirror from the nearest existing non-root ancestor. Any remount or registration
+failure detaches the mount and rolls the operation back.
+
 ## Configuration
 
 Configuration file path:
