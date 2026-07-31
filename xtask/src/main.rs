@@ -22,6 +22,7 @@ use crate::zip_ext::zip_create_from_directory_with_options;
 
 #[derive(Deserialize)]
 struct Package {
+    name: String,
     version: String,
 }
 
@@ -252,7 +253,7 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
     let _ = fs::remove_dir_all(&temp_dir);
     let _ = fs::create_dir_all(&temp_dir);
     let _ = fs::create_dir_all(&bin_path);
-    build(verbose, target)?;
+    build(verbose, target, data.package.name)?;
     match target {
         Targets::Arm64 => {
             let arm64_v8a = bin_path.join("arm64-v8a").join("magic_mount_rs");
@@ -363,10 +364,16 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
     Ok(())
 }
 
-fn build(verbose: bool, target: Targets) -> Result<()> {
+fn build(verbose: bool, target: Targets, name: String) -> Result<()> {
     let temp_dir = temp_dir();
 
+    unsafe {
+        std::env::set_var("MODULE_ID", name);
+    }
     build_webui()?;
+    unsafe {
+        std::env::remove_var("MODULE_ID");
+    }
 
     let mut cargo = cargo_ndk(target);
     let args = vec![
