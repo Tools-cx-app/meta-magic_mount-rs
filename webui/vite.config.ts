@@ -9,7 +9,7 @@ import vue from "@vitejs/plugin-vue";
 let moduleid = process.env.MODULE_ID;
 
 if (!moduleid) {
-  moduleid = "magic_mount_rs";
+  moduleid = "test";
 }
 
 export default defineConfig({
