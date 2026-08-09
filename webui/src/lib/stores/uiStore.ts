@@ -11,6 +11,7 @@ const lang = ref("en");
 const isReady = ref(false);
 const uiStyle = ref<"miuix" | "md3">("miuix");
 const monetEnabled = ref(false);
+const navindex = ref(0);
 
 const availableLanguages = ref<{ code: string; display: string }[]>([]);
 let toastHandler: (text: string) => void = toast;
@@ -39,6 +40,10 @@ function setUiStyle(style: "miuix" | "md3") {
     "miuix-monet",
     style === "miuix" && monetEnabled.value,
   );
+}
+
+function setNavindex(index: number) {
+  navindex.value = index;
 }
 
 function setMonetEnabled(enabled: boolean) {
@@ -89,10 +94,14 @@ export const uiStore = {
   get monetEnabled() {
     return monetEnabled.value;
   },
+  get navindex() {
+    return navindex.value;
+  },
   showToast,
   setToastHandler,
   setLang,
   setUiStyle,
+  setNavindex,
   setMonetEnabled,
   init,
   fetchAvailableLanguages,
