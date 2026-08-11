@@ -40,9 +40,6 @@ const emit = defineEmits<{
   (e: "update:navindex", value: number): void;
 }>();
 
-const Reboottitle = t("common.rebootTitle");
-const RebootSummary = t("common.rebootConfirm");
-
 const rebootreq_click = ref(false);
 
 const navicoms = [ScreenMirroring, Settings, Folder, Info];
@@ -135,8 +132,8 @@ onBeforeUnmount(() => {
 
   <MiuixDialog
     v-model="rebootreq_click"
-    :title="Reboottitle"
-    :summary="RebootSummary"
+    :title="t('common.rebootTitle')"
+    :summary="t('common.rebootConfirm')"
     @close="rebootreq_click = false"
   >
     <template #default="{ close }">
