@@ -227,13 +227,12 @@ const RealAPI: AppAPI = {
     const cmd_normal = "svc power reboot || reboot"; // late_load: false
     const cmd_jailbreak = "ksud soft-reboot"; // late_load: true
 
-    const { stdout } = await ksuExec!('ksud debug info | grep "late_load: "')
+    const { stdout } = await ksuExec!('ksud debug info | grep "late_load: "');
     if (stdout.slice(11).trim() === "true") {
-      ksuExec!(cmd_jailbreak)
+      ksuExec!(cmd_jailbreak);
     } else {
-      ksuExec!(cmd_normal)
+      ksuExec!(cmd_normal);
     }
- 
   },
 };
 
