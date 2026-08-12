@@ -24,7 +24,7 @@ update = "https://github.com/Tools-cx-app/meta-magic_mount-rs/raw/master/update/
 edition = "2024"
 
 [workspace.dependencies]
-anyhow = "1"
+anyhow = "1.0.104"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.150"
 toml = "1.1.2"
