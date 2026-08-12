@@ -73,7 +73,7 @@ android_logger = "0.15.1"
 ksu = { git = "https://github.com/Tools-cx-app/ksu.git", version = "0.2.0" }
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
-env_logger = "0.11.10"
+env_logger = "0.11.11"
 
 [workspace.lints.clippy]
 disallowed_types = "deny"
