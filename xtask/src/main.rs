@@ -471,13 +471,11 @@ fn cargo_ndk(target: Targets) -> Command {
 }
 
 fn build_webui() -> Result<()> {
-    let pnpm = || {
-        let mut command = Command::new("pnpm");
-        command.current_dir("webui");
-        command
-    };
-
-    pnpm().args(["run", "build"]).spawn()?.wait()?;
+    let pnpm_name = if cfg!(windows) { "pnpm.cmd" } else { "pnpm" };
+    let mut command = Command::new(pnpm_name);
+    command.current_dir("webui");
+    command.args(["run", "build"]);
+    command.spawn()?.wait()?;
 
     Ok(())
 }
