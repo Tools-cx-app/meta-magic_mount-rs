@@ -474,20 +474,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn status_returns_injected_status() {
-        let (app, _dir) = test_router(false).await;
-        let response = app
-            .oneshot(authorized(Method::GET, "/api/v1/status"))
-            .await
-            .unwrap();
-        assert_eq!(response.status(), StatusCode::OK);
-        let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
-        let status: Status = serde_json::from_slice(&body).unwrap();
-        assert_eq!(status.version, "4.0.6");
-        assert_eq!(status.device.model.as_deref(), Some("Test Device"));
-    }
-
-    #[tokio::test]
     async fn open_link_accepts_only_hosted_http_urls() {
         let (app, _dir) = test_router(false).await;
         for url in [

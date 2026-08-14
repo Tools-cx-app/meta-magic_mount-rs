@@ -112,7 +112,7 @@ checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
 
 [[package]]
 name = "api"
-version = "4.0.6"
+version = "4.0.7"
 dependencies = [
  "serde",
  "serde_json",
@@ -410,7 +410,7 @@ dependencies = [
 
 [[package]]
 name = "daemon"
-version = "4.0.6"
+version = "4.0.7"
 dependencies = [
  "anyhow",
  "api",
