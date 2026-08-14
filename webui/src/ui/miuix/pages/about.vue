@@ -31,10 +31,11 @@ interface Contributor {
 }
 
 const version = ref("");
-const loading_contributor = ref(true)
 
 const { t } = useI18n();
 const contributors = ref<Contributor[]>([]);
+const loading = ref(true)
+const error = ref(false)
 
 API.getVersion().then((ver) => {
   version.value = ver;
@@ -51,7 +52,7 @@ if (cached) {
       Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000
     ) {
       contributors.value = parsed.data;
-      loading_contributor.value = false;
+      loading.value = false;
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
@@ -101,16 +102,12 @@ if (!contributors.value.length) {
           data: result,
         }),
       );
+      loading.value = false;
     })
-    .catch(function (error) {
-      console.error(error);
-      contributors.value = [];
+    .catch(function () {
+      error.value = true;
+      loading.value = false;
     });
-  loading_contributor.value = false;
-}
-
-function getDisplayBio(bio: string | null) {
-  return bio ?? t("info.noBio");
 }
 
 function open_github_repo() {
@@ -135,7 +132,7 @@ function open_github_repo() {
     </MiuixCard>
 
     <MiuixSmallTitle :text="t('info.contributors')" />
-    <MiuixCard v-if="!loading_contributor" class="ex-card">
+    <MiuixCard v-if="!loading" class="ex-card">
       <div
         v-if="contributors.length > 0"
         v-for="contributor in contributors"
@@ -143,7 +140,7 @@ function open_github_repo() {
       >
         <MiuixBasicComponent
           :title="contributor.name ?? contributor.login"
-          :summary="getDisplayBio(contributor.bio)"
+          :summary="contributor.bio ?? t('info.noBio')"
           :clickable="true"
           @click="API.openLink(contributor.html_url)"
         >
@@ -152,12 +149,12 @@ function open_github_repo() {
           </template>
         </MiuixBasicComponent>
       </div>
-      <div v-else>
+      <div v-else-if="error">
         <MiuixBasicComponent :title="t('info.loadFail')" />
       </div>
     </MiuixCard>
-    <div v-else class="loading" align="center">
-      <MiuixProgressIndicator type="infinite" color="var(--m-color-on-background-variant)"/>
+    <div v-else align="center">
+      <MiuixProgressIndicator type="infinite" color="var(--m-color-on-background-variant)" style="padding-top: 12px;"/>
     </div>
   </div>
 </template>
@@ -189,10 +186,6 @@ function open_github_repo() {
 }
 
 .ex-card {
-  margin: 0 12px 12px;
-}
-
-.loading {
   margin: 0 12px 12px;
 }
 </style>
