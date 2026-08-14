@@ -8,8 +8,8 @@ members = ["api", "daemon", "xtask"]
 
 [package]
 name = "magic_mount_rs"
-version = "4.0.7"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
 description = "An implementation of a metamodule using Magic Mount, Based on MKSU, Template is from meta-overlay."
 authors = ["mmrs developers"]
 license = "GPL-v3"
@@ -22,7 +22,7 @@ update = "https://github.com/Tools-cx-app/meta-magic_mount-rs/raw/master/update/
 
 [workspace.package]
 edition = "2024"
-version = "4.0.6"
+version = "4.0.7"
 
 [workspace.dependencies]
 anyhow = "1.0.104"
