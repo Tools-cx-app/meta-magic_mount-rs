@@ -5,23 +5,23 @@
 #![warn(clippy::nursery)]
 
 mod bind_mount;
-mod config;
+mod daemon;
 mod defs;
 mod errors;
 mod magic_mount;
 mod misc;
 mod parser;
-mod scanner;
 mod utils;
 
 use rustix::mount::{MountFlags, mount};
 
 use crate::{
     bind_mount::bind_mount,
-    config::Config,
-    defs::MODULE_PATH,
+    daemon::load_config,
+    defs::{CONNECTION_FILE, MODULE_PATH},
     errors::Result,
     misc::{cleanup, emulated_soft_reboot},
+    parser::init_from_config,
     utils::ksucalls::unmount,
 };
 
@@ -31,7 +31,8 @@ fn main() -> Result<()> {
 
     misc::pre_init();
 
-    let config = Config::load(defs::CONFIG_FILE)?;
+    let config = load_config(std::path::Path::new(CONNECTION_FILE))?;
+    init_from_config(&config)?;
     if let Some(command) = std::env::args().nth(1) {
         if command == "emulated-soft-reboot" {
             emulated_soft_reboot(&config.mountsource)?;
@@ -44,11 +45,8 @@ fn main() -> Result<()> {
         .into());
     }
 
-    let modules = scanner::list_modules(MODULE_PATH, &config.partitions);
-    let _ = std::fs::write(defs::SCANNED_LIST, &serde_json::to_string_pretty(&modules)?);
-
     log::info!("Magic Mount Starting");
-    log::info!("config info:\n{config}");
+    log::info!("config mount source: {}", config.mountsource);
 
     log::debug!(
         "current selinux: {}",
