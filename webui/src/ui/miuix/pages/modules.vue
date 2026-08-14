@@ -11,9 +11,11 @@ import {
   MiuixSearchBar,
   MiuixCard,
   MiuixText,
+  MiuixIcon,
   MiuixBasicComponent,
   MiuixProgressIndicator
 } from "miuix-vue";
+import { Help } from "miuix-vue/icons";
 import Label from "../components/Label.vue";
 import { moduleStore } from "../../../lib/stores/moduleStore";
 
@@ -53,7 +55,6 @@ onMounted(async () => {
         :label="t('modules.searchPlaceholder')"
       ></MiuixSearchBar>
     </div>
-
     <div v-if="moduleStore.loading" class="loading-wrapper">
       <div class="loading-content">
         <MiuixProgressIndicator type="infinite" color="var(--m-color-on-background-variant)" style="flex: 1;"/>
@@ -63,9 +64,12 @@ onMounted(async () => {
 
     <div
       v-else-if="moduleStore.modules.length === 0 || filterModules.length === 0"
-      align="center"
+      class="notfound-wrapper"
     >
-      <MiuixText class="ex-card">{{ t("modules.emptyState") }}</MiuixText>
+      <div class="loading-content">
+        <MiuixIcon :icon="Help" size="98" />
+        <MiuixText color="var(--m-color-on-surface-variant-actions)">{{ t("modules.emptyState") }}</MiuixText>
+      </div>
     </div>
 
     <div v-else>
@@ -142,6 +146,7 @@ onMounted(async () => {
   right: 0;
   bottom: 0;
   display: flex;
+  text-align: center;
   align-items: center;
   justify-content: center;
 }
@@ -152,5 +157,15 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   gap: 12px;
+}
+
+.notfound-wrapper {
+  position: absolute;
+  left: 38%;
+  top: 45%;
+  display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
 }
 </style>
