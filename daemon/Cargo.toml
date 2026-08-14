@@ -5,7 +5,6 @@
 name = "daemon"
 version.workspace = true
 edition.workspace = true
-publish = false
 
 [dependencies]
 api = { path = "../api" }
@@ -26,7 +25,15 @@ serde.workspace = true
 serde_json.workspace = true
 tempfile = "3.27.0"
 thiserror = "2.0.18"
-tokio = { version = "1.52.3", features = ["io-util", "macros", "fs", "process", "rt-multi-thread", "signal", "sync"] }
+tokio = { version = "1.52.3", features = [
+  "io-util",
+  "macros",
+  "fs",
+  "process",
+  "rt-multi-thread",
+  "signal",
+  "sync",
+] }
 toml.workspace = true
 tower-http = { version = "0.6.8", features = ["cors"] }
 url = "2.5.8"
