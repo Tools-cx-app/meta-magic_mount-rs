@@ -12,6 +12,7 @@ import {
   MiuixSmallTitle,
   MiuixBasicComponent,
   MiuixText,
+  MiuixProgressIndicator
 } from "miuix-vue";
 import magicmount from "../components/logo.vue";
 import { useI18n } from "vue-i18n";
@@ -24,11 +25,13 @@ interface Contributor {
   name: string;
   url: string;
   html_url: string;
+  avatar_url: string;
   bio: string;
   type: string;
 }
 
 const version = ref("");
+const loading_contributor = ref(true)
 
 const { t } = useI18n();
 const contributors = ref<Contributor[]>([]);
@@ -48,6 +51,7 @@ if (cached) {
       Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000
     ) {
       contributors.value = parsed.data;
+      loading_contributor.value = false;
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
@@ -102,6 +106,7 @@ if (!contributors.value.length) {
       console.error(error);
       contributors.value = [];
     });
+  loading_contributor.value = false;
 }
 
 function getDisplayBio(bio: string | null) {
@@ -130,7 +135,7 @@ function open_github_repo() {
     </MiuixCard>
 
     <MiuixSmallTitle :text="t('info.contributors')" />
-    <MiuixCard class="ex-card">
+    <MiuixCard v-if="!loading_contributor" class="ex-card">
       <div
         v-if="contributors.length > 0"
         v-for="contributor in contributors"
@@ -141,12 +146,19 @@ function open_github_repo() {
           :summary="getDisplayBio(contributor.bio)"
           :clickable="true"
           @click="API.openLink(contributor.html_url)"
-        />
+        >
+          <template #start>
+            <img :src="contributor.avatar_url" width="42" style="margin: 0 8px; border-radius: 12px;"/>
+          </template>
+        </MiuixBasicComponent>
       </div>
       <div v-else>
         <MiuixBasicComponent :title="t('info.loadFail')" />
       </div>
     </MiuixCard>
+    <div v-else class="loading" align="center">
+      <MiuixProgressIndicator type="infinite" color="var(--m-color-on-background-variant)"/>
+    </div>
   </div>
 </template>
 
@@ -177,6 +189,10 @@ function open_github_repo() {
 }
 
 .ex-card {
+  margin: 0 12px 12px;
+}
+
+.loading {
   margin: 0 12px 12px;
 }
 </style>
