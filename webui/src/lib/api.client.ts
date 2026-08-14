@@ -63,8 +63,7 @@ export function createRealAPI(
     init: RequestInit = {},
   ): Promise<T> {
     const method = (init.method ?? "GET").toUpperCase();
-    const canRetryNetworkFailure =
-      method === "GET" || method === "HEAD" || method === "PUT";
+    const canRetryNetworkFailure = method === "GET" || method === "HEAD";
     for (let attempt = 0; attempt < 2; attempt += 1) {
       const connection = await discover();
       let response: Response;
@@ -121,8 +120,8 @@ export function createRealAPI(
   return {
     loadConfig: () => requestJSON<AppConfig>("/config"),
     saveConfig: (config) =>
-      requestJSON<void>("/config", {
-        method: "PUT",
+      requestJSON<void>("/actions/reload", {
+        method: "POST",
         body: JSON.stringify(config),
       }),
     scanModules: () => requestJSON("/modules"),

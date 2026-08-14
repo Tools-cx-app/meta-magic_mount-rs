@@ -232,7 +232,11 @@ test("uses daemon routes and JSON request bodies", async () => {
   assert.deepEqual(
     requests.map(([url, init]) => [url, init?.method, init?.body]),
     [
-      ["http://127.0.0.1:1/api/v1/config", "PUT", JSON.stringify(config)],
+      [
+        "http://127.0.0.1:1/api/v1/actions/reload",
+        "POST",
+        JSON.stringify(config),
+      ],
       ["http://127.0.0.1:1/api/v1/modules", undefined, undefined],
       [
         "http://127.0.0.1:1/api/v1/actions/open-link",

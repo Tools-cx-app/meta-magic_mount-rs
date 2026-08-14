@@ -45,7 +45,11 @@ async fn run() -> Result<()> {
     let token = auth::generate_token()?;
     let listener = TcpListener::bind("127.0.0.1:0").await?;
     let port = listener.local_addr()?.port();
-    let router = api::router(api::AppState::production(token.clone()));
+    let router = api::router(
+        api::AppState::production(token.clone())
+            .initialize()
+            .await?,
+    );
     write_connection_file(
         Path::new(defs::CONNECTION_FILE),
         &ConnectionInfo { port, token },

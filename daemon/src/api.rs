@@ -20,6 +20,7 @@ use axum::{
     routing::{get, post},
 };
 use tokio::process::Command;
+use tokio::sync::RwLock;
 use tower_http::cors::{AllowOrigin, CorsLayer};
 
 use crate::{
@@ -34,6 +35,13 @@ pub struct AppState {
     modules_path: PathBuf,
     token: Arc<str>,
     actions: Arc<dyn SystemActions>,
+    snapshot: Arc<RwLock<Option<Snapshot>>>,
+}
+
+#[derive(Clone)]
+struct Snapshot {
+    config: ApiConfig,
+    modules: Vec<api::Module>,
 }
 
 impl AppState {
@@ -57,8 +65,21 @@ impl AppState {
             modules_path: modules_path.into(),
             token: token.into(),
             actions,
+            snapshot: Arc::new(RwLock::new(None)),
         }
     }
+
+    pub async fn initialize(self) -> anyhow::Result<Self> {
+        let snapshot = load_snapshot(&self.store, &self.modules_path).await?;
+        *self.snapshot.write().await = Some(snapshot);
+        Ok(self)
+    }
+}
+
+async fn load_snapshot(store: &Store, modules_path: &PathBuf) -> anyhow::Result<Snapshot> {
+    let config = store.load().await?;
+    let modules = scanner::list_modules(modules_path, &config.partitions).await;
+    Ok(Snapshot { config, modules })
 }
 
 #[async_trait]
@@ -168,10 +189,16 @@ async fn authorize(State(state): State<AppState>, request: Request, next: Next) 
 }
 
 async fn get_config(State(state): State<AppState>) -> ApiResult<Json<ApiConfig>> {
-    state.store.load().await.map(Json).map_err(internal)
+    state
+        .snapshot
+        .read()
+        .await
+        .as_ref()
+        .map(|snapshot| Json(snapshot.config.clone()))
+        .ok_or_else(|| internal("daemon snapshot is not initialized"))
 }
 
-async fn put_config(State(state): State<AppState>, request: Request) -> ApiResult<StatusCode> {
+async fn reload(State(state): State<AppState>, request: Request) -> ApiResult<StatusCode> {
     let Json(config) = Json::<ApiConfig>::from_request(request, &state)
         .await
         .map_err(invalid_json)?;
@@ -187,6 +214,10 @@ async fn put_config(State(state): State<AppState>, request: Request) -> ApiResul
             ),
             ConfigError::Other(error) => internal(error),
         })?;
+    let snapshot = load_snapshot(&state.store, &state.modules_path)
+        .await
+        .map_err(internal)?;
+    *state.snapshot.write().await = Some(snapshot);
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -200,10 +231,13 @@ fn invalid_json(error: JsonRejection) -> ApiFailure {
 }
 
 async fn get_modules(State(state): State<AppState>) -> ApiResult<Json<Vec<api::Module>>> {
-    let config = state.store.load().await.map_err(internal)?;
-    Ok(Json(
-        scanner::list_modules(state.modules_path, &config.partitions).await,
-    ))
+    state
+        .snapshot
+        .read()
+        .await
+        .as_ref()
+        .map(|snapshot| Json(snapshot.modules.clone()))
+        .ok_or_else(|| internal("daemon snapshot is not initialized"))
 }
 
 async fn get_status(State(state): State<AppState>) -> Json<Status> {
@@ -261,11 +295,12 @@ async fn method_not_allowed() -> ApiFailure {
 
 pub fn router(state: AppState) -> Router {
     let v1 = Router::new()
-        .route("/config", get(get_config).put(put_config))
+        .route("/config", get(get_config))
         .route("/modules", get(get_modules))
         .route("/status", get(get_status))
         .route("/actions/open-link", post(open_link))
         .route("/actions/reboot", post(reboot))
+        .route("/actions/reload", post(reload))
         .fallback(not_found)
         .method_not_allowed_fallback(method_not_allowed)
         .layer(from_fn_with_state(state.clone(), authorize))
@@ -338,12 +373,17 @@ mod tests {
         let modules = dir.path().join("modules");
         tokio::fs::create_dir(&modules).await.unwrap();
         (
-            router(AppState::new(
-                store,
-                modules,
-                "test-token",
-                Arc::new(FakeActions { fail: fail_actions }),
-            )),
+            router(
+                AppState::new(
+                    store,
+                    modules,
+                    "test-token",
+                    Arc::new(FakeActions { fail: fail_actions }),
+                )
+                .initialize()
+                .await
+                .unwrap(),
+            ),
             dir,
         )
     }
@@ -407,7 +447,7 @@ mod tests {
     #[tokio::test]
     async fn config_round_trip_uses_full_json() {
         let (app, _dir) = test_router(false).await;
-        let request = Request::put("/api/v1/config")
+        let request = Request::post("/api/v1/actions/reload")
             .header(AUTHORIZATION, "Bearer test-token")
             .header(CONTENT_TYPE, "application/json")
             .body(Body::from(r#"{"mountsource":"KSU","umount":true,"partitions":["vendor"],"ignoreList":["/ignored"],"customMounts":[{"source":"/a","target":"/b"}]}"#))
@@ -430,9 +470,69 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn config_reads_cached_snapshot() {
+        let (app, dir) = test_router(false).await;
+        tokio::fs::write(
+            dir.path().join("config.toml"),
+            "mountsource = \"APatch\"\npartitions = []\numount = false\n",
+        )
+        .await
+        .unwrap();
+        let response = app
+            .oneshot(authorized(Method::GET, "/api/v1/config"))
+            .await
+            .unwrap();
+        let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        let config: ApiConfig = serde_json::from_slice(&body).unwrap();
+        assert_eq!(config.mountsource, "KSU");
+    }
+
+    #[tokio::test]
+    async fn reload_updates_cached_snapshot() {
+        let (app, _dir) = test_router(false).await;
+        let request = Request::post("/api/v1/actions/reload")
+            .header(AUTHORIZATION, "Bearer test-token")
+            .header(CONTENT_TYPE, "application/json")
+            .body(Body::from(r#"{"mountsource":"APatch","umount":false,"partitions":[],"ignoreList":[],"customMounts":[]}"#))
+            .unwrap();
+        assert_eq!(
+            app.clone().oneshot(request).await.unwrap().status(),
+            StatusCode::NO_CONTENT
+        );
+        let response = app
+            .oneshot(authorized(Method::GET, "/api/v1/config"))
+            .await
+            .unwrap();
+        let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        let config: ApiConfig = serde_json::from_slice(&body).unwrap();
+        assert_eq!(config.mountsource, "APatch");
+    }
+
+    #[tokio::test]
+    async fn failed_reload_keeps_cached_snapshot() {
+        let (app, _dir) = test_router(false).await;
+        let request = Request::post("/api/v1/actions/reload")
+            .header(AUTHORIZATION, "Bearer test-token")
+            .header(CONTENT_TYPE, "application/json")
+            .body(Body::from(r#"{"mountsource":"","umount":false,"partitions":[],"ignoreList":[],"customMounts":[]}"#))
+            .unwrap();
+        assert_eq!(
+            app.clone().oneshot(request).await.unwrap().status(),
+            StatusCode::BAD_REQUEST
+        );
+        let response = app
+            .oneshot(authorized(Method::GET, "/api/v1/config"))
+            .await
+            .unwrap();
+        let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        let config: ApiConfig = serde_json::from_slice(&body).unwrap();
+        assert_eq!(config.mountsource, "KSU");
+    }
+
+    #[tokio::test]
     async fn invalid_config_and_json_use_common_errors() {
         let (app, _dir) = test_router(false).await;
-        let invalid = Request::put("/api/v1/config")
+        let invalid = Request::post("/api/v1/actions/reload")
             .header(AUTHORIZATION, "Bearer test-token")
             .header(CONTENT_TYPE, "application/json")
             .body(Body::from(r#"{"mountsource":"","umount":false,"partitions":[],"ignoreList":[],"customMounts":[]}"#))
@@ -441,7 +541,7 @@ mod tests {
         assert_eq!(response.status(), StatusCode::BAD_REQUEST);
         assert_eq!(error(response).await, ApiError::InvalidConfig);
 
-        let malformed = Request::put("/api/v1/config")
+        let malformed = Request::post("/api/v1/actions/reload")
             .header(AUTHORIZATION, "Bearer test-token")
             .header(CONTENT_TYPE, "application/json")
             .body(Body::from("{}"))
@@ -455,7 +555,7 @@ mod tests {
     async fn modules_use_configured_partitions() {
         let (app, dir) = test_router(false).await;
         write_module(&dir.path().join("modules")).await;
-        let config = Request::put("/api/v1/config")
+        let config = Request::post("/api/v1/actions/reload")
             .header(AUTHORIZATION, "Bearer test-token")
             .header(CONTENT_TYPE, "application/json")
             .body(Body::from(r#"{"mountsource":"KSU","umount":false,"partitions":["vendor"],"ignoreList":[],"customMounts":[]}"#))
@@ -548,6 +648,16 @@ mod tests {
             .unwrap();
         assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
         assert_eq!(error(response).await, ApiError::InvalidRequest);
+    }
+
+    #[tokio::test]
+    async fn put_config_is_removed() {
+        let (app, _dir) = test_router(false).await;
+        let response = app
+            .oneshot(authorized(Method::PUT, "/api/v1/config"))
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::METHOD_NOT_ALLOWED);
     }
 
     #[tokio::test]
