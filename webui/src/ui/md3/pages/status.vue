@@ -17,9 +17,9 @@ import { configStore } from "../../../lib/stores/configStore";
 
 const { t } = useI18n();
 
-function handle_setnav(navindex:number) {
+function handle_setnav(navindex: number) {
   if (!sysStore.loading) {
-    uiStore.setNavindex(navindex)
+    uiStore.setNavindex(navindex);
   }
 }
 

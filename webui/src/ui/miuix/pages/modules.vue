@@ -13,7 +13,7 @@ import {
   MiuixText,
   MiuixIcon,
   MiuixBasicComponent,
-  MiuixProgressIndicator
+  MiuixProgressIndicator,
 } from "miuix-vue";
 import { Help } from "miuix-vue/icons";
 import Label from "../components/Label.vue";
@@ -57,8 +57,17 @@ onMounted(async () => {
     </div>
     <div v-if="moduleStore.loading" class="loading-wrapper">
       <div class="loading-content">
-        <MiuixProgressIndicator type="infinite" color="var(--m-color-on-background-variant)" style="flex: 1;"/>
-        <MiuixText color="var(--m-color-on-surface-variant-actions)" style="flex: 1;">{{ t("modules.scanning") }}</MiuixText>
+        <MiuixProgressIndicator
+          type="infinite"
+          color="var(--m-color-on-background-variant)"
+          style="flex: 1"
+        />
+        <MiuixText
+          color="var(--m-color-on-surface-variant-actions)"
+          style="flex: 1"
+        >
+          {{ t("modules.scanning") }}
+        </MiuixText>
       </div>
     </div>
 
@@ -68,7 +77,9 @@ onMounted(async () => {
     >
       <div class="loading-content">
         <MiuixIcon :icon="Help" size="98" />
-        <MiuixText color="var(--m-color-on-surface-variant-actions)">{{ t("modules.emptyState") }}</MiuixText>
+        <MiuixText color="var(--m-color-on-surface-variant-actions)">
+          {{ t("modules.emptyState") }}
+        </MiuixText>
       </div>
     </div>
 
