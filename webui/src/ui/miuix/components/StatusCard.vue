@@ -46,6 +46,7 @@ const statusConfig = {
 <template>
   <MiuixCard
     class="status-card"
+    press-feedback="tilt"
     :style="{
       '--m-card-color': statusConfig[props.status].bgColor,
     }"

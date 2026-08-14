@@ -63,11 +63,11 @@ onMounted(async () => {
     </div>
     <MiuixSmallTitle :text="t('status.sysInfoTitle')" />
     <MiuixCard class="ex-card">
-      <MiuixBasicComponent
+      <MiuixBasicComponent clickable
         :title="t('status.kernelLabel')"
         :summary="sysStore.systemInfo.kernel"
       />
-      <MiuixBasicComponent
+      <MiuixBasicComponent clickable
         :title="t('status.selinuxLabel')"
         :summary="sysStore.systemInfo.selinux"
       />
