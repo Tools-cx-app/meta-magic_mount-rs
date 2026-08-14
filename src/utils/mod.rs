@@ -140,5 +140,5 @@ pub fn update_desc(files: u32, symbols: u32) -> Result<()> {
 }
 
 #[cfg(test)]
-#[path = "../../tests/unit/utils.rs"]
+#[path = "../../tests/unit/magic_mount/utils.rs"]
 mod tests;

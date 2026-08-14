@@ -206,5 +206,5 @@ pub fn bind_mount(umount: bool) -> Result<()> {
 }
 
 #[cfg(test)]
-#[path = "../tests/unit/bind_mount.rs"]
+#[path = "../tests/unit/magic_mount/bind_mount.rs"]
 mod tests;

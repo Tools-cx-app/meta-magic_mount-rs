@@ -66,9 +66,14 @@ mod tests {
         let address = listener.local_addr().unwrap();
         let thread = std::thread::spawn(move || {
             let (mut stream, _) = listener.accept().unwrap();
-            let mut request = [0; 1024];
-            let size = stream.read(&mut request).unwrap();
-            let request = String::from_utf8_lossy(&request[..size]);
+            let mut request = Vec::new();
+            let mut buffer = [0; 256];
+            while !request.windows(4).any(|window| window == b"\r\n\r\n") {
+                let size = stream.read(&mut buffer).unwrap();
+                assert_ne!(size, 0);
+                request.extend_from_slice(&buffer[..size]);
+            }
+            let request = String::from_utf8(request).unwrap();
             assert!(request.contains("GET /api/v1/config HTTP/1.1"));
             assert!(request.contains("Authorization: Bearer secret\r\n"));
             let body = r#"{"mountsource":"KSU","umount":false,"partitions":[],"ignoreList":[],"customMounts":[]}"#;
