@@ -1,3 +1,6 @@
+// Copyright (C) 2026 meta-magic_mount-rs developers
+// SPDX-License-Identifier: GPL-v3
+
 use api::{ApiConfig, CustomMount};
 
 use super::{ConfigError, Store, format_path, parse_path};
