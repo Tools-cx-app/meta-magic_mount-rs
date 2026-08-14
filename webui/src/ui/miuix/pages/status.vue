@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { MiuixCard, MiuixSmallTitle, MiuixBasicComponent } from "miuix-vue";
+import { MiuixCard, MiuixSmallTitle, MiuixBasicComponent, MiuixText } from "miuix-vue";
 import StatusCard from "../components/StatusCard.vue";
 import { uiStore } from "../../../lib/stores/uiStore.ts";
 import { sysStore } from "../../../lib/stores/sysStore";
