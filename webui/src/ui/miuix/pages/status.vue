@@ -16,6 +16,12 @@ import { configStore } from "../../../lib/stores/configStore";
 
 const { t } = useI18n();
 
+function handle_setnav(navindex:number) {
+  if (!sysStore.loading) {
+    uiStore.setNavindex(navindex)
+  }
+}
+
 onMounted(async () => {
   await Promise.all([
     uiStore.init(),
@@ -36,8 +42,8 @@ onMounted(async () => {
       :summary="sysStore.device.model"
     />
     <div class="ex-card-row">
-      <MiuixCard class="ex-card--pad ex-grow">
-        <MiuixBasicComponent :title="t('status.moduleActive')">
+      <MiuixCard show-indication press-feedback="sink" class="ex-card--pad ex-grow">
+        <MiuixBasicComponent :title="t('status.moduleActive')" clickable @click="handle_setnav(2)">
           <template #end>
             <MiuixText>
               {{
@@ -47,8 +53,8 @@ onMounted(async () => {
           </template>
         </MiuixBasicComponent>
       </MiuixCard>
-      <MiuixCard class="ex-card--pad ex-grow">
-        <MiuixBasicComponent :title="t('status.mountSource')">
+      <MiuixCard show-indication press-feedback="sink" class="ex-card--pad ex-grow">
+        <MiuixBasicComponent :title="t('status.mountSource')" clickable @click="handle_setnav(1)">
           <template #end>
             <MiuixText>{{ configStore.config.mountsource }}</MiuixText>
           </template>

@@ -17,6 +17,12 @@ import { configStore } from "../../../lib/stores/configStore";
 
 const { t } = useI18n();
 
+function handle_setnav(navindex:number) {
+  if (!sysStore.loading) {
+    uiStore.setNavindex(navindex)
+  }
+}
+
 onMounted(async () => {
   await Promise.all([
     uiStore.init(),
@@ -135,7 +141,7 @@ onMounted(async () => {
       </div>
 
       <div class="metrics-row">
-        <div class="metric-card">
+        <div class="metric-card" @click="handle_setnav(2)">
           <template v-if="!moduleStore.loading">
             <span class="metric-value">
               {{
@@ -152,7 +158,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="metric-card">
+        <div class="metric-card" @click="handle_setnav(1)">
           <template v-if="!sysStore.loading">
             <span class="metric-value">
               {{ configStore.config.mountsource }}
