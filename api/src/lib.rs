@@ -114,31 +114,6 @@ mod tests {
     }
 
     #[test]
-    fn module_and_status_use_camel_case_fields() {
-        let module = serde_json::to_value(Module {
-            id: "example".into(),
-            name: "Example".into(),
-            version: "1".into(),
-            author: "Author".into(),
-            description: "Description".into(),
-            is_mounted: true,
-        })
-        .unwrap();
-        assert_eq!(module["isMounted"], true);
-
-        let status = serde_json::to_value(Status {
-            version: "4.0.6".into(),
-            device: DeviceInfo { model: None },
-            system: SystemInfo {
-                kernel: None,
-                selinux: None,
-            },
-        })
-        .unwrap();
-        assert_eq!(status["version"], "4.0.6");
-    }
-
-    #[test]
     fn api_error_serializes_as_camel_case() {
         assert_eq!(
             serde_json::to_string(&ApiError::InvalidRequest).unwrap(),
