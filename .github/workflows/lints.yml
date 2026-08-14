@@ -69,6 +69,7 @@ jobs:
   webui-check:
     uses: rayxiom/workflows/.github/workflows/conventional-ci.yml@v1
     with:
+      node-versions: "24"
       skip-test: false
       working-directory: webui
   shellcheck:
