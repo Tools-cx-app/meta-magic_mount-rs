@@ -12,6 +12,7 @@ import {
   MiuixCard,
   MiuixText,
   MiuixBasicComponent,
+  MiuixProgressIndicator
 } from "miuix-vue";
 import Label from "../components/Label.vue";
 import { moduleStore } from "../../../lib/stores/moduleStore";
@@ -53,8 +54,11 @@ onMounted(async () => {
       ></MiuixSearchBar>
     </div>
 
-    <div v-if="moduleStore.loading" align="center">
-      <MiuixText>{{ t("modules.scanning") }}</MiuixText>
+    <div v-if="moduleStore.loading" class="loading-wrapper">
+      <div class="loading-content">
+        <MiuixProgressIndicator type="infinite" color="var(--m-color-on-background-variant)" style="flex: 1;"/>
+        <MiuixText color="var(--m-color-on-surface-variant-actions)" style="flex: 1;">{{ t("modules.scanning") }}</MiuixText>
+      </div>
     </div>
 
     <div
@@ -129,5 +133,24 @@ onMounted(async () => {
 }
 .ex-card {
   margin: 0 12px 12px;
+}
+
+.loading-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
 </style>
