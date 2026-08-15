@@ -132,5 +132,5 @@ where
         .collect()
 }
 #[cfg(test)]
-#[path = "../tests/unit/scanner.rs"]
+#[path = "../tests/unit/magic_mount/scanner.rs"]
 mod tests;

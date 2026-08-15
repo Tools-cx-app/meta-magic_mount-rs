@@ -55,5 +55,5 @@ impl Config {
     }
 }
 #[cfg(test)]
-#[path = "../tests/unit/config.rs"]
+#[path = "../tests/unit/magic_mount/config.rs"]
 mod tests;

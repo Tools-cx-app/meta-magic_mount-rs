@@ -180,5 +180,5 @@ fn parse_file(input: &str) -> Option<String> {
 }
 
 #[cfg(test)]
-#[path = "../tests/unit/parser.rs"]
+#[path = "../tests/unit/magic_mount/parser.rs"]
 mod tests;
