@@ -49,7 +49,7 @@ extract 'metamount.sh'
 extract 'metauninstall.sh'
 extract 'emulated-soft-reboot.sh'
 extract 'uninstall.sh'
-extract 'service.sh'
+extract 'post-fs-data.sh'
 extract 'launcher.png'
 mkdir -p "$MODPATH/bin/$ARCH_BINARY"
 extract "bin/$ARCH_BINARY/magic_mount_rs" "bin/$ARCH_BINARY" "magic_mount_rs"
