@@ -154,7 +154,7 @@ function open_github_repo() {
         </MiuixBasicComponent>
       </div>
       <div v-else-if="error">
-        <MiuixBasicComponent :title="t('info.loadFail')" />
+        <MiuixBasicComponent :title="t('info.loadFail')" clickable />
       </div>
     </MiuixCard>
     <div v-else align="center">

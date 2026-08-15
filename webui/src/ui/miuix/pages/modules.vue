@@ -76,7 +76,7 @@ onMounted(async () => {
       class="notfound-wrapper"
     >
       <div class="loading-content">
-        <MiuixIcon :icon="Help" size="98" />
+        <MiuixIcon :icon="Help" size="90" />
         <MiuixText color="var(--m-color-on-surface-variant-actions)">
           {{ t("modules.emptyState") }}
         </MiuixText>
@@ -93,7 +93,7 @@ onMounted(async () => {
           )"
         :key="module.id"
       >
-        <MiuixCard class="ex-card">
+        <MiuixCard show-indication class="ex-card">
           <MiuixBasicComponent
             :title="module.name"
             :summary="module.author + ' ' + module.version"
