@@ -150,6 +150,8 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
+@import url("https://cdn.jsdelivr.net/npm/misans-vf-4web@latest/dist/result.css");
+
 :root {
   --top-inset: var(--window-inset-top, 0px);
   --bottom-inset: var(--window-inset-bottom, 0px);
