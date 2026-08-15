@@ -18,24 +18,37 @@ use ::api::ConnectionInfo;
 use anyhow::Result;
 use tokio::{io::AsyncWriteExt, net::TcpListener};
 
+fn init_logger() {
+    #[cfg(not(target_os = "android"))]
+    {
+        let mut builder = env_logger::Builder::new();
+
+        builder.format(|buf, record| {
+            writeln!(
+                buf,
+                "[{}] [{}] {}",
+                record.level(),
+                record.target(),
+                record.args()
+            )
+        });
+        builder.filter_level(log::LevelFilter::Debug).init();
+    }
+
+    #[cfg(target_os = "android")]
+    {
+        android_logger::init_once(
+            android_logger::Config::default()
+                .with_max_level(log::LevelFilter::Debug)
+                .with_tag("MagicMount"),
+        );
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
-    let mut builder = env_logger::Builder::new();
+    init_logger();
 
-    builder.format(|buf, record| {
-        writeln!(
-            buf,
-            "[{}] [{}] {}",
-            record.level(),
-            record.target(),
-            record.args()
-        )
-    });
-
-    builder
-        .filter_level(log::LevelFilter::Info)
-        .parse_default_env()
-        .init();
     run().await
 }
 
