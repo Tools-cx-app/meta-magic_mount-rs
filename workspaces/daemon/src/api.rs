@@ -41,7 +41,6 @@ pub struct AppState {
 #[derive(Clone)]
 struct Snapshot {
     config: ApiConfig,
-    modules: Vec<api::Module>,
 }
 
 impl AppState {
@@ -70,16 +69,15 @@ impl AppState {
     }
 
     pub async fn initialize(self) -> anyhow::Result<Self> {
-        let snapshot = load_snapshot(&self.store, &self.modules_path).await?;
+        let snapshot = load_snapshot(&self.store).await?;
         *self.snapshot.write().await = Some(snapshot);
         Ok(self)
     }
 }
 
-async fn load_snapshot(store: &Store, modules_path: &PathBuf) -> anyhow::Result<Snapshot> {
+async fn load_snapshot(store: &Store) -> anyhow::Result<Snapshot> {
     let config = store.load().await?;
-    let modules = scanner::list_modules(modules_path, &config.partitions).await;
-    Ok(Snapshot { config, modules })
+    Ok(Snapshot { config })
 }
 
 #[async_trait]
@@ -214,9 +212,7 @@ async fn reload(State(state): State<AppState>, request: Request) -> ApiResult<St
             ),
             ConfigError::Other(error) => internal(error),
         })?;
-    let snapshot = load_snapshot(&state.store, &state.modules_path)
-        .await
-        .map_err(internal)?;
+    let snapshot = load_snapshot(&state.store).await.map_err(internal)?;
     *state.snapshot.write().await = Some(snapshot);
     Ok(StatusCode::NO_CONTENT)
 }
@@ -231,13 +227,16 @@ fn invalid_json(error: JsonRejection) -> ApiFailure {
 }
 
 async fn get_modules(State(state): State<AppState>) -> ApiResult<Json<Vec<api::Module>>> {
-    state
+    let partitions = state
         .snapshot
         .read()
         .await
         .as_ref()
-        .map(|snapshot| Json(snapshot.modules.clone()))
-        .ok_or_else(|| internal("daemon snapshot is not initialized"))
+        .map(|snapshot| snapshot.config.partitions.clone())
+        .ok_or_else(|| internal("daemon snapshot is not initialized"))?;
+    Ok(Json(
+        scanner::list_modules(&state.modules_path, &partitions).await,
+    ))
 }
 
 async fn get_status(State(state): State<AppState>) -> Json<Status> {

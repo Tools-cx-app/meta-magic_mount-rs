@@ -257,6 +257,20 @@ async fn modules_use_configured_partitions() {
 }
 
 #[tokio::test]
+async fn modules_are_scanned_on_each_request() {
+    let (app, dir) = test_router(false).await;
+    write_module(&dir.path().join("modules")).await;
+
+    let response = app
+        .oneshot(authorized(Method::GET, "/api/v1/modules"))
+        .await
+        .unwrap();
+    let body = to_bytes(response.into_body(), usize::MAX).await.unwrap();
+    let modules: Vec<api::Module> = serde_json::from_slice(&body).unwrap();
+    assert_eq!(modules.len(), 1);
+}
+
+#[tokio::test]
 async fn open_link_accepts_only_hosted_http_urls() {
     let (app, _dir) = test_router(false).await;
     for url in [

@@ -18,7 +18,7 @@ use rustix::mount::{MountFlags, mount};
 use crate::{
     bind_mount::bind_mount,
     daemon::load_config,
-    defs::{CONNECTION_FILE, MODULE_PATH},
+    defs::{CONFIG_FILE, CUSTOM_LIST_PATH, MODULE_PATH},
     errors::Result,
     misc::{cleanup, emulated_soft_reboot},
     parser::init_from_config,
@@ -31,7 +31,10 @@ fn main() -> Result<()> {
 
     misc::pre_init();
 
-    let config = load_config(std::path::Path::new(CONNECTION_FILE))?;
+    let config = load_config(
+        std::path::Path::new(CONFIG_FILE),
+        std::path::Path::new(CUSTOM_LIST_PATH),
+    )?;
     init_from_config(&config)?;
     if let Some(command) = std::env::args().nth(1) {
         if command == "emulated-soft-reboot" {
