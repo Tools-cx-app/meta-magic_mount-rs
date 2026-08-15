@@ -3,7 +3,7 @@
 
 use rustix::mount::{UnmountFlags, unmount};
 
-use crate::{errors::Result, utils::ksucalls};
+use crate::{defs, errors::Result, utils::ksucalls};
 
 fn init_logger() {
     #[cfg(not(target_os = "android"))]
@@ -32,6 +32,11 @@ fn init_logger() {
                 .with_tag("MagicMount"),
         );
     }
+}
+
+fn init_list() {
+    super::parser::COMMAND_LIST
+        .get_or_init(|| super::parser::parser_custom(defs::CUSTOM_LIST_PATH));
 }
 
 fn init_hook() {
@@ -69,4 +74,5 @@ pub fn pre_init() {
 
     init_hook();
     ksucalls::check_ksu();
+    init_list();
 }

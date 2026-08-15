@@ -1,100 +1,17 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: GPL-v3
 
-use std::{fmt, path::Path, sync::OnceLock};
+use std::{fmt, fs, path::Path, sync::OnceLock};
 
-use api::{ApiConfig, CustomMount};
-use rustc_hash::FxHashSet;
+use parking_lot::Mutex;
 
 pub static COMMAND_LIST: OnceLock<Vec<MountType>> = OnceLock::new();
+static FILES: Mutex<Vec<String>> = Mutex::new(Vec::new());
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MountType {
     Mount { source: String, target: String },
     Ignore { source: String },
-}
-
-pub fn init_from_config(config: &ApiConfig) -> anyhow::Result<()> {
-    let mut commands = config
-        .ignore_list
-        .iter()
-        .cloned()
-        .map(|source| MountType::Ignore { source })
-        .collect::<Vec<_>>();
-    commands.extend(
-        config
-            .custom_mounts
-            .iter()
-            .cloned()
-            .map(|mount| MountType::Mount {
-                source: mount.source,
-                target: mount.target,
-            }),
-    );
-    COMMAND_LIST
-        .set(commands)
-        .map_err(|_| anyhow::anyhow!("mount command list is already initialized"))
-}
-
-pub fn load_custom(path: &Path) -> (Vec<String>, Vec<CustomMount>) {
-    enum Work {
-        File(std::path::PathBuf),
-        Line(String),
-    }
-
-    let mut ignores = Vec::new();
-    let mut mounts = Vec::new();
-    let mut visited = FxHashSet::default();
-    let mut work = vec![Work::File(path.into())];
-    while let Some(item) = work.pop() {
-        match item {
-            Work::File(path) if visited.insert(path.clone()) => {
-                if let Ok(content) = std::fs::read_to_string(path) {
-                    work.extend(content.lines().rev().map(|line| Work::Line(line.into())));
-                }
-            }
-            Work::Line(line) => {
-                let tokens = tokenize(line.trim());
-                match tokens.as_slice() {
-                    [command, source, ..] if command == "ignore" => ignores.push(source.clone()),
-                    [command, source, target, ..] if command == "bind" => {
-                        mounts.push(CustomMount {
-                            source: source.clone(),
-                            target: target.clone(),
-                        });
-                    }
-                    [command, included, ..] if command == "file" || command == "add" => {
-                        work.push(Work::File(included.into()));
-                    }
-                    _ => {}
-                }
-            }
-            Work::File(_) => {}
-        }
-    }
-    (ignores, mounts)
-}
-
-fn tokenize(input: &str) -> Vec<String> {
-    let mut tokens = Vec::new();
-    let mut current = String::new();
-    let mut quote = None;
-    for ch in input.chars() {
-        match quote {
-            Some(end) if ch == end => quote = None,
-            None if ch == '\'' || ch == '"' => quote = Some(ch),
-            None if ch.is_ascii_whitespace() => {
-                if !current.is_empty() {
-                    tokens.push(std::mem::take(&mut current));
-                }
-            }
-            Some(_) | None => current.push(ch),
-        }
-    }
-    if !current.is_empty() {
-        tokens.push(current);
-    }
-    tokens
 }
 
 impl fmt::Display for MountType {
@@ -106,36 +23,162 @@ impl fmt::Display for MountType {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use api::{ApiConfig, CustomMount};
+pub fn parser_custom<P>(path: P) -> Vec<MountType>
+where
+    P: AsRef<Path>,
+{
+    fs::read_to_string(path.as_ref()).map_or_else(|_| Vec::new(), |s| parse(&s))
+}
 
-    use super::{COMMAND_LIST, MountType, init_from_config};
+fn parse(content: &str) -> Vec<MountType> {
+    let mut types = Vec::new();
+    for line in content.lines() {
+        let line = line.trim();
 
-    #[test]
-    fn initializes_commands_from_daemon_config() {
-        init_from_config(&ApiConfig {
-            mountsource: "KSU".into(),
-            umount: false,
-            partitions: vec![],
-            ignore_list: vec!["/ignored".into()],
-            custom_mounts: vec![CustomMount {
-                source: "/source".into(),
-                target: "/target".into(),
-            }],
-        })
-        .unwrap();
-        assert_eq!(
-            COMMAND_LIST.get().unwrap(),
-            &[
-                MountType::Ignore {
-                    source: "/ignored".into()
-                },
-                MountType::Mount {
-                    source: "/source".into(),
-                    target: "/target".into()
+        if line.starts_with('#') || line.is_empty() {
+            continue;
+        }
+
+        if line.starts_with("bind") {
+            match parse_bind(line) {
+                Some(s) => {
+                    log::debug!("new bind command: {s}");
+                    types.push(s);
                 }
-            ]
-        );
+                None => {
+                    log::debug!("failed to parse {line}");
+                }
+            }
+        } else if line.starts_with("ignore") {
+            match parse_ignore(line) {
+                Some(s) => {
+                    log::debug!("new bind command: {s}");
+                    types.push(s);
+                }
+                None => {
+                    log::debug!("failed to parse {line}");
+                }
+            }
+        } else if line.starts_with("file") || line.starts_with("add") {
+            match parse_file(line) {
+                Some(s) => {
+                    if FILES.lock().contains(&s) {
+                        log::warn!("detected same file, skip {line} for solving loop");
+                    } else {
+                        log::debug!("new file: {s}");
+                        FILES.lock().push(s.clone());
+                        match fs::read_to_string(&s) {
+                            Ok(s) => types.extend(parse(&s)),
+                            Err(e) => log::warn!("failed to read {s}: {e}"),
+                        }
+                    }
+                }
+                _ => {
+                    log::debug!("failed to parse {line}");
+                }
+            }
+        }
+    }
+
+    types
+}
+
+fn parse_path(input: &str) -> String {
+    if input.is_empty() {
+        return String::new();
+    }
+    let first = input.as_bytes()[0] as char;
+    let last = input.as_bytes()[input.len() - 1] as char;
+
+    let strings = if (first == '\'' && last == '"') || (first == '"' && last == '\'') {
+        log::error!("mixed quotes detected in path: {input}");
+        String::new()
+    } else if input.len() > 1 && (first == '\'' || first == '"') && first == last {
+        input[1..input.len() - 1].to_string()
+    } else {
+        input.to_string()
+    };
+
+    strings.chars().filter(|c| !c.is_control()).collect()
+}
+
+fn tokenize(input: &str) -> Vec<String> {
+    let mut tokens = Vec::new();
+    let mut current = String::new();
+    let mut in_quote: Option<char> = None;
+
+    for ch in input.chars() {
+        match in_quote {
+            Some(quote) => {
+                current.push(ch);
+                if ch == quote {
+                    in_quote = None;
+                }
+            }
+            None => {
+                if ch == '\'' || ch == '"' {
+                    in_quote = Some(ch);
+                    current.push(ch);
+                } else if ch.is_ascii_whitespace() {
+                    if !current.is_empty() {
+                        tokens.push(std::mem::take(&mut current));
+                    }
+                } else {
+                    current.push(ch);
+                }
+            }
+        }
+    }
+    if !current.is_empty() {
+        tokens.push(current);
+    }
+    tokens
+}
+
+fn parse_bind(input: &str) -> Option<MountType> {
+    let tokens = tokenize(input);
+
+    if tokens.len() < 3 || tokens[0] != "bind" {
+        return None;
+    }
+    let source = parse_path(&tokens[1]);
+    let target = parse_path(&tokens[2]);
+    if source.is_empty() || target.is_empty() {
+        log::debug!("missing source/target, skip");
+        None
+    } else {
+        Some(MountType::Mount { source, target })
     }
 }
+
+fn parse_ignore(input: &str) -> Option<MountType> {
+    let tokens = tokenize(input);
+    if tokens.len() < 2 || tokens[0] != "ignore" {
+        return None;
+    }
+    let source = parse_path(&tokens[1]);
+    if source.is_empty() {
+        log::debug!("missing source, skip");
+        None
+    } else {
+        Some(MountType::Ignore { source })
+    }
+}
+
+fn parse_file(input: &str) -> Option<String> {
+    let tokens = tokenize(input);
+    if tokens.len() < 2 || (tokens[0] != "file" && tokens[0] != "add") {
+        return None;
+    }
+    let path = parse_path(&tokens[1]);
+    if path.is_empty() {
+        log::debug!("missing path, skip");
+        None
+    } else {
+        Some(path)
+    }
+}
+
+#[cfg(test)]
+#[path = "../tests/unit/parser.rs"]
+mod tests;
