@@ -7,9 +7,7 @@ on:
     branches: ["master"]
     paths:
       - 'src/**'
-      - 'api/**'
-      - 'daemon/**'
-      - 'xtask/**'
+      - 'workspaces/**'
       - 'tests/**'
       - 'Cargo.*'
       - 'webui/**'
@@ -19,13 +17,11 @@ on:
   pull_request:
     branches: ["master"]
     paths:
-      - 'webui/**'
       - 'src/**'
-      - 'api/**'
-      - 'daemon/**'
-      - 'xtask/**'
+      - 'workspaces/**'
       - 'tests/**'
       - 'Cargo.*'
+      - 'webui/**'
       - 'build.rs'
       - 'module/**'
       - '.github/workflows/lints.yml'

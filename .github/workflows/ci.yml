@@ -8,12 +8,10 @@ on:
     branches: ["master"]
     paths:
       - "src/**"
-      - "api/**"
-      - "daemon/**"
+      - "workspaces/**"
       - "Cargo.*"
       - "module/**"
       - "webui/**"
-      - "xtask/**"
       - "tests/**"
       - "build.rs"
       - ".github/workflows/ci.yml"
@@ -22,12 +20,10 @@ on:
     branches: ["master"]
     paths:
       - "src/**"
-      - "api/**"
-      - "daemon/**"
+      - "workspaces/**"
       - "Cargo.*"
       - "module/**"
       - "webui/**"
-      - "xtask/**"
       - "tests/**"
       - "build.rs"
       - ".github/workflows/ci.yml"

@@ -7,9 +7,7 @@ on:
     branches: ["master"]
     paths:
       - "src/**"
-      - "api/**"
-      - "daemon/**"
-      - "xtask/**"
+      - "workspaces/**"
       - "tests/**"
       - "Cargo.*"
       - "build.rs"
@@ -18,9 +16,7 @@ on:
     branches: ["master"]
     paths:
       - "src/**"
-      - "api/**"
-      - "daemon/**"
-      - "xtask/**"
+      - "workspaces/**"
       - "tests/**"
       - "Cargo.*"
       - "build.rs"
