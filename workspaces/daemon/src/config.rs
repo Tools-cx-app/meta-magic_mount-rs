@@ -403,5 +403,5 @@ fn tokenize(input: &str) -> Vec<String> {
 }
 
 #[cfg(test)]
-#[path = "../../tests/unit/daemon/config.rs"]
+#[path = "../../../tests/unit/daemon/config.rs"]
 mod tests;

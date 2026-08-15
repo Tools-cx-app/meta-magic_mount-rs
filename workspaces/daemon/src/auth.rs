@@ -24,5 +24,5 @@ pub fn is_authorized(expected: &str, header: Option<&str>) -> bool {
 }
 
 #[cfg(test)]
-#[path = "../../tests/unit/daemon/auth.rs"]
+#[path = "../../../tests/unit/daemon/auth.rs"]
 mod tests;

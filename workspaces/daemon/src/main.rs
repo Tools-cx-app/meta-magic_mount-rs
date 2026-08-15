@@ -169,5 +169,5 @@ async fn shutdown_signal() {
 }
 
 #[cfg(test)]
-#[path = "../../tests/unit/daemon/main.rs"]
+#[path = "../../../tests/unit/daemon/main.rs"]
 mod tests;

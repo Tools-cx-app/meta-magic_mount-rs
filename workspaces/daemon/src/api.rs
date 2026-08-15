@@ -317,5 +317,5 @@ pub fn router(state: AppState) -> Router {
 }
 
 #[cfg(test)]
-#[path = "../../tests/unit/daemon/api.rs"]
+#[path = "../../../tests/unit/daemon/api.rs"]
 mod tests;

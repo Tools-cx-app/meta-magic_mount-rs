@@ -151,5 +151,5 @@ where
         .collect()
 }
 #[cfg(test)]
-#[path = "../../tests/unit/daemon/scanner.rs"]
+#[path = "../../../tests/unit/daemon/scanner.rs"]
 mod tests;
