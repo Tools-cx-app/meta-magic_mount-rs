@@ -62,18 +62,28 @@ impl Store {
         .context("failed to parse config")?;
         let (ignore_list, custom_mounts) = self.load_custom_list().await?;
 
-        Ok(ApiConfig {
+        let config = ApiConfig {
             mountsource: disk.mountsource,
             umount: disk.umount,
             partitions: disk.partitions,
             ignore_list,
             custom_mounts,
-        })
+        };
+        log::info!(
+            "configuration loaded: {} partitions, {} ignored paths, {} custom mounts",
+            config.partitions.len(),
+            config.ignore_list.len(),
+            config.custom_mounts.len()
+        );
+        Ok(config)
     }
 
     pub async fn save(&self, mut config: ApiConfig) -> Result<(), ConfigError> {
         let _guard = self.access.write().await;
         normalize(&mut config)?;
+        let partition_count = config.partitions.len();
+        let ignore_count = config.ignore_list.len();
+        let custom_mount_count = config.custom_mounts.len();
         let disk = toml::to_string_pretty(&DiskConfig {
             mountsource: config.mountsource,
             partitions: config.partitions,
@@ -108,6 +118,12 @@ impl Store {
             }
             return Err(anyhow::Error::new(error).into());
         }
+        log::info!(
+            "configuration saved: {} partitions, {} ignored paths, {} custom mounts",
+            partition_count,
+            ignore_count,
+            custom_mount_count
+        );
         Ok(())
     }
 

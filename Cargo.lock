@@ -412,6 +412,7 @@ dependencies = [
 name = "daemon"
 version = "4.0.7"
 dependencies = [
+ "android_logger",
  "anyhow",
  "api",
  "async-trait",

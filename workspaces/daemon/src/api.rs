@@ -187,13 +187,15 @@ async fn authorize(State(state): State<AppState>, request: Request, next: Next) 
 }
 
 async fn get_config(State(state): State<AppState>) -> ApiResult<Json<ApiConfig>> {
-    state
+    let config = state
         .snapshot
         .read()
         .await
         .as_ref()
         .map(|snapshot| Json(snapshot.config.clone()))
-        .ok_or_else(|| internal("daemon snapshot is not initialized"))
+        .ok_or_else(|| internal("daemon snapshot is not initialized"))?;
+    log::info!("configuration requested");
+    Ok(config)
 }
 
 async fn reload(State(state): State<AppState>, request: Request) -> ApiResult<StatusCode> {
@@ -214,6 +216,7 @@ async fn reload(State(state): State<AppState>, request: Request) -> ApiResult<St
         })?;
     let snapshot = load_snapshot(&state.store).await.map_err(internal)?;
     *state.snapshot.write().await = Some(snapshot);
+    log::info!("configuration reloaded");
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -234,13 +237,15 @@ async fn get_modules(State(state): State<AppState>) -> ApiResult<Json<Vec<api::M
         .as_ref()
         .map(|snapshot| snapshot.config.partitions.clone())
         .ok_or_else(|| internal("daemon snapshot is not initialized"))?;
-    Ok(Json(
-        scanner::list_modules(&state.modules_path, &partitions).await,
-    ))
+    let modules = scanner::list_modules(&state.modules_path, &partitions).await;
+    log::info!("modules requested: {} modules", modules.len());
+    Ok(Json(modules))
 }
 
 async fn get_status(State(state): State<AppState>) -> Json<Status> {
-    Json(state.actions.status().await)
+    let status = state.actions.status().await;
+    log::info!("status requested");
+    Json(status)
 }
 
 async fn open_link(State(state): State<AppState>, request: Request) -> ApiResult<StatusCode> {
@@ -265,6 +270,7 @@ async fn open_link(State(state): State<AppState>, request: Request) -> ApiResult
             "System action unavailable",
         )
     })?;
+    log::info!("open-link action completed");
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -277,6 +283,7 @@ async fn reboot(State(state): State<AppState>) -> ApiResult<StatusCode> {
             "System action unavailable",
         )
     })?;
+    log::info!("reboot action completed");
     Ok(StatusCode::ACCEPTED)
 }
 

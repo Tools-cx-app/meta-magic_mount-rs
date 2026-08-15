@@ -45,6 +45,7 @@ async fn run() -> Result<()> {
     let token = auth::generate_token()?;
     let listener = TcpListener::bind("127.0.0.1:0").await?;
     let port = listener.local_addr()?.port();
+    log::info!("daemon listening on 127.0.0.1:{port}");
     let router = api::router(
         api::AppState::production(token.clone())
             .initialize()
@@ -55,13 +56,17 @@ async fn run() -> Result<()> {
         &ConnectionInfo { port, token },
     )
     .await?;
+    log::info!("daemon discovery file published");
 
     let serve_result = axum::serve(listener, router)
         .with_graceful_shutdown(shutdown_signal())
         .await;
     let cleanup_result = remove_connection_file(defs::CONNECTION_FILE).await;
     match (serve_result, cleanup_result) {
-        (Ok(()), Ok(())) => Ok(()),
+        (Ok(()), Ok(())) => {
+            log::info!("daemon stopped cleanly");
+            Ok(())
+        }
         (Err(error), Ok(())) | (Ok(()), Err(error)) => Err(error.into()),
         (Err(serve), Err(cleanup)) => Err(anyhow::anyhow!(
             "server failed: {serve}; failed to remove discovery file: {cleanup}"
@@ -151,8 +156,8 @@ async fn shutdown_signal() {
             }
         };
     tokio::select! {
-        () = wait_for_ctrl_c() => {},
-        _ = terminate.recv() => {},
+        () = wait_for_ctrl_c() => log::info!("received Ctrl-C shutdown signal"),
+        _ = terminate.recv() => log::info!("received SIGTERM shutdown signal"),
     }
 }
 

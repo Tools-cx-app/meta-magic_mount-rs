@@ -137,7 +137,7 @@ pub async fn list_modules<P>(module_dir: P, extra: &[String]) -> Vec<api::Module
 where
     P: AsRef<Path>,
 {
-    collect_modules(module_dir, extra)
+    let modules: Vec<_> = collect_modules(module_dir, extra)
         .await
         .into_iter()
         .map(|module| api::Module {
@@ -148,7 +148,9 @@ where
             description: module.description,
             is_mounted: module.has_mount_files && !module.disabled && !module.skip_mount,
         })
-        .collect()
+        .collect();
+    log::info!("module scan completed: {} modules", modules.len());
+    modules
 }
 #[cfg(test)]
 #[path = "../../../tests/unit/daemon/scanner.rs"]
