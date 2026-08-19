@@ -18,7 +18,6 @@ import {
   MiuixSmallTitle,
   MiuixSwitch,
   MiuixButton,
-  MiuixDropdownPreference,
   MiuixInput,
   MiuixBasicComponent,
   MiuixIcon,
@@ -26,6 +25,8 @@ import {
   showSnackbar,
 } from "miuix-vue";
 import {
+  Translate,
+  Theme,
   FolderFill,
   Delete,
   Layers,
@@ -38,6 +39,7 @@ import {
 import RemoveableLabel from "../components/RemoveableLabel.vue";
 import BindCard from "../components/BindCard.vue";
 import IgnoredCard from "../components/IgnoredCard.vue";
+import MiuixDropdownPreference from "../components/DropdownPreference.vue"
 
 import { configStore } from "../../../lib/stores/configStore";
 import { DEFAULT_CONFIG } from "../../../lib/constants";
@@ -234,12 +236,20 @@ function saveCustomMountDialog() {
         :title="t('common.language')"
         v-model="language_set"
         :items="display_list"
-      />
+      >
+        <template #start>
+          <MiuixIcon :icon="Translate" />
+        </template>
+      </MiuixDropdownPreference>
       <MiuixDropdownPreference
         :title="t('config.uiStyle')"
         :items="styleOptions"
         v-model="styles"
-      />
+      >
+        <template #start>
+          <MiuixIcon :icon="Theme" />
+        </template>
+      </MiuixDropdownPreference>
       <MiuixBasicComponent :title="t('config.monetTheme')">
         <template #start>
           <MiuixIcon :icon="Photos" />
