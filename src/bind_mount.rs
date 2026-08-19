@@ -12,6 +12,7 @@ use rustix::mount::{MountFlags, UnmountFlags, mount_bind, mount_move, mount_remo
 use crate::{
     errors::Result,
     magic_mount::utils::mount_mirror,
+    mount_list,
     parser::{COMMAND_LIST, MountType},
     utils::ksucalls::send_unmountable,
 };
@@ -100,10 +101,26 @@ fn validate_mirror_entry(entry: &DirEntry) -> Result<()> {
     Ok(())
 }
 
-fn mount_readonly(source: &Path, target: &Path) -> Result<()> {
+fn report_rollback(success: bool, on_failure: impl FnOnce()) {
+    if !success {
+        on_failure();
+    }
+}
+
+fn mount_readonly(
+    source: &Path,
+    target: &Path,
+    leaked_mounts: Option<&mount_list::MountList>,
+) -> Result<()> {
     mount_bind(source, target)?;
     if let Err(error) = mount_remount(target, MountFlags::BIND | MountFlags::RDONLY, "") {
-        if let Err(unmount_error) = unmount(target, UnmountFlags::DETACH) {
+        let rollback = unmount(target, UnmountFlags::DETACH);
+        report_rollback(rollback.is_ok(), || {
+            if let Some(mounts) = leaked_mounts {
+                mounts.record(target);
+            }
+        });
+        if let Err(unmount_error) = rollback {
             log::error!(
                 "failed to roll back bind mount {}: {unmount_error}",
                 target.display()
@@ -147,7 +164,7 @@ fn mount_missing_target(source: &Path, target: &Path) -> Result<PathBuf> {
 
         let mirror_target = workdir.path().join(relative_target);
         create_mirror_target(source, &mirror_target)?;
-        mount_readonly(source, &mirror_target)?;
+        mount_readonly(source, &mirror_target, None)?;
         mount_remount(workdir.path(), MountFlags::BIND | MountFlags::RDONLY, "")?;
         mount_move(workdir.path(), &ancestor)?;
         Ok(())
@@ -166,11 +183,11 @@ fn mount_missing_target(source: &Path, target: &Path) -> Result<PathBuf> {
     Ok(ancestor)
 }
 
-fn mount_target(source: &Path, target: &Path) -> Result<PathBuf> {
+fn mount_target(source: &Path, target: &Path, mounts: &mount_list::MountList) -> Result<PathBuf> {
     match target.metadata() {
         Ok(_) => {
             let target = fs::canonicalize(target)?;
-            mount_readonly(source, &target)?;
+            mount_readonly(source, &target, Some(mounts))?;
             Ok(target)
         }
         Err(error) if error.kind() == ErrorKind::NotFound => mount_missing_target(source, target),
@@ -178,7 +195,7 @@ fn mount_target(source: &Path, target: &Path) -> Result<PathBuf> {
     }
 }
 
-pub fn bind_mount(umount: bool) -> Result<()> {
+pub fn bind_mount(umount: bool, mounts: &mount_list::MountList) -> Result<()> {
     let commands = COMMAND_LIST
         .get()
         .ok_or_else(|| Error::new(ErrorKind::NotFound, "mount command list is not initialized"))?;
@@ -196,7 +213,8 @@ pub fn bind_mount(umount: bool) -> Result<()> {
             continue;
         }
 
-        let unmount_target = mount_target(source, Path::new(target))?;
+        let unmount_target = mount_target(source, Path::new(target), mounts)?;
+        mounts.record(&unmount_target);
         if umount {
             send_unmountable(unmount_target);
         }

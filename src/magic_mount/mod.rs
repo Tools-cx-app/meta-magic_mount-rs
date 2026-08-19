@@ -21,6 +21,7 @@ use crate::{
         node::{Node, NodeFileType},
         utils::{clone_symlink, collect_module_files, mount_mirror},
     },
+    mount_list,
     utils::{ensure_dir_exists, ksucalls::send_unmountable},
 };
 
@@ -28,16 +29,24 @@ static MOUNTDED_FILES: AtomicU32 = AtomicU32::new(0);
 static IGNORED_FILES: AtomicU32 = AtomicU32::new(0);
 static MOUNTDED_SYMBOLS_FILES: AtomicU32 = AtomicU32::new(0);
 
-struct MagicMount {
+struct MagicMount<'a> {
     node: Node,
     path: PathBuf,
     work_dir_path: PathBuf,
     has_tmpfs: bool,
     umount: bool,
+    mounts: &'a mount_list::MountList,
 }
 
-impl MagicMount {
-    fn new<P>(node: &Node, path: P, work_dir_path: P, has_tmpfs: bool, umount: bool) -> Self
+impl<'a> MagicMount<'a> {
+    fn new<P>(
+        node: &Node,
+        path: P,
+        work_dir_path: P,
+        has_tmpfs: bool,
+        umount: bool,
+        mounts: &'a mount_list::MountList,
+    ) -> Self
     where
         P: AsRef<Path>,
     {
@@ -47,6 +56,7 @@ impl MagicMount {
             work_dir_path: work_dir_path.as_ref().join(node.name.clone()),
             has_tmpfs,
             umount,
+            mounts,
         }
     }
 
@@ -63,7 +73,7 @@ impl MagicMount {
     }
 }
 
-impl MagicMount {
+impl MagicMount<'_> {
     fn symlink(&self) -> Result<()> {
         if let Some(module_path) = &self.node.module_path {
             log::debug!(
@@ -119,10 +129,11 @@ impl MagicMount {
                 )
             })
             .is_ok()
-            && self.umount
-            && !self.work_dir_path.starts_with("/mnt")
         {
-            send_unmountable(target);
+            self.mounts.record_if_final(&self.path, self.has_tmpfs);
+            if self.umount && !self.work_dir_path.starts_with("/mnt") {
+                send_unmountable(target);
+            }
         }
 
         // we should use MS_REMOUNT | MS_BIND | MS_xxx to change mount flags
@@ -215,6 +226,7 @@ impl MagicMount {
                     &self.work_dir_path,
                     has_tmpfs,
                     self.umount,
+                    self.mounts,
                 )
                 .do_mount()
             }
@@ -249,6 +261,8 @@ impl MagicMount {
                     self.path.display()
                 )
             })?;
+            self.mounts.commit_staged_under(&self.path);
+            self.mounts.record(&self.path);
             // make private to reduce peer group count
             if let Err(e) = mount_change(
                 &self.path,
@@ -266,7 +280,7 @@ impl MagicMount {
     }
 }
 
-impl MagicMount {
+impl MagicMount<'_> {
     fn mount_path(&mut self, has_tmpfs: bool) -> Result<()> {
         for entry in self.path.read_dir()?.flatten() {
             let name = entry.file_name().to_string_lossy().to_string();
@@ -282,6 +296,7 @@ impl MagicMount {
                         &self.work_dir_path,
                         has_tmpfs,
                         self.umount,
+                        self.mounts,
                     )
                     .do_mount()
                     .with_context(|| format!("magic mount {}/{name}", self.path.display()))
@@ -310,6 +325,7 @@ pub fn magic_mount<P>(
     mount_source: &str,
     extra_partitions: &[String],
     umount: bool,
+    mounts: &mount_list::MountList,
 ) -> Result<()>
 where
     P: AsRef<Path>,
@@ -327,7 +343,15 @@ where
         )
         .context("make tmp recursively private")?;
 
-        MagicMount::new(&root, Path::new("/"), tmp_dir.as_path(), false, umount).do_mount()?;
+        MagicMount::new(
+            &root,
+            Path::new("/"),
+            tmp_dir.as_path(),
+            false,
+            umount,
+            mounts,
+        )
+        .do_mount()?;
     } else {
         log::info!("no modules to mount, skipping!");
     }

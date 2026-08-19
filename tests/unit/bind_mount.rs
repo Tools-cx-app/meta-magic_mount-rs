@@ -4,6 +4,14 @@
 use super::*;
 
 #[test]
+fn reports_failed_bind_rollback() {
+    let mut leaked = false;
+
+    report_rollback(false, || leaked = true);
+    assert!(leaked);
+}
+
+#[test]
 fn rejects_parent_component_in_mirror_target() {
     let tempdir = tempfile::tempdir().unwrap();
     let target = tempdir.path().join("missing/../target");

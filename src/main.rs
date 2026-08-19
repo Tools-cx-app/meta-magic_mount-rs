@@ -10,6 +10,7 @@ mod defs;
 mod errors;
 mod magic_mount;
 mod misc;
+mod mount_list;
 mod parser;
 mod scanner;
 mod utils;
@@ -32,7 +33,6 @@ fn main() -> Result<()> {
     misc::pre_init();
 
     let args: Vec<_> = std::env::args().collect();
-    let config = Config::load(defs::CONFIG_FILE)?;
 
     if let Some(arg) = args.get(1) {
         match arg.as_str() {
@@ -40,7 +40,7 @@ fn main() -> Result<()> {
                 handle_show_config()?;
             }
             "emulated-soft-reboot" => {
-                emulated_soft_reboot(&config.mountsource)?;
+                emulated_soft_reboot()?;
             }
             "save-config" => {
                 handle_save_config(&args[2..])?;
@@ -60,6 +60,7 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    let config = Config::load(defs::CONFIG_FILE)?;
     let modules = scanner::list_modules(MODULE_PATH, &config.partitions);
     let _ = std::fs::write(defs::SCANNED_LIST, &serde_json::to_string_pretty(&modules)?);
 
@@ -70,6 +71,8 @@ fn main() -> Result<()> {
         "current selinux: {}",
         std::fs::read_to_string("/proc/self/attr/current")?
     );
+
+    let mounts = mount_list::MountList::persistent()?;
 
     if let Err(e) = mount(
         &config.mountsource,
@@ -87,9 +90,10 @@ fn main() -> Result<()> {
         &config.mountsource,
         &config.partitions,
         config.umount,
+        &mounts,
     );
     let bind_mount_result = if magic_mount_result.is_ok() {
-        Some(bind_mount(config.umount))
+        Some(bind_mount(config.umount, &mounts))
     } else {
         None
     };
