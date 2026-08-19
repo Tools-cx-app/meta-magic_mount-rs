@@ -1,3 +1,9 @@
+<!--
+
+    Copyright (C) 2026 meta-magic_mount-rs developers
+    SPDX-License-Identifier: GPL-v3
+
+-->
 <script setup lang="ts">
 // Copyright 2026, miuix-vue contributors
 // SPDX-License-Identifier: Apache-2.0
