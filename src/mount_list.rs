@@ -11,7 +11,10 @@ use std::{
 
 use rustix::mount::{UnmountFlags, unmount};
 
-use crate::{defs, errors::Result};
+use crate::{
+    defs,
+    errors::{Error, Result},
+};
 
 pub struct MountList {
     path: PathBuf,
@@ -20,7 +23,10 @@ pub struct MountList {
 }
 
 impl MountList {
-    pub fn new(path: impl AsRef<Path>) -> Result<Self> {
+    pub fn new<P>(path: P) -> Result<Self>
+    where
+        P: AsRef<Path>,
+    {
         let path = path.as_ref().to_path_buf();
         match fs::remove_file(&path) {
             Ok(()) => {}
@@ -38,7 +44,10 @@ impl MountList {
         Self::new(defs::UMOUNT_LIST)
     }
 
-    pub fn record(&self, target: impl AsRef<Path>) {
+    pub fn record<T>(&self, target: T)
+    where
+        T: AsRef<Path>,
+    {
         let target = target.as_ref();
         let mut targets = self.targets.borrow_mut();
         if !targets.iter().any(|mount| mount == target) {
@@ -46,7 +55,10 @@ impl MountList {
         }
     }
 
-    pub fn record_if_final(&self, target: impl AsRef<Path>, has_tmpfs: bool) {
+    pub fn record_if_final<T>(&self, target: T, has_tmpfs: bool)
+    where
+        T: AsRef<Path>,
+    {
         if has_tmpfs {
             self.staged.borrow_mut().push(target.as_ref().to_path_buf());
         } else {
@@ -54,7 +66,10 @@ impl MountList {
         }
     }
 
-    pub fn commit_staged_under(&self, parent: impl AsRef<Path>) {
+    pub fn commit_staged_under<P>(&self, parent: P)
+    where
+        P: AsRef<Path>,
+    {
         let parent = parent.as_ref();
         let mut staged = self.staged.borrow_mut();
         let mut committed = Vec::new();
@@ -86,7 +101,7 @@ impl MountList {
 
     pub fn unmount_persisted() -> Result<()> {
         unmount_from(Path::new(defs::UMOUNT_LIST), |target| {
-            unmount(target, UnmountFlags::DETACH)
+            unmount(target, UnmountFlags::DETACH).map_err(Error::from)
         })
     }
 }
@@ -99,12 +114,9 @@ impl Drop for MountList {
     }
 }
 
-fn unmount_from<E>(
-    path: &Path,
-    mut detach: impl FnMut(&Path) -> std::result::Result<(), E>,
-) -> Result<()>
+fn unmount_from<F>(path: &Path, mut detach: F) -> Result<()>
 where
-    E: std::fmt::Display,
+    F: FnMut(&Path) -> Result<()>,
 {
     let content = match fs::read_to_string(path) {
         Ok(content) => content,
