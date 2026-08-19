@@ -39,7 +39,7 @@ import {
 import RemoveableLabel from "../components/RemoveableLabel.vue";
 import BindCard from "../components/BindCard.vue";
 import IgnoredCard from "../components/IgnoredCard.vue";
-import MiuixDropdownPreference from "../components/DropdownPreference.vue"
+import MiuixDropdownPreference from "../components/DropdownPreference.vue";
 
 import { configStore } from "../../../lib/stores/configStore";
 import { DEFAULT_CONFIG } from "../../../lib/constants";
