@@ -32,7 +32,7 @@ toml = "1.1.4"
 [dependencies]
 anyhow.workspace = true
 extattr = "1"
-log = "0.4.33"
+log = "0.4.34"
 rustix = { version = "1.1.4", features = ["fs", "mount"] }
 libc = "0.2.189"
 serde.workspace = true
