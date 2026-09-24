@@ -1,9 +1,8 @@
 <!--
-
-    Copyright (C) 2026 meta-magic_mount-rs developers
-    SPDX-License-Identifier: GPL-v3
-
+Copyright (C) 2026 meta-magic_mount-rs developers
+SPDX-License-Identifier: GPL-v3
 -->
+
 <script setup lang="ts">
 import { MiuixText, MiuixIcon, MiuixIconButton } from "miuix-vue";
 import { Close } from "miuix-vue/icons";

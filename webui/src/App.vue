@@ -1,9 +1,8 @@
 <!--
-
-    Copyright (C) 2026 meta-magic_mount-rs developers
-    SPDX-License-Identifier: GPL-v3
-
+Copyright (C) 2026 meta-magic_mount-rs developers
+SPDX-License-Identifier: GPL-v3
 -->
+
 <script setup lang="ts">
 import { computed, defineAsyncComponent } from "vue";
 import { uiStore } from "./lib/stores/uiStore";

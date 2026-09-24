@@ -2,7 +2,6 @@
 # Copyright (C) 2026 meta-magic_mount-rs developers
 # SPDX-License-Identifier: GPL-v3
 
-
 MODDIR="${0%/*}"
 
 BINARY="$MODDIR/meta-mm"
