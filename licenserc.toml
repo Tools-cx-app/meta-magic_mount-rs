@@ -7,10 +7,18 @@ text = "Copyright (C) {{props.inception_year}} {{props.copyright_owner}}\nSPDX-L
 [files]
 root = "{{ config_dir }}"
 excludes = [
-  ".github/bot/requirements.txt", 
+  ".github/bot/requirements.txt",
   ".hintrc",
-  "libs/",
-  "module/libs/"
+  "**/*.md",
+  "**/*.svg",
+  "**/.gitignore",
+  "**/*.lock",
+  "update/**",
+  ".github/renovate.json",
+  "module/launcher.png",
+  "LICENSE",
+  "webui/*.json",
+  "webui/src/locales/*.json",
 ]
 
 [props]
