@@ -3,7 +3,7 @@
 
 use rustix::mount::{UnmountFlags, unmount};
 
-use crate::{defs, errors::Result, mount_list, utils::ksucalls};
+use crate::{defs, errors::Result, mount::mount_list, utils::ksucalls};
 
 fn init_logger() {
     #[cfg(not(target_os = "android"))]

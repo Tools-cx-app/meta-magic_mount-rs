@@ -15,7 +15,7 @@ use rustix::{
 use crate::{
     defs,
     errors::{Error, Result},
-    magic_mount::node::Node,
+    mount::magic_mount::node::Node,
     utils::{lgetfilecon, lsetfilecon, validate_module_id},
 };
 

@@ -8,9 +8,8 @@ mod bind_mount;
 mod config;
 mod defs;
 mod errors;
-mod magic_mount;
 mod misc;
-mod mount_list;
+mod mount;
 mod parser;
 mod scanner;
 mod utils;
@@ -75,7 +74,7 @@ fn main() -> Result<()> {
         std::fs::read_to_string("/proc/self/attr/current")?
     );
 
-    let mounts = mount_list::MountList::persistent()?;
+    let mounts = mount::mount_list::MountList::persistent()?;
 
     if let Err(e) = mount(
         &config.mountsource,
@@ -88,7 +87,7 @@ fn main() -> Result<()> {
         std::process::exit(1);
     }
 
-    let magic_mount_result = magic_mount::magic_mount(
+    let magic_mount_result = mount::magic_mount::magic_mount(
         MODULE_PATH,
         &config.mountsource,
         &config.partitions,

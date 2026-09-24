@@ -11,8 +11,7 @@ use rustix::mount::{MountFlags, UnmountFlags, mount_bind, mount_move, mount_remo
 
 use crate::{
     errors::Result,
-    magic_mount::utils::mount_mirror,
-    mount_list,
+    mount::{magic_mount::utils::mount_mirror, mount_list},
     parser::{COMMAND_LIST, MountType},
     utils::ksucalls::send_unmountable,
 };

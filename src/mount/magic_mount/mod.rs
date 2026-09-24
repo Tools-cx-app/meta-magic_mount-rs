@@ -17,11 +17,13 @@ use rustix::mount::{
 
 use crate::{
     errors::{Error, Result},
-    magic_mount::{
-        node::{Node, NodeFileType},
-        utils::{clone_symlink, collect_module_files, mount_mirror},
+    mount::{
+        magic_mount::{
+            node::{Node, NodeFileType},
+            utils::{clone_symlink, collect_module_files, mount_mirror},
+        },
+        mount_list,
     },
-    mount_list,
     utils::{ensure_dir_exists, ksucalls::send_unmountable},
 };
 
