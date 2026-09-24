@@ -62,14 +62,14 @@ jobs:
           add-to-path: true
           local-cache: true
       - name: Setup Rust toolchain
-        if: ${{ inputs.target != 'riscv64-linux-android' }}
+        if: ${{ matirx.target != 'riscv64' }}
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: nightly
           targets: ${{ matrix.rust-target }}
           components: rust-src, rustc-codegen-cranelift-preview
       - name: Setup Rust toolchain
-        if: ${{ inputs.target == 'riscv64-linux-android' }}
+        if: ${{ matrix.target == 'riscv64' }}
         run: |
           rustup toolchain install nightly --profile minimal --component rust-src,rustc-codegen-cranelift-preview
       - name: Install pnpm
