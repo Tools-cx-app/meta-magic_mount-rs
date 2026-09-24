@@ -416,7 +416,15 @@ fn build(verbose: bool, target: Targets, name: String) -> Result<()> {
         let uutriple = utriple.to_ascii_uppercase();
         let mut cargo = Command::new("cargo");
 
-        cargo.args(["+nightly", "build", "--release", "--target", target]);
+        cargo.args([
+            "+nightly",
+            "build",
+            "--release",
+            "--target",
+            target,
+            "-Z",
+            "build-std=std,panic_abort",
+        ]);
         cargo.envs([
             ("RUSTFLAGS", "-C default-linker-libraries"),
             (&format!("CC_{utriple}"), &clang_path),
