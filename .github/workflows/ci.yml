@@ -62,7 +62,7 @@ jobs:
           add-to-path: true
           local-cache: true
       - name: Setup Rust toolchain
-        if: ${{ matirx.target != 'riscv64' }}
+        if: ${{ matrix.target != 'riscv64' }}
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: nightly
@@ -90,7 +90,7 @@ jobs:
           cache-all-crates: "true"
           save-if: ${{ github.event_name != 'pull_request' }}
       - name: Install cargo-ndk
-        if: ${{ inputs.target != 'riscv64-linux-android' }}
+        if: ${{ matrix.target != 'riscv64' }}
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-ndk
