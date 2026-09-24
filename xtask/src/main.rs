@@ -379,8 +379,6 @@ fn build(verbose: bool, target: Targets, name: String) -> Result<()> {
     let args = vec![
         "build",
         "-Z",
-        "build-std=std,core,panic_abort",
-        "-Z",
         "build-std-features=optimize_for_size",
         "-Z",
         "trim-paths",
