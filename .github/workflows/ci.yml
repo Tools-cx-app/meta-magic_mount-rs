@@ -71,7 +71,8 @@ jobs:
       - name: Setup Rust toolchain
         if: ${{ matrix.target == 'riscv64' }}
         run: |
-          rustup toolchain install nightly --profile minimal --component rust-src,rustc-codegen-cranelift-preview
+          rustup toolchain install nightly --profile minimal --component rust-src --component rustc-codegen-cranelift-preview
+          rustup default nightly
       - name: Install pnpm
         uses: pnpm/action-setup@v6.0.10
         with:
