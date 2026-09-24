@@ -1,10 +1,11 @@
 # Copyright (C) 2026 meta-magic_mount-rs developers
 # SPDX-License-Identifier: GPL-v3
 
-inlineHeader = """
-Copyright (C) {{props["year"]}} meta-magic_mount-rs developers
-SPDX-License-Identifier: GPL-v3
-"""
+[header]
+text = "Copyright (C) {{props.inception_year}} {{props.copyright_owner}}\nSPDX-License-Identifier: GPL-v3"
+
+[files]
+root = "{{ config_dir }}"
 excludes = [
   ".github/bot/requirements.txt", 
   ".hintrc",
@@ -12,5 +13,6 @@ excludes = [
   "module/libs/"
 ]
 
-[properties]
-year = 2026
+[props]
+inception_year = 2026
+copyright_owner = "meta-magic_mount-rs developers"
