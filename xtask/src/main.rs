@@ -293,11 +293,11 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
         Targets::Riscv64 => {
             let riscv64 = bin_path.join("riscv64").join("magic_mount_rs");
 
-            let _ = fs::create_dir_all(riscv64);
+            let _ = fs::create_dir_all(riscv64.parent().unwrap());
 
             file::copy(
                 riscv64_bin_path(),
-                riscv64,
+                &riscv64,
                 &file::CopyOptions::new().overwrite(true),
             )?;
         }
@@ -305,10 +305,12 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
             let arm64_v8a = bin_path.join("arm64-v8a").join("magic_mount_rs");
             let armeabi_v7a = bin_path.join("armeabi-v7a").join("magic_mount_rs");
             let x86_64 = bin_path.join("x86_64").join("magic_mount_rs");
+            let riscv64 = bin_path.join("riscv64").join("magic_mount_rs");
 
             let _ = fs::create_dir_all(arm64_v8a.parent().unwrap());
             let _ = fs::create_dir_all(armeabi_v7a.parent().unwrap());
             let _ = fs::create_dir_all(x86_64.parent().unwrap());
+            let _ = fs::create_dir_all(riscv64.parent().unwrap());
 
             file::copy(
                 armv7_bin_path(),
@@ -323,6 +325,11 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
             file::copy(
                 x86_64_bin_path(),
                 &x86_64,
+                &file::CopyOptions::new().overwrite(true),
+            )?;
+            file::copy(
+                riscv64_bin_path(),
+                &riscv64,
                 &file::CopyOptions::new().overwrite(true),
             )?;
         }
