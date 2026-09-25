@@ -707,7 +707,7 @@ dependencies = [
 
 [[package]]
 name = "magic_mount_rs"
-version = "4.0.9"
+version = "4.0.10"
 dependencies = [
  "android_logger",
  "anyhow",
