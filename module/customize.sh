@@ -22,6 +22,10 @@ x64)
   ui_print " - Selected architecture: x86_64"
   ARCH_BINARY="x86_64"
   ;;
+riscv64)
+  ui_print " - Selected architecture: riscv64"
+  ARCH_BINARY="riscv64"
+  ;;
 *)
   abort "! Unsupported platform: $ABI"
   ;;

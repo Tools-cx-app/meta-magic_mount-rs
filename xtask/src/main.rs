@@ -48,11 +48,12 @@ struct Cli {
     command: Commands,
 }
 
-#[derive(Debug, ValueEnum, Copy, Clone)]
+#[derive(Debug, ValueEnum, PartialEq, PartialOrd, Copy, Clone)]
 enum Targets {
     Arm64,
     Armv7,
     X86_64,
+    Riscv64,
     Universal,
 }
 
@@ -102,6 +103,7 @@ impl Targets {
             Self::Arm64 => "arm64",
             Self::Armv7 => "armv7",
             Self::X86_64 => "x86_64",
+            Self::Riscv64 => "riscv64",
             Self::Universal => "universal",
         }
     }
@@ -288,14 +290,27 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
                 &file::CopyOptions::new().overwrite(true),
             )?;
         }
+        Targets::Riscv64 => {
+            let riscv64 = bin_path.join("riscv64").join("magic_mount_rs");
+
+            let _ = fs::create_dir_all(riscv64.parent().unwrap());
+
+            file::copy(
+                riscv64_bin_path(),
+                &riscv64,
+                &file::CopyOptions::new().overwrite(true),
+            )?;
+        }
         Targets::Universal => {
             let arm64_v8a = bin_path.join("arm64-v8a").join("magic_mount_rs");
             let armeabi_v7a = bin_path.join("armeabi-v7a").join("magic_mount_rs");
             let x86_64 = bin_path.join("x86_64").join("magic_mount_rs");
+            let riscv64 = bin_path.join("riscv64").join("magic_mount_rs");
 
             let _ = fs::create_dir_all(arm64_v8a.parent().unwrap());
             let _ = fs::create_dir_all(armeabi_v7a.parent().unwrap());
             let _ = fs::create_dir_all(x86_64.parent().unwrap());
+            let _ = fs::create_dir_all(riscv64.parent().unwrap());
 
             file::copy(
                 armv7_bin_path(),
@@ -310,6 +325,11 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
             file::copy(
                 x86_64_bin_path(),
                 &x86_64,
+                &file::CopyOptions::new().overwrite(true),
+            )?;
+            file::copy(
+                riscv64_bin_path(),
+                &riscv64,
                 &file::CopyOptions::new().overwrite(true),
             )?;
         }
@@ -375,23 +395,63 @@ fn build(verbose: bool, target: Targets, name: String) -> Result<()> {
         std::env::remove_var("MODULE_ID");
     }
 
-    let mut cargo = cargo_ndk(target);
-    let args = vec![
-        "build",
-        "-Z",
-        "build-std-features=optimize_for_size",
-        "-Z",
-        "trim-paths",
-        "-r",
-    ];
+    if target != Targets::Riscv64 {
+        let mut cargo = cargo_ndk(target);
+        let args = vec![
+            "build",
+            "-Z",
+            "build-std-features=optimize_for_size",
+            "-Z",
+            "trim-paths",
+            "-r",
+        ];
 
-    if verbose {
-        cargo.arg("--verbose");
+        if verbose {
+            cargo.arg("--verbose");
+        }
+
+        cargo.args(args);
+
+        cargo.spawn()?.wait()?;
+    } else {
+        let ndk = std::env::var("ANDROID_NDK_HOME")?;
+        let target = "riscv64-linux-android";
+        let llvm_path = format!("{ndk}/toolchains/llvm/prebuilt/linux-x86_64");
+        let llvm_bin = format!("{llvm_path}/bin");
+        let clang_path = format!("{llvm_bin}/{target}35-clang");
+        let utriple = target.replace('-', "_");
+        let uutriple = utriple.to_ascii_uppercase();
+        let mut cargo = Command::new("cargo");
+
+        cargo.args([
+            "+nightly",
+            "build",
+            "--release",
+            "--target",
+            target,
+            "-Z",
+            "build-std=std,panic_abort",
+        ]);
+        cargo.envs([
+            ("RUSTFLAGS", "-C default-linker-libraries"),
+            (&format!("CC_{utriple}"), &clang_path),
+            (&format!("CXX_{utriple}"), &format!("{clang_path}++")),
+            (&format!("AR_{utriple}"), &format!("{llvm_bin}/llvm-ar")),
+            (&format!("CARGO_TARGET_{uutriple}_LINKER"), &clang_path),
+            (
+                &format!("BINDGEN_EXTRA_CLANG_ARGS_{utriple}"),
+                &format!(
+                    "--sysroot={llvm_path}/sysroot -I{llvm_path}/sysroot/usr/include/{target}"
+                ),
+            ),
+        ]);
+
+        if verbose {
+            cargo.arg("--verbose");
+        }
+
+        cargo.spawn()?.wait()?;
     }
-
-    cargo.args(args);
-
-    cargo.spawn()?.wait()?;
 
     let module_dir = module_dir();
     dir::copy(
@@ -437,6 +497,13 @@ fn x86_64_bin_path() -> PathBuf {
         .join("magic_mount_rs")
 }
 
+fn riscv64_bin_path() -> PathBuf {
+    Path::new("target")
+        .join("riscv64-linux-android")
+        .join("release")
+        .join("magic_mount_rs")
+}
+
 fn cargo_ndk(target: Targets) -> Command {
     let mut command = Command::new("cargo");
     command
@@ -461,6 +528,7 @@ fn cargo_ndk(target: Targets) -> Command {
         Targets::X86_64 => {
             command.args(["-t", "x86_64"]);
         }
+        Targets::Riscv64 => unreachable!(),
         Targets::Universal => {
             command.args(["-t", "arm64-v8a", "-t", "x86_64", "-t", "armeabi-v7a"]);
         }
