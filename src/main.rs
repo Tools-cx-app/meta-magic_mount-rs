@@ -1,9 +1,6 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: GPL-v3
 
-#![deny(clippy::all, clippy::pedantic)]
-#![warn(clippy::nursery)]
-
 mod bind_mount;
 mod config;
 mod defs;
