@@ -26,6 +26,8 @@ jobs:
             rust-target: armv7-linux-androideabi
           - target: x86-64
             rust-target: x86_64-linux-android
+          - target: riscv64
+            rust-target: riscv64-linux-android
           - target: universal
             rust-target: x86_64-linux-android, aarch64-linux-android, armv7-linux-androideabi
     steps:
@@ -39,11 +41,17 @@ jobs:
           add-to-path: true
           local-cache: true
       - name: Setup Rust toolchain
+        if: ${{ matrix.target != 'riscv64' }}
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: nightly
           targets: ${{ matrix.rust-target }}
           components: rust-src, rustc-codegen-cranelift-preview
+      - name: Setup Rust toolchain
+        if: ${{ matrix.target == 'riscv64' || matrix.target == 'universal' }}
+        run: |
+          rustup toolchain install nightly --profile minimal --component rust-src --component rustc-codegen-cranelift-preview
+          rustup default nightly
       - name: Install pnpm
         uses: pnpm/action-setup@v6.0.10
         with:
@@ -56,6 +64,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: webui/pnpm-lock.yaml
       - name: Install cargo-ndk
+        if: ${{ matrix.target != 'riscv64' }}
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-ndk

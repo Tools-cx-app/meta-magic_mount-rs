@@ -413,7 +413,9 @@ fn build(verbose: bool, target: Targets, name: String) -> Result<()> {
         cargo.args(args);
 
         cargo.spawn()?.wait()?;
-    } else {
+    }
+
+    if target == Targets::Riscv64 || target == Targets::Universal {
         let ndk = std::env::var("ANDROID_NDK_HOME")?;
         let target = "riscv64-linux-android";
         let llvm_path = format!("{ndk}/toolchains/llvm/prebuilt/linux-x86_64");
