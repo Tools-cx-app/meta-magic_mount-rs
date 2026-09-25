@@ -293,7 +293,7 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
         Targets::Riscv64 => {
             let riscv64 = bin_path.join("riscv64").join("magic_mount_rs");
 
-            let _ = fs::create_dir_all(bin_path);
+            let _ = fs::create_dir_all(riscv64);
 
             file::copy(
                 riscv64_bin_path(),
