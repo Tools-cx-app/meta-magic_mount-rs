@@ -8,7 +8,7 @@ members = ["xtask"]
 
 [package]
 name = "magic_mount_rs"
-version = "4.0.8"
+version = "4.0.9"
 edition = "2024"
 description = "An implementation of a metamodule using Magic Mount, Based on MKSU, Template is from meta-overlay."
 authors = ["mmrs developers"]
