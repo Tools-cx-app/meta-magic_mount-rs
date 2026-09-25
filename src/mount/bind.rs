@@ -223,5 +223,5 @@ pub fn bind_mount(umount: bool, mounts: &mount_list::MountList) -> Result<()> {
 }
 
 #[cfg(test)]
-#[path = "../tests/unit/bind_mount.rs"]
+#[path = "../../tests/unit/bind_mount.rs"]
 mod tests;

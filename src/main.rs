@@ -1,7 +1,6 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: GPL-v3
 
-mod bind_mount;
 mod config;
 mod defs;
 mod errors;
@@ -14,11 +13,11 @@ mod utils;
 use rustix::mount::{MountFlags, mount};
 
 use crate::{
-    bind_mount::bind_mount,
     config::{Config, handle_gen_config, handle_save_config, handle_show_config},
     defs::MODULE_PATH,
     errors::Result,
     misc::{cleanup, emulated_soft_reboot},
+    mount::bind::bind_mount,
     utils::ksucalls::unmount,
 };
 
