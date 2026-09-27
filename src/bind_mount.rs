@@ -11,9 +11,10 @@ use rustix::mount::{MountFlags, UnmountFlags, mount_bind, mount_move, mount_remo
 
 use crate::{
     errors::Result,
-    mount::{magic_mount::utils::mount_mirror, mount_list},
+    ksucalls::send_unmountable,
+    magic_mount::mount_mirror,
+    mount_list,
     parser::{COMMAND_LIST, MountType},
-    utils::ksucalls::send_unmountable,
 };
 
 fn mirror_paths(target: &Path) -> Result<(PathBuf, PathBuf)> {
@@ -223,5 +224,5 @@ pub fn bind_mount(umount: bool, mounts: &mount_list::MountList) -> Result<()> {
 }
 
 #[cfg(test)]
-#[path = "../../tests/unit/bind_mount.rs"]
+#[path = "../tests/unit/bind_mount.rs"]
 mod tests;

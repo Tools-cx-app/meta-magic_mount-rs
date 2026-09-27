@@ -1,8 +1,6 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: GPL-v3
 
-pub mod ksucalls;
-
 use std::{
     fs::{self, create_dir_all},
     io::Write,
@@ -17,7 +15,7 @@ use regex_lite::Regex;
 use crate::{
     defs,
     errors::{Error, Result},
-    utils::ksucalls::KSU,
+    ksucalls::KSU,
 };
 
 /// Validate `module_id` format and security
@@ -140,5 +138,5 @@ pub fn update_desc(files: u32, symbols: u32) -> Result<()> {
 }
 
 #[cfg(test)]
-#[path = "../../tests/unit/utils.rs"]
+#[path = "../tests/unit/utils.rs"]
 mod tests;
