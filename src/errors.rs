@@ -17,8 +17,6 @@ pub enum Error {
     RegularDirectory { path: String },
     #[error("Invalid module ID: '{module_id:?}'. Must match /^[a-zA-Z][a-zA-Z0-9._-]+$/")]
     InvalidModuleID { module_id: String },
-    #[error("missing required --payload argument")]
-    MissingArgment,
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error(transparent)]

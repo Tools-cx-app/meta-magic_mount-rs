@@ -10,7 +10,7 @@ use serde_json::json;
 
 use crate::{
     defs,
-    errors::{Error, Result},
+    errors::Result,
     parser::{COMMAND_LIST, MountType, parser_custom},
 };
 
@@ -217,15 +217,6 @@ impl Config {
     }
 }
 
-pub fn parse_payload_arg(args: &[String]) -> Result<&str> {
-    let payload = args
-        .windows(2)
-        .find_map(|window| (window[0] == "--payload").then_some(window[1].as_str()))
-        .ok_or_else(|| Error::MissingArgment)?;
-
-    Ok(payload)
-}
-
 pub fn handle_show_config() -> Result<()> {
     let config = Config::load_or_default(defs::CONFIG_FILE);
     let (ignore_list, custom_mounts) = COMMAND_LIST.get().map_or_else(
@@ -254,8 +245,7 @@ pub fn handle_show_config() -> Result<()> {
     Ok(())
 }
 
-pub fn handle_save_config(args: &[String]) -> Result<()> {
-    let payload_hex = parse_payload_arg(args)?;
+pub fn handle_save_config(payload_hex: &str) -> Result<()> {
     let payload_json =
         String::from_utf8(decode(payload_hex)?).context("decoded payload is not valid utf-8")?;
     let payload: ApiConfigPayload =

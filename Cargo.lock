@@ -711,6 +711,7 @@ version = "4.0.10"
 dependencies = [
  "android_logger",
  "anyhow",
+ "clap",
  "const_format",
  "encoding_rs",
  "env_logger",

@@ -25,22 +25,6 @@ fn test_decode_hex_invalid_length_error() {
 }
 
 #[test]
-fn test_parse_payload_arg_success() {
-    let args = vec![
-        "magic_mount".to_string(),
-        "--payload".to_string(),
-        "7b7d".to_string(),
-    ];
-    assert_eq!(parse_payload_arg(&args).unwrap(), "7b7d");
-}
-
-#[test]
-fn test_parse_payload_arg_missing() {
-    let args = vec!["magic_mount".to_string(), "--wrong-flag".to_string()];
-    assert!(parse_payload_arg(&args).is_err());
-}
-
-#[test]
 fn test_format_custom_path() {
     assert_eq!(
         Config::format_custom_path("/system/bin/sh"),

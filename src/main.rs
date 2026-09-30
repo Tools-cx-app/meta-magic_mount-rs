@@ -13,6 +13,11 @@ mod parser;
 mod scanner;
 mod utils;
 
+#[cfg(test)]
+#[path = "../tests/unit/cli.rs"]
+mod cli_tests;
+
+use clap::{Parser, Subcommand};
 use rustix::mount::{MountFlags, mount};
 
 use crate::{
@@ -24,40 +29,69 @@ use crate::{
     misc::{cleanup, emulated_soft_reboot},
 };
 
+#[derive(Debug, Parser)]
+#[command(
+    about = "Magic Mount metamodule",
+    after_help = "With no subcommand, perform module mounts."
+)]
+struct Cli {
+    #[command(subcommand)]
+    command: Option<Commands>,
+}
+
+#[derive(Debug, PartialEq, Subcommand)]
+enum Commands {
+    /// Show the current configuration as JSON
+    ShowConfig,
+    /// Unmount persisted mounts for an emulated soft reboot
+    EmulatedSoftReboot,
+    /// Save a hex-encoded JSON configuration
+    SaveConfig {
+        #[arg(long, value_name = "HEX")]
+        payload: String,
+    },
+    /// Generate the default configuration
+    GenConfig,
+    /// List modules as JSON
+    Modules,
+    /// Show the version as JSON
+    Version,
+}
+
 fn main() -> Result<()> {
     #[cfg(not(any(target_os = "linux", target_os = "android")))]
     compile_error!("unsupported platform!");
 
+    let cli = Cli::parse();
+
     misc::pre_init();
 
-    let args: Vec<_> = std::env::args().collect();
     let config = Config::load(defs::CONFIG_FILE)?;
     let modules = scanner::list_modules(MODULE_PATH, &config.partitions);
 
-    if let Some(arg) = args.get(1) {
-        match arg.as_str() {
-            "show-config" => {
+    if let Some(command) = cli.command {
+        match command {
+            Commands::ShowConfig => {
                 handle_show_config()?;
             }
-            "emulated-soft-reboot" => {
+            Commands::EmulatedSoftReboot => {
                 emulated_soft_reboot()?;
             }
-            "save-config" => {
-                handle_save_config(&args[2..])?;
+            Commands::SaveConfig { payload } => {
+                handle_save_config(&payload)?;
             }
-            "gen-config" => {
+            Commands::GenConfig => {
                 handle_gen_config()?;
             }
-            "modules" => {
+            Commands::Modules => {
                 println!(
                     "{}",
                     serde_json::to_string_pretty(&scanner::show_modules(modules)?)?
                 );
             }
-            "version" => {
+            Commands::Version => {
                 println!("{{ \"version\": \"{}\" }}", env!("CARGO_PKG_VERSION"));
             }
-            _ => {}
         }
 
         return Ok(());
