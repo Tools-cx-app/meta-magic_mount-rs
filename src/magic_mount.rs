@@ -31,6 +31,10 @@ use crate::{
     utils::{ensure_dir_exists, lgetfilecon, lsetfilecon, validate_module_id},
 };
 
+static MOUNTDED_FILES: AtomicU32 = AtomicU32::new(0);
+static IGNORED_FILES: AtomicU32 = AtomicU32::new(0);
+static MOUNTDED_SYMBOLS_FILES: AtomicU32 = AtomicU32::new(0);
+
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub enum NodeFileType {
     RegularFile,
@@ -62,6 +66,15 @@ pub struct Node {
     pub module_path: Option<PathBuf>,
     pub replace: bool,
     pub skip: bool,
+}
+
+struct MagicMount<'a> {
+    node: Node,
+    path: PathBuf,
+    work_dir_path: PathBuf,
+    has_tmpfs: bool,
+    umount: bool,
+    mounts: &'a mount_list::MountList,
 }
 
 impl fmt::Debug for Node {
@@ -202,6 +215,7 @@ impl Node {
         None
     }
 }
+
 fn metadata_path<P>(path: P, node: &Node) -> Result<(Metadata, PathBuf)>
 where
     P: AsRef<Path>,
@@ -403,18 +417,6 @@ where
         src_symlink.display()
     );
     Ok(())
-}
-static MOUNTDED_FILES: AtomicU32 = AtomicU32::new(0);
-static IGNORED_FILES: AtomicU32 = AtomicU32::new(0);
-static MOUNTDED_SYMBOLS_FILES: AtomicU32 = AtomicU32::new(0);
-
-struct MagicMount<'a> {
-    node: Node,
-    path: PathBuf,
-    work_dir_path: PathBuf,
-    has_tmpfs: bool,
-    umount: bool,
-    mounts: &'a mount_list::MountList,
 }
 
 impl<'a> MagicMount<'a> {
