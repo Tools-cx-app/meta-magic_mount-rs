@@ -17,7 +17,7 @@ async def github_api(
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2026-03-10",
+        "X-GitHub-Api-Version": "2022-11-28",
     }
     url = GH_BASE_URL + settings.github_repository + endpoint
     async with AsyncClient() as client:
@@ -35,13 +35,27 @@ async def get_workflow_run(run_id: int) -> dict:
     return data
 
 
-async def list_workflow_runs(page: int = 1) -> dict:
+async def list_workflow_runs(
+    page: int = 1,
+    branch: str | None = None,
+    event: str | None = None,
+    status: str | None = None,
+    per_page: int = 100,
+) -> dict:
     logger.info(f"Listing workflow runs (page: {page})")
     from .gh_helpers import get_workflow_file
 
+    params: dict[str, str | int] = {"page": page, "per_page": per_page}
+    if branch:
+        params["branch"] = branch
+    if event:
+        params["event"] = event
+    if status:
+        params["status"] = status
+
     return await github_api(
         endpoint=f"/actions/workflows/{await get_workflow_file()}/runs",
-        params={"event": "push", "page": page},
+        params=params,
     )
 
 
@@ -52,9 +66,16 @@ async def get_latest_release() -> dict:
     return data
 
 
-async def compare_commit(base: str, head: str, page: int = 1) -> dict:
+async def compare_commit(
+    base: str, head: str, page: int = 1, per_page: int = 100
+) -> dict:
     logger.info(f"Getting commits between {base} and {head}")
     return await github_api(
         endpoint=f"/compare/{base}...{head}",
-        params={"page": page},
+        params={"page": page, "per_page": per_page},
     )
+
+
+async def get_commit(sha: str) -> dict:
+    logger.info(f"Getting commit: {sha}")
+    return await github_api(endpoint=f"/commits/{sha}")
