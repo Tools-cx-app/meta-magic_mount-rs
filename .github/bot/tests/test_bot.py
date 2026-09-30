@@ -210,5 +210,38 @@ class TestMsgGen(unittest.IsolatedAsyncioTestCase):
             msg = await generate_msg_ci()
             self.assertIn("single commit fallback", msg)
             self.assertIn("https://github.com/test/repo/commit/abcdef123456", msg)
+class TestTelegramPost(unittest.IsolatedAsyncioTestCase):
+    async def test_post_media_group_stream_not_reused(self):
+        from bot.telegram import post
+        with tempfile.NamedTemporaryFile("wb", delete=False) as f1, \
+             tempfile.NamedTemporaryFile("wb", delete=False) as f2, \
+             tempfile.NamedTemporaryFile("wb", delete=False) as f_empty:
+            f1.write(b"file1 content")
+            f2.write(b"file2 content")
+            p1, p2, p_empty = f1.name, f2.name, f_empty.name
+
+        try:
+            mock_bot = AsyncMock()
+            with patch("bot.telegram.telegram.Bot") as MockBotClass:
+                MockBotClass.return_value.__aenter__.return_value = mock_bot
+                # Pass p1, p2, and an empty file (which should be filtered out)
+                await post("caption test", [p1, p2, p_empty], "html")
+                
+                self.assertEqual(mock_bot.send_media_group.call_count, 1)
+                call_args = mock_bot.send_media_group.call_args
+                medias = call_args[0][1]
+                self.assertEqual(len(medias), 2)
+                # Check that both medias have non-empty InputFile
+                for m in medias:
+                    self.assertGreater(len(m.media.input_file_content), 0)
+                # Caption should be on the last media
+                self.assertIsNone(medias[0].caption)
+                self.assertEqual(medias[1].caption, "caption test")
+        finally:
+            for p in (p1, p2, p_empty):
+                if os.path.exists(p):
+                    os.remove(p)
+
+
 if __name__ == "__main__":
     unittest.main()
