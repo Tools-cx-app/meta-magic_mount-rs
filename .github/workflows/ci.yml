@@ -138,6 +138,9 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           RUN_NO: ${{ github.run_number }}
           RUN_ID: ${{ github.run_id }}
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
           if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ]; then
             exit 0

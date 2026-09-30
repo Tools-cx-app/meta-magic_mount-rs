@@ -7,15 +7,18 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    bot_token: str
-    chat_id: int
-    run_no: int
-    run_id: int
-    github_repository: str
-    github_token: str
-    github_sha: str
+    bot_token: str = ""
+    chat_id: int = 0
+    run_no: int = 0
+    run_id: int = 0
+    github_repository: str = ""
+    github_token: str = ""
+    github_sha: str = ""
     is_release: bool = False
-
+    github_event_path: str | None = None
+    github_event_name: str | None = None
+    github_ref_name: str | None = None
+    github_ref: str | None = None
 
 @dataclass
 class _Cache:
