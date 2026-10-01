@@ -1,12 +1,15 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: GPL-v3
 
-use std::{fmt, fs, path::Path, sync::OnceLock};
+use std::{
+    fmt, fs,
+    path::{Path, PathBuf},
+    sync::OnceLock,
+};
 
-use parking_lot::Mutex;
+use rustc_hash::FxHashSet;
 
 pub static COMMAND_LIST: OnceLock<Vec<MountType>> = OnceLock::new();
-static FILES: Mutex<Vec<String>> = Mutex::new(Vec::new());
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MountType {
@@ -27,152 +30,128 @@ pub fn parser_custom<P>(path: P) -> Vec<MountType>
 where
     P: AsRef<Path>,
 {
-    fs::read_to_string(path.as_ref()).map_or_else(|_| Vec::new(), |s| parse(&s))
+    Parser::default().parse_file(path.as_ref())
 }
 
+#[cfg(test)]
 fn parse(content: &str) -> Vec<MountType> {
-    let mut types = Vec::new();
-    for line in content.lines() {
-        let line = line.trim();
+    Parser::default().parse_content(content)
+}
 
-        if line.starts_with('#') || line.is_empty() {
-            continue;
-        }
+#[derive(Debug, PartialEq, Eq)]
+enum Command {
+    Bind { source: String, target: String },
+    Ignore { source: String },
+    Include { path: String },
+}
 
-        if line.starts_with("bind") {
-            match parse_bind(line) {
-                Some(s) => {
-                    log::debug!("new bind command: {s}");
-                    types.push(s);
-                }
-                None => {
-                    log::debug!("failed to parse {line}");
-                }
-            }
-        } else if line.starts_with("ignore") {
-            match parse_ignore(line) {
-                Some(s) => {
-                    log::debug!("new bind command: {s}");
-                    types.push(s);
-                }
-                None => {
-                    log::debug!("failed to parse {line}");
-                }
-            }
-        } else if line.starts_with("file") || line.starts_with("add") {
-            match parse_file(line) {
-                Some(s) => {
-                    if FILES.lock().contains(&s) {
-                        log::warn!("detected same file, skip {line} for solving loop");
+struct LexParser;
+
+impl LexParser {
+    fn tokenize(input: &str) -> Option<Vec<String>> {
+        let mut tokens = Vec::new();
+        let mut current = String::new();
+        let mut in_quote: Option<char> = None;
+        let mut started = false;
+
+        for ch in input.chars() {
+            match in_quote {
+                Some(quote) => {
+                    if ch == quote {
+                        in_quote = None;
                     } else {
-                        log::debug!("new file: {s}");
-                        FILES.lock().push(s.clone());
-                        match fs::read_to_string(&s) {
-                            Ok(s) => types.extend(parse(&s)),
-                            Err(e) => log::warn!("failed to read {s}: {e}"),
+                        current.push(ch);
+                    }
+                }
+                None => {
+                    if ch == '\'' || ch == '"' {
+                        in_quote = Some(ch);
+                        started = true;
+                    } else if ch.is_ascii_whitespace() {
+                        if started {
+                            tokens.push(std::mem::take(&mut current));
+                            started = false;
                         }
+                    } else {
+                        current.push(ch);
+                        started = true;
                     }
-                }
-                _ => {
-                    log::debug!("failed to parse {line}");
                 }
             }
         }
+        if in_quote.is_some() {
+            return None;
+        }
+        if started {
+            tokens.push(current);
+        }
+        Some(tokens)
     }
-
-    types
 }
 
-fn parse_path(input: &str) -> String {
-    let first = input.as_bytes()[0] as char;
-    let last = input.as_bytes()[input.len() - 1] as char;
-
-    let strings = if (first == '\'' && last == '"') || (first == '"' && last == '\'') {
-        log::error!("mixed quotes detected in path: {input}");
-        String::new()
-    } else if (first == '\'' || first == '"') && first == last {
-        input[1..input.len() - 1].to_string()
-    } else {
-        input.to_string()
-    };
-
-    strings.chars().filter(|c| !c.is_control()).collect()
+#[derive(Default)]
+struct Parser {
+    seen: FxHashSet<PathBuf>,
 }
 
-fn tokenize(input: &str) -> Vec<String> {
-    let mut tokens = Vec::new();
-    let mut current = String::new();
-    let mut in_quote: Option<char> = None;
-
-    for ch in input.chars() {
-        match in_quote {
-            Some(quote) => {
-                current.push(ch);
-                if ch == quote {
-                    in_quote = None;
-                }
-            }
-            None => {
-                if ch == '\'' || ch == '"' {
-                    in_quote = Some(ch);
-                    current.push(ch);
-                } else if ch.is_ascii_whitespace() {
-                    if !current.is_empty() {
-                        tokens.push(std::mem::take(&mut current));
-                    }
-                } else {
-                    current.push(ch);
-                }
-            }
+impl Parser {
+    // ponytail: add new commands here and in parse_content; the lexer stays command-agnostic.
+    fn parse_line(line: &str) -> Option<Command> {
+        let tokens = LexParser::tokenize(line)?;
+        let path = |index: usize| -> Option<String> {
+            let value: String = tokens
+                .get(index)?
+                .chars()
+                .filter(|c| !c.is_control())
+                .collect();
+            (!value.is_empty()).then_some(value)
+        };
+        match tokens.first()?.as_str() {
+            "bind" => Some(Command::Bind {
+                source: path(1)?,
+                target: path(2)?,
+            }),
+            "ignore" => Some(Command::Ignore { source: path(1)? }),
+            "file" | "add" => Some(Command::Include { path: path(1)? }),
+            _ => None,
         }
     }
-    if !current.is_empty() {
-        tokens.push(current);
-    }
-    tokens
-}
 
-fn parse_bind(input: &str) -> Option<MountType> {
-    let tokens = tokenize(input);
+    fn parse_content(&mut self, content: &str) -> Vec<MountType> {
+        let mut types = Vec::new();
+        for line in content
+            .lines()
+            .map(str::trim)
+            .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        {
+            match Self::parse_line(line) {
+                Some(Command::Bind { source, target }) => {
+                    types.push(MountType::Mount { source, target })
+                }
+                Some(Command::Ignore { source }) => types.push(MountType::Ignore { source }),
+                Some(Command::Include { path }) => types.extend(self.parse_file(Path::new(&path))),
+                None => log::debug!("failed to parse {line}"),
+            }
+        }
+        types
+    }
 
-    if tokens.len() < 3 || tokens[0] != "bind" {
-        return None;
-    }
-    let source = parse_path(&tokens[1]);
-    let target = parse_path(&tokens[2]);
-    if source.is_empty() || target.is_empty() {
-        log::debug!("missing source/target, skip");
-        None
-    } else {
-        Some(MountType::Mount { source, target })
-    }
-}
-
-fn parse_ignore(input: &str) -> Option<MountType> {
-    let tokens = tokenize(input);
-    if tokens.len() < 2 || tokens[0] != "ignore" {
-        return None;
-    }
-    let source = parse_path(&tokens[1]);
-    if source.is_empty() {
-        log::debug!("missing source, skip");
-        None
-    } else {
-        Some(MountType::Ignore { source })
-    }
-}
-
-fn parse_file(input: &str) -> Option<String> {
-    let tokens = tokenize(input);
-    if tokens.len() < 2 || (tokens[0] != "file" && tokens[0] != "add") {
-        return None;
-    }
-    let path = parse_path(&tokens[1]);
-    if path.is_empty() {
-        log::debug!("missing path, skip");
-        None
-    } else {
-        Some(path)
+    fn parse_file(&mut self, path: &Path) -> Vec<MountType> {
+        let identity = fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
+        if !self.seen.insert(identity) {
+            log::warn!(
+                "detected same file, skip {} for solving loop",
+                path.display()
+            );
+            return Vec::new();
+        }
+        match fs::read_to_string(path) {
+            Ok(content) => self.parse_content(&content),
+            Err(error) => {
+                log::warn!("failed to read {}: {error}", path.display());
+                Vec::new()
+            }
+        }
     }
 }
 
