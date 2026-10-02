@@ -64,6 +64,12 @@ function normalizeConfigPayload(payload: Record<string, unknown>): AppConfig {
     partitions: Array.isArray(payload.partitions)
       ? payload.partitions.filter((value): value is string => !!value)
       : [],
+    extra_mount: Array.isArray(payload.extra_mount)
+      ? payload.extra_mount.filter(
+          (value): value is string =>
+            typeof value === "string" && value.length > 0,
+        )
+      : [],
     ignoreList: ignoreListSource.filter(
       (value): value is string => typeof value === "string" && value.length > 0,
     ),
@@ -88,6 +94,7 @@ function normalizeConfigPayload(payload: Record<string, unknown>): AppConfig {
 const createStandardConfigPayload = (config: AppConfig) => ({
   mountsource: config.mountsource,
   partitions: config.partitions,
+  extra_mount: config.extra_mount,
   ignoreList: config.ignoreList,
   customMounts: config.customMounts
     .map((mount) => ({

@@ -12,6 +12,7 @@ export interface AppConfig {
   mountsource: string;
   umount: boolean;
   partitions: string[];
+  extra_mount: string[];
   ignoreList: string[];
   customMounts: CustomMount[];
 }

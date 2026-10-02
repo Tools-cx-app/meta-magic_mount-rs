@@ -67,7 +67,10 @@ fn main() -> Result<()> {
     misc::pre_init();
 
     let config = Config::load(defs::CONFIG_FILE)?;
-    let modules = scanner::list_modules(MODULE_PATH, &config.partitions);
+    let extra_mount = config.extra_mount_partitions(std::path::Path::new("/"));
+    let mut scan_partitions = config.partitions.clone();
+    scan_partitions.extend(extra_mount.iter().cloned());
+    let modules = scanner::list_modules(MODULE_PATH, &scan_partitions);
 
     if let Some(command) = cli.command {
         match command {
@@ -124,6 +127,7 @@ fn main() -> Result<()> {
         MODULE_PATH,
         &config.mountsource,
         &config.partitions,
+        &extra_mount,
         config.umount,
         &mounts,
     );

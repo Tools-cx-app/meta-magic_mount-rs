@@ -7,6 +7,7 @@ export const DEFAULT_CONFIG = {
   mountsource: "KSU",
   umount: true,
   partitions: [],
+  extra_mount: [],
   ignoreList: [],
   customMounts: [],
 };

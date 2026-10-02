@@ -35,6 +35,10 @@ static MOUNTDED_FILES: AtomicU32 = AtomicU32::new(0);
 static IGNORED_FILES: AtomicU32 = AtomicU32::new(0);
 static MOUNTDED_SYMBOLS_FILES: AtomicU32 = AtomicU32::new(0);
 
+#[cfg(test)]
+#[path = "../tests/unit/magic_mount.rs"]
+mod tests;
+
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub enum NodeFileType {
     RegularFile,
@@ -307,6 +311,7 @@ where
 pub fn collect_module_files(
     module_dir: &Path,
     extra_partitions: &[String],
+    extra_mount: &[String],
 ) -> Result<Option<Node>> {
     let mut root = Node::new_root("");
     let mut system = Node::new_root("system");
@@ -346,14 +351,25 @@ pub fn collect_module_files(
         }
 
         let mod_system = entry.path().join("system");
-        if !mod_system.is_dir() {
-            log::debug!("{id} due not modify system");
-            continue;
+        if mod_system.is_dir() {
+            log::debug!("collecting {}", mod_system.display());
+            has_file |= system.collect_module_files(&mod_system)?;
         }
 
-        log::debug!("collecting {}", entry.path().display());
-
-        has_file |= system.collect_module_files(&mod_system)?;
+        for partition in extra_mount {
+            let path = entry.path().join(partition);
+            if path.is_dir() {
+                log::debug!("collecting extra_mount {}", path.display());
+                let node = root.children.entry(partition.clone()).or_insert_with(|| {
+                    let mut node = Node::new_root(partition);
+                    node.module_path = Some(path.clone());
+                    node.replace = Node::dir_is_replace(&path);
+                    node.skip = Node::dir_is_skip(&path);
+                    node
+                });
+                has_file |= node.collect_module_files(&path)? || node.replace;
+            }
+        }
     }
 
     if has_file {
@@ -370,7 +386,7 @@ pub fn collect_module_files(
             if path_of_root.is_dir() && (!require_symlink || path_of_system.is_symlink()) {
                 let name = partition.to_string();
                 if let Some(node) = system.children.remove(&name) {
-                    root.children.insert(name, node);
+                    root.children.entry(name).or_insert(node);
                 }
             }
         }
@@ -391,7 +407,7 @@ pub fn collect_module_files(
                 let name = partition.clone();
                 if let Some(node) = system.children.remove(&name) {
                     log::debug!("attach extra partition '{name}' to root");
-                    root.children.insert(name, node);
+                    root.children.entry(name).or_insert(node);
                 }
             }
         }
@@ -705,13 +721,14 @@ pub fn magic_mount<P>(
     module_dir: P,
     mount_source: &str,
     extra_partitions: &[String],
+    extra_mount: &[String],
     umount: bool,
     mounts: &mount_list::MountList,
 ) -> Result<()>
 where
     P: AsRef<Path>,
 {
-    if let Some(root) = collect_module_files(module_dir.as_ref(), extra_partitions)? {
+    if let Some(root) = collect_module_files(module_dir.as_ref(), extra_partitions, extra_mount)? {
         log::debug!("collected: {root:?}");
         let tmp_root = Path::new("/debug_ramdisk");
         let tmp_dir = tmp_root.join("workdir");

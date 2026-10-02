@@ -4,3 +4,4 @@
 mountsource = "KSU"
 umount = false
 partitions = []
+extra_mount = []

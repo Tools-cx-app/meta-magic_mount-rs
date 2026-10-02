@@ -25,6 +25,7 @@ pub struct ApiConfig {
     pub moduledir: String,
     pub mountsource: String,
     pub partitions: Vec<String>,
+    pub extra_mount: Vec<String>,
     pub umount: bool,
     pub disable_umount: bool,
     #[serde(rename = "ignoreList")]
@@ -37,6 +38,7 @@ pub struct ApiConfig {
 pub struct ApiConfigPayload {
     pub mountsource: Option<String>,
     pub partitions: Option<Vec<String>>,
+    pub extra_mount: Option<Vec<String>>,
     pub umount: Option<bool>,
     pub disable_umount: Option<bool>,
     #[serde(rename = "ignoreList", alias = "ignore_list")]
@@ -50,6 +52,8 @@ pub struct Config {
     #[serde(default = "default_mountsource")]
     pub mountsource: String,
     pub partitions: Vec<String>,
+    #[serde(default)]
+    pub extra_mount: Vec<String>,
     pub umount: bool,
 }
 
@@ -71,12 +75,41 @@ impl Default for Config {
         Self {
             mountsource: default_mountsource(),
             partitions: Vec::new(),
+            extra_mount: Vec::new(),
             umount: false,
         }
     }
 }
 
 impl Config {
+    pub fn extra_mount_partitions(&self, root: &Path) -> Vec<String> {
+        let mut partitions = Vec::new();
+        for name in &self.extra_mount {
+            if name.is_empty()
+                || matches!(name.as_str(), "." | ".." | "system")
+                || name.contains(['/', '\0'])
+            {
+                log::warn!("invalid extra_mount partition: {name:?}");
+                continue;
+            }
+            if partitions.contains(name) {
+                continue;
+            }
+            if !root.join(name).is_dir() {
+                log::warn!("extra_mount {name}: target is not an existing directory");
+                continue;
+            }
+            match fs::symlink_metadata(root.join("system").join(name)) {
+                Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+                    partitions.push(name.clone());
+                }
+                Ok(_) => log::warn!("extra_mount {name}: /system entry already exists"),
+                Err(err) => log::warn!("extra_mount {name}: cannot check /system entry: {err}"),
+            }
+        }
+        partitions
+    }
+
     const fn umount_enabled(&self) -> bool {
         self.umount
     }
@@ -193,6 +226,7 @@ impl Config {
             moduledir: defs::MODULE_PATH.trim_end_matches('/').to_string(),
             mountsource: self.mountsource,
             partitions: self.partitions,
+            extra_mount: self.extra_mount,
             umount: umount_enabled,
             disable_umount: !umount_enabled,
             ignore_list,
@@ -207,6 +241,10 @@ impl Config {
 
         if let Some(partitions) = payload.partitions {
             self.partitions = partitions;
+        }
+
+        if let Some(extra_mount) = payload.extra_mount {
+            self.extra_mount = extra_mount;
         }
 
         if let Some(umount) = payload.umount {

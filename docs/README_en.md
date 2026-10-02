@@ -53,6 +53,7 @@ Example:
 mountsource = "KSU"
 umount = false
 partitions = []
+extra_mount = []
 ```
 
 | Field | Description |
@@ -62,7 +63,9 @@ partitions = []
 | `partitions` | A list of specific partitions to perform Systemless operations on, e.g. `"mi_ext"`, `"my_stock"`. |
 | `tmpfsdir` | Temporary directory, default is `/debug_ramdisk`. This option is optional. |
 
-Configuration can also be performed via the Web UI (recommended).
+`extra_mount` defaults to `[]`. For example, `extra_mount = ["my_product"]` merges `<module>/my_product/` into `/my_product/`, rather than reading `<module>/system/my_product/`. The target directory must exist and `/system/my_product` must have no entry, including a dangling symlink. Use single-level partition names, not paths; invalid entries are logged and skipped. Modules without `system/` are supported; `disable`, `remove`, and `skip_mount` still apply. Edit the configuration file and reboot to apply changes.
+
+Other settings can also be changed via the Web UI (recommended). It preserves `extra_mount` but has no editor for it.
 
 ---
 
