@@ -10,6 +10,7 @@ import { ICONS } from "../icons";
 const props = defineProps<{
   values: string[];
   placeholder?: string;
+  validate?: (value: string) => boolean;
 }>();
 
 const emit = defineEmits<{
@@ -21,6 +22,7 @@ const inputValue = ref("");
 function handleAdd() {
   const value = inputValue.value.trim();
   if (value && !props.values.includes(value)) {
+    if (props.validate && !props.validate(value)) return;
     emit("update:values", [...props.values, value]);
     inputValue.value = "";
   }

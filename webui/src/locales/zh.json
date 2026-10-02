@@ -37,6 +37,9 @@
     "refresh": "刷新"
   },
   "config": {
+    "extraMount": "额外挂载分区（模块顶层）",
+    "extraMountDesc": "将 <模块>/my_product/ 合并到 /my_product/。每次填写一个分区名，不填写路径。目标目录必须存在，且 /system/my_product 不得有任何目录项（包括悬空符号链接）。保存后重启生效。",
+    "extraMountInvalid": "请输入单级分区名，不能包含路径、NUL 字符，也不能是 .、.. 或 system。",
     "title": "配置",
     "umountLabel": "开启 Umount",
     "umountOff": "默认",

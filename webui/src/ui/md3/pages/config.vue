@@ -13,6 +13,7 @@ import { ICONS } from "../icons";
 import { configStore } from "../../../lib/stores/configStore";
 import type { CustomMount } from "../../../lib/types";
 import { uiStore } from "../../../lib/stores/uiStore";
+import { isValidExtraMount } from "../../../lib/extraMount";
 
 const { t } = useI18n();
 
@@ -135,6 +136,12 @@ function reload() {
   void configStore.loadConfig().then(() => {
     initialConfigStr.value = JSON.stringify(configStore.config);
   });
+}
+
+function validateExtraMount(value: string) {
+  if (isValidExtraMount(value)) return true;
+  toast(t("config.extraMountInvalid"));
+  return false;
 }
 
 function save() {
@@ -346,6 +353,29 @@ function save() {
           :values="configStore.config.partitions"
           placeholder="e.g. product, system_ext..."
           @update:values="(values) => updateConfig('partitions', values)"
+        />
+      </div>
+    </section>
+
+    <section class="config-group">
+      <div class="config-card">
+        <div class="card-header">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <path :d="ICONS.storage" />
+            </svg>
+          </div>
+          <div class="card-text">
+            <span class="card-title">{{ t("config.extraMount") }}</span>
+            <span class="card-desc">{{ t("config.extraMountDesc") }}</span>
+          </div>
+        </div>
+
+        <ChipInput
+          :values="configStore.config.extra_mount"
+          placeholder="my_product"
+          :validate="validateExtraMount"
+          @update:values="(values) => updateConfig('extra_mount', values)"
         />
       </div>
     </section>

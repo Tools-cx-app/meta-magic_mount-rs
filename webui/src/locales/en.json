@@ -37,6 +37,9 @@
     "refresh": "Refresh"
   },
   "config": {
+    "extraMount": "Top-level Partition Mounts",
+    "extraMountDesc": "Merge <module>/my_product/ into /my_product/. Enter one partition name, not a path. The target directory must exist and /system/my_product must have no entry, including dangling symlinks. Save and reboot to apply.",
+    "extraMountInvalid": "Enter a single partition name: paths, ., .., system and NUL characters are not allowed.",
     "title": "Configuration",
     "umountLabel": "Enable Unmount",
     "umountOff": "Default",

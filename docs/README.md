@@ -48,7 +48,7 @@ extra_mount = []
 
 `extra_mount` 默认 `[]`。例如 `extra_mount = ["my_product"]` 将 `<模块>/my_product/` 内容合并挂载到 `/my_product/`，不从 `<模块>/system/my_product/` 读取。要求目标目录已存在，且 `/system/my_product` 完全没有目录项（包括悬空符号链接）。只填写单级分区名，不填写路径；无效条目记录日志并跳过。没有 `system/` 的模块也受支持，仍遵循 `disable`、`remove` 和 `skip_mount` 标记。编辑配置后重启生效。
 
-其他配置也可通过 WEBUI 修改（推荐）；WEBUI 会保留 `extra_mount`，但暂不提供其编辑控件。
+也可通过 WEBUI 配置页修改（推荐）；MiuiX 和 MD3 均提供“额外挂载分区（模块顶层）”编辑控件，支持添加和删除 `extra_mount` 分区名。保存后重启生效。
 
 ---
 

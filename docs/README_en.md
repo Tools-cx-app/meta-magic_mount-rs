@@ -65,7 +65,7 @@ extra_mount = []
 
 `extra_mount` defaults to `[]`. For example, `extra_mount = ["my_product"]` merges `<module>/my_product/` into `/my_product/`, rather than reading `<module>/system/my_product/`. The target directory must exist and `/system/my_product` must have no entry, including a dangling symlink. Use single-level partition names, not paths; invalid entries are logged and skipped. Modules without `system/` are supported; `disable`, `remove`, and `skip_mount` still apply. Edit the configuration file and reboot to apply changes.
 
-Other settings can also be changed via the Web UI (recommended). It preserves `extra_mount` but has no editor for it.
+Settings can also be changed on the Web UI configuration page (recommended). Both MiuiX and MD3 provide a “Top-level Partition Mounts” editor to add and remove `extra_mount` partition names. Save and reboot to apply changes.
 
 ---
 

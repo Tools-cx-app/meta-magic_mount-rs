@@ -37,6 +37,9 @@
     "refresh": "刷新"
   },
   "config": {
+    "extraMount": "額外掛載分割區（模組頂層）",
+    "extraMountDesc": "將 <模組>/my_product/ 合併至 /my_product/。每次填寫一個分割區名稱，不填寫路徑。目標目錄必須存在，且 /system/my_product 不得有任何目錄項目（包括懸空符號連結）。儲存後重新啟動生效。",
+    "extraMountInvalid": "請輸入單層分割區名稱，不能包含路徑、NUL 字元，也不能是 .、.. 或 system。",
     "title": "配置",
     "umountLabel": "開啓 Umount",
     "umountOff": "默認",

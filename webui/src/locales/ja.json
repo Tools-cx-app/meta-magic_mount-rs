@@ -37,6 +37,9 @@
     "refresh": "更新"
   },
   "config": {
+    "extraMount": "モジュール直下のパーティションマウント",
+    "extraMountDesc": "<モジュール>/my_product/ を /my_product/ に統合します。パスではなくパーティション名を1つずつ入力してください。対象ディレクトリが存在し、/system/my_product にはリンク切れを含むエントリがないことが必要です。保存後に再起動すると適用されます。",
+    "extraMountInvalid": "単一階層のパーティション名を入力してください。パス、.、..、system、NUL 文字は使用できません。",
     "title": "設定",
     "umountLabel": "Umount を有効化",
     "umountOff": "デフォルト",

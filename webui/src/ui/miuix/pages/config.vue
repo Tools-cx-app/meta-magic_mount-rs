@@ -44,6 +44,7 @@ import { configStore } from "../../../lib/stores/configStore";
 import { DEFAULT_CONFIG } from "../../../lib/constants";
 import type { CustomMount } from "../../../lib/types";
 import { uiStore } from "../../../lib/stores/uiStore";
+import { isValidExtraMount } from "../../../lib/extraMount";
 
 const { t } = useI18n();
 
@@ -51,6 +52,7 @@ const display_list = ref<string[]>([]);
 const lang_code = ref<string[]>([]);
 const lang_dropdown_index = ref(0);
 const partition = ref("");
+const extraMount = ref("");
 const ignorepath = ref("");
 
 const current_lang = ref(0);
@@ -139,6 +141,25 @@ function handle_add_ignorepath() {
   configStore.config.ignoreList.push(ignorepath.value);
   ignorepath.value = "";
   updateConfig("ignoreList", configStore.config.ignoreList);
+}
+
+function addExtraMount() {
+  const name = extraMount.value.trim();
+  if (!isValidExtraMount(name)) {
+    showSnackbar({ message: t("config.extraMountInvalid") });
+    return;
+  }
+  if (!configStore.config.extra_mount.includes(name)) {
+    updateConfig("extra_mount", [...configStore.config.extra_mount, name]);
+  }
+  extraMount.value = "";
+}
+
+function removeExtraMount(index: number) {
+  updateConfig(
+    "extra_mount",
+    configStore.config.extra_mount.filter((_, i) => i !== index),
+  );
 }
 
 function removePartition(index: number) {
@@ -315,6 +336,40 @@ function saveCustomMountDialog() {
           single-line
         />
         <MiuixIconButton v-if="partition" @click="handle_add_partition()">
+          <MiuixIcon :icon="Add" :size="24" />
+        </MiuixIconButton>
+      </div>
+    </MiuixCard>
+    <MiuixCard class="ex-card">
+      <MiuixBasicComponent
+        :title="t('config.extraMount')"
+        :summary="t('config.extraMountDesc')"
+      >
+        <template #start>
+          <MiuixIcon :icon="Layers" />
+        </template>
+      </MiuixBasicComponent>
+      <div v-if="configStore.config.extra_mount.length > 0" class="chip-list">
+        <RemoveableLabel
+          v-for="(name, index) in configStore.config.extra_mount"
+          :key="index"
+          :text="name"
+          @remove="removeExtraMount(index)"
+        />
+      </div>
+      <div style="display: flex; padding: 0 16px 16px">
+        <MiuixInput
+          v-model="extraMount"
+          :label="t('config.extraMount')"
+          placeholder="my_product"
+          single-line
+          @keydown.enter.prevent="addExtraMount"
+        />
+        <MiuixIconButton
+          v-if="extraMount"
+          :aria-label="t('config.extraMount')"
+          @click="addExtraMount"
+        >
           <MiuixIcon :icon="Add" :size="24" />
         </MiuixIconButton>
       </div>
