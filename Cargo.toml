@@ -68,9 +68,6 @@ codegen-backend = "cranelift"
 [target.'cfg(target_os = "android")'.dependencies]
 android_logger = "0.15.1"
 
-[target.'cfg(any(target_os = "linux", target_os = "android"))'.dependencies]
-ksu = { git = "https://github.com/Tools-cx-app/ksu.git", version = "0.2.0" }
-
 [target.'cfg(not(target_os = "android"))'.dependencies]
 env_logger = "0.11.11"
 

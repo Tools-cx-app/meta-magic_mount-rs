@@ -15,7 +15,7 @@ use regex_lite::Regex;
 use crate::{
     defs,
     errors::{Error, Result},
-    ksucalls::KSU,
+    ksucalls,
 };
 
 /// Validate `module_id` format and security
@@ -103,11 +103,7 @@ pub fn update_desc(files: u32, symbols: u32) -> Result<()> {
         files + symbols
     );
 
-    let cmd = if KSU.load(std::sync::atomic::Ordering::Relaxed) {
-        "ksud"
-    } else {
-        "apd"
-    };
+    let cmd = if ksucalls::check_ksu() { "ksud" } else { "apd" };
 
     let output = Command::new(cmd)
         .args([
