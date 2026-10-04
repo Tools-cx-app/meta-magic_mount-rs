@@ -10,7 +10,6 @@ use std::{
 
 #[test]
 fn late_load_detects_only_bit_two_and_returns_false_on_probe_failure() {
-    let ksu_before = KSU.load(Ordering::Relaxed);
     for (flags, expected) in [(0, false), (1, false), (2, false), (4, true), (7, true)] {
         assert_eq!(
             check_late_load_with(|_, cmd| {
@@ -30,7 +29,6 @@ fn late_load_detects_only_bit_two_and_returns_false_on_probe_failure() {
         cmd.flags = 4;
         Ok(())
     }));
-    assert_eq!(KSU.load(Ordering::Relaxed), ksu_before);
 }
 
 #[test]

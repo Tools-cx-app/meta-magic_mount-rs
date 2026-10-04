@@ -6,10 +6,7 @@ use std::{
     fs, io,
     os::{fd::RawFd, unix::ffi::OsStrExt},
     path::{Path, PathBuf},
-    sync::{
-        OnceLock,
-        atomic::{AtomicBool, Ordering},
-    },
+    sync::OnceLock,
 };
 
 use anyhow::Context;
@@ -17,7 +14,6 @@ use parking_lot::{Mutex, const_mutex};
 
 use crate::errors::Result;
 
-pub static KSU: AtomicBool = AtomicBool::new(false);
 static DRIVER_FD: OnceLock<RawFd> = OnceLock::new();
 static LIST: Mutex<Vec<PathBuf>> = const_mutex(Vec::new());
 
@@ -140,8 +136,8 @@ fn add_umount_with(
     })
 }
 
-pub fn check_ksu() {
-    let status = match get_info_with(ksuctl) {
+pub fn check_ksu() -> bool {
+    match get_info_with(ksuctl) {
         Ok(info) => {
             log::info!("KernelSU Version: {}", info.version);
             true
@@ -150,8 +146,7 @@ pub fn check_ksu() {
             log::debug!("KernelSU detection failed: {error}");
             false
         }
-    };
-    KSU.store(status, Ordering::Relaxed);
+    }
 }
 
 fn check_late_load_with(call: impl FnMut(u32, &mut GetInfoCmd) -> io::Result<()>) -> bool {
@@ -166,7 +161,7 @@ pub fn send_unmountable<P>(target: P)
 where
     P: AsRef<Path>,
 {
-    if !KSU.load(Ordering::Relaxed) {
+    if !check_ksu() {
         return;
     }
 
@@ -174,7 +169,7 @@ where
 }
 
 pub fn unmount() -> Result<()> {
-    if KSU.load(Ordering::Relaxed) {
+    if check_ksu() {
         let mut control = LIST.lock();
         for target in control.iter() {
             add_umount_with(target, |cmd| ksuctl(MANAGE_TRY_UMOUNT, cmd))?;
