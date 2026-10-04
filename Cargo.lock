@@ -644,20 +644,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a4933f3f57a8e9d9da04db23fb153356ecaf00cbd14aee46279c33dc80925c37"
 
 [[package]]
-name = "ksu"
-version = "0.2.0"
-source = "git+https://github.com/Tools-cx-app/ksu.git#cedc38071c8cf0e84e6b601201bfc836ba563f1f"
-dependencies = [
- "anyhow",
- "bitflags 2.13.0",
- "libc",
- "linux-raw-sys",
- "log",
- "rustix",
- "thiserror",
-]
-
-[[package]]
 name = "lazy_static"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -718,7 +704,6 @@ dependencies = [
  "extattr",
  "hex",
  "java-properties",
- "ksu",
  "libc",
  "log",
  "parking_lot",
