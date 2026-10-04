@@ -9,6 +9,31 @@ use std::{
 };
 
 #[test]
+fn late_load_detects_only_bit_two_and_returns_false_on_probe_failure() {
+    let ksu_before = KSU.load(Ordering::Relaxed);
+    for (flags, expected) in [(0, false), (1, false), (2, false), (4, true), (7, true)] {
+        assert_eq!(
+            check_late_load_with(|_, cmd| {
+                cmd.flags = flags;
+                Ok(())
+            }),
+            expected
+        );
+    }
+    assert!(!check_late_load_with(|_, _| Err(
+        io::Error::from_raw_os_error(libc::ENOTTY)
+    )));
+    assert!(check_late_load_with(|request, cmd| {
+        if request == 0x80104b02 {
+            return Err(io::Error::from_raw_os_error(libc::ENOTTY));
+        }
+        cmd.flags = 4;
+        Ok(())
+    }));
+    assert_eq!(KSU.load(Ordering::Relaxed), ksu_before);
+}
+
+#[test]
 fn commands_match_kernel_abi() {
     assert_eq!(mem::size_of::<GetInfoCmd>(), 16);
     assert_eq!(mem::offset_of!(GetInfoCmd, uapi_version), 12);

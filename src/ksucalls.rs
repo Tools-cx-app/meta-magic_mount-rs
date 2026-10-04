@@ -154,6 +154,14 @@ pub fn check_ksu() {
     KSU.store(status, Ordering::Relaxed);
 }
 
+fn check_late_load_with(call: impl FnMut(u32, &mut GetInfoCmd) -> io::Result<()>) -> bool {
+    get_info_with(call).is_ok_and(|info| info.flags & (1 << 2) != 0)
+}
+
+pub fn check_late_load() -> bool {
+    check_late_load_with(ksuctl)
+}
+
 pub fn send_unmountable<P>(target: P)
 where
     P: AsRef<Path>,

@@ -63,7 +63,7 @@ pub fn pre_init() {
     ksucalls::check_ksu();
     init_list();
 
-    if std::env::var("KSU_LATE_LOAD").is_ok() {
+    if ksucalls::check_late_load() || std::env::var("KSU_LATE_LOAD").is_ok() {
         log::info!("late load mode!!");
     }
 }
