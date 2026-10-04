@@ -21,9 +21,10 @@ pub static KSU: AtomicBool = AtomicBool::new(false);
 static DRIVER_FD: OnceLock<RawFd> = OnceLock::new();
 static LIST: Mutex<Vec<PathBuf>> = const_mutex(Vec::new());
 
-const GET_INFO: u32 = 0x80104b02;
-const GET_INFO_LEGACY: u32 = 0x80004b02;
-const MANAGE_TRY_UMOUNT: u32 = 0x40004b12;
+const GET_INFO: u32 = libc::_IOR::<GetInfoCmd>(b'K' as u32, 2) as u32;
+// These UAPI requests encode size 0 despite accepting command buffers.
+const GET_INFO_LEGACY: u32 = libc::_IOR::<()>(b'K' as u32, 2) as u32;
+const MANAGE_TRY_UMOUNT: u32 = libc::_IOW::<()>(b'K' as u32, 18) as u32;
 
 #[repr(C)]
 #[derive(Default)]
