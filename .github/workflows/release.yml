@@ -53,7 +53,7 @@ jobs:
           rustup toolchain install nightly --profile minimal --component rust-src --component rustc-codegen-cranelift-preview
           rustup default nightly
       - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.10
+        uses: pnpm/action-setup@v6.1.0
         with:
           run_install: false
           package_json_file: webui/package.json
