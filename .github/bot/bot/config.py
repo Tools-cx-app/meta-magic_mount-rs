@@ -17,5 +17,4 @@ New release available: **{name}**
 """
 TG_MSG_EXPECTED_PARSE_MODE_RELEASE = "markdown"
 
-GH_BASE_URL = "https://api.github.com/repos/"
 GH_CI_DIST_PATTERN = "./output/*.zip"

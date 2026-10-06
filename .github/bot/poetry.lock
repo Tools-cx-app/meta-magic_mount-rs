@@ -388,4 +388,4 @@ typing-extensions = ">=4.12.0"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "73e4efc16154bb849fcebc4414848b98f5960730652605809129f57599929235"
+content-hash = "301db6ad287fe31b62e55ed952d4db675e0f0d8efb9079f792eaa533b0899ee8"

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-v3
 
 from dataclasses import dataclass
+from pathlib import Path
 from logging import getLogger
 from pydantic_settings import BaseSettings
 
@@ -12,7 +13,6 @@ class Settings(BaseSettings):
     run_no: int = 0
     run_id: int = 0
     github_repository: str = ""
-    github_token: str = ""
     github_sha: str = ""
     is_release: bool = False
     github_event_path: str | None = None
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
 @dataclass
 class _Cache:
-    workflow_file: str | None = None
+    git_root: Path | None = None
 
 
 settings = Settings()   # type: ignore
