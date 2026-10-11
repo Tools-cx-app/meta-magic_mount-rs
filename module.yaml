@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/KernelSU-Modules/tools/main/schemas/module.schema.json
+schemaVersion: 1
+id: magic_mount_rs
+name: Magic Mount-rs
+summary: An implementation of a metamodule using Magic Mount, Based on MKSU, Template is from meta-overlay.
+icon: docs/mmrs.svg
+license: GPL-3.0-only
+metamodule: true
+description: docs/README.md
+starsRepository: Tools-cx-app/meta-magic_mount-rs
+homepage: https://github.com/Tools-cx-app/meta-magic_mount-rs
+support: https://github.com/Tools-cx-app/meta-magic_mount-rs/issues
+
+compatibility:
+  androidMinApi: 26
+  architectures:
+    - x86_64
+    - arm64-v8a
+    - armeabi-v7a
+    - riscv64
+
+tags:
+  - metamodule
+
+authors:
+  - name: mmrs developers
+
+release:
+  assetPattern: "magic_mount-rs-*-universal.zip"
