@@ -19,6 +19,7 @@ excludes = [
   "LICENSE",
   "webui/*.json",
   "webui/src/locales/*.json",
+  "module.yaml"
 ]
 
 [props]
