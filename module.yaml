@@ -3,7 +3,7 @@ schemaVersion: 1
 id: magic_mount_rs
 name: Magic Mount-rs
 summary: An implementation of a metamodule using Magic Mount, Based on MKSU, Template is from meta-overlay.
-icon: docs/mmrs.svg
+icon: module/launcher.png
 license: GPL-3.0
 metamodule: true
 description: docs/README.md
