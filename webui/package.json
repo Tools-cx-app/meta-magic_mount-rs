@@ -29,7 +29,7 @@
     "@typescript-eslint/parser": "^8.66.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/tsconfig": "^0.9.1",
-    "@vueuse/core": "^14.4.0",
+    "@vueuse/core": "^15.0.0",
     "axios": "^1.19.0",
     "eslint": "^10.8.1",
     "eslint-plugin-vue": "^10.10.0",
