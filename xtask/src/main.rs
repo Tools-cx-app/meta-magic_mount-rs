@@ -13,7 +13,7 @@ use anyhow::Result;
 use clap::{Parser, Subcommand, ValueEnum};
 use fs_extra::{dir, file};
 use serde::{Deserialize, Serialize};
-use zip::{CompressionMethod, write::FileOptions};
+use zip::{CompressionMethod, write::SimpleFileOptions};
 
 use sha2::{Digest, Sha256};
 use std::io::{BufReader, Read};
@@ -366,7 +366,7 @@ fn match_build(verbose: bool, target: Targets) -> Result<()> {
         }
     }
 
-    let options: FileOptions<'_, ()> = FileOptions::default()
+    let options = SimpleFileOptions::default()
         .compression_method(CompressionMethod::Deflated)
         .compression_level(Some(9));
     zip_create_from_directory_with_options(
