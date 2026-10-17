@@ -128,23 +128,10 @@ jobs:
           name: meta-mm-${{ github.run_number }}
           path: output/*.zip
           if-no-files-found: error
-      - name: Upload
+      - name: Upload to telegram 
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SHA: ${{ github.sha }}
-          RUN_NO: ${{ github.run_number }}
-          RUN_ID: ${{ github.run_id }}
-          GITHUB_EVENT_PATH: ${{ github.event_path }}
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-        run: |
-          if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ]; then
-            exit 0
-          fi
-          cd .github/bot
-          pip3 install -e .
-          cd ../..
-          python3 -m bot
+        uses: Tools-cx-app/telegram-upload-bot@master
+        with:
+          bot-token: ${{ secrets.BOT_TOKEN }}
+          chat-id: ${{ secrets.CHAT_ID }}
+          files: ./output/*.zip
