@@ -7,35 +7,29 @@ use std::{
     path::{Component, Path, PathBuf},
 };
 
-use zip::{
-    ZipWriter,
-    result::ZipResult,
-    write::{FileOptionExtension, FileOptions},
-};
+use zip::{ZipWriter, result::ZipResult, write::SimpleFileOptions};
 
 /// Creates a zip archive that contains the files and directories from the specified directory, uses the specified compression level.
-pub fn zip_create_from_directory_with_options<F, T>(
+pub fn zip_create_from_directory_with_options<F>(
     archive_file: &PathBuf,
     directory: &Path,
     cb_file_options: F,
 ) -> ZipResult<()>
 where
-    T: FileOptionExtension,
-    F: Fn(&PathBuf) -> FileOptions<T>,
+    F: Fn(&PathBuf) -> SimpleFileOptions,
 {
     let file = File::create(archive_file)?;
     let zip_writer = ZipWriter::new(file);
     create_from_directory_with_options(zip_writer, directory, cb_file_options)
 }
 
-fn create_from_directory_with_options<F, T>(
+fn create_from_directory_with_options<F>(
     mut zip_writer: ZipWriter<File>,
     directory: &Path,
     cb_file_options: F,
 ) -> ZipResult<()>
 where
-    T: FileOptionExtension,
-    F: Fn(&PathBuf) -> FileOptions<T>,
+    F: Fn(&PathBuf) -> SimpleFileOptions,
 {
     let mut paths_queue: Vec<PathBuf> = vec![];
     paths_queue.push(directory.to_path_buf());
