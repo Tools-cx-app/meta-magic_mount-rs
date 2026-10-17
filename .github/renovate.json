@@ -3,7 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "ignoreDeps": ["typescript"],
+  "ignoreDeps": ["typescript","pnpm"],
   "packageRules": [
     {
       "matchManagers": [
