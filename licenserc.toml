@@ -18,6 +18,7 @@ excludes = [
   "module/launcher.png",
   "LICENSE",
   "webui/*.json",
+  "webui/pnpm-lock.yaml",
   "webui/src/locales/*.json",
   "module.yaml"
 ]
