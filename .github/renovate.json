@@ -3,12 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "ignoreDeps": [
-    "typescript",
-    "pnpm"
-  ],
-  "automerge": true,
-  "automergeType": "pr",
+  "ignoreDeps": ["typescript","pnpm"],
   "packageRules": [
     {
       "matchManagers": [
