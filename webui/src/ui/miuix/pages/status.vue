@@ -12,6 +12,8 @@ import {
   MiuixBasicComponent,
   MiuixText,
 } from "miuix-vue";
+import Security from "vue-material-design-icons/Security.vue";
+import DeveloperBoard from "vue-material-design-icons/DeveloperBoard.vue";
 import StatusCard from "../components/StatusCard.vue";
 import { uiStore } from "../../../lib/stores/uiStore.ts";
 import { sysStore } from "../../../lib/stores/sysStore";
@@ -87,12 +89,20 @@ onMounted(async () => {
         clickable
         :title="t('status.kernelLabel')"
         :summary="sysStore.systemInfo.kernel"
-      />
+      >
+        <template #start>
+          <DeveloperBoard />
+        </template>
+      </MiuixBasicComponent>
       <MiuixBasicComponent
         clickable
         :title="t('status.selinuxLabel')"
         :summary="sysStore.systemInfo.selinux"
-      />
+      >
+        <template #start>
+          <Security />
+        </template>
+      </MiuixBasicComponent>
     </MiuixCard>
   </div>
 </template>
