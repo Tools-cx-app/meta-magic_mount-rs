@@ -52,27 +52,46 @@ extra_mount = []
 
 ---
 
-## 自定义规则
+## 自定义 Lua 钩子
 
-规则文件：`/data/adb/magic_mount/custom`
+Lua 5.4 钩子取代旧文本 DSL 和声明式规则。**不兼容变更：**
+`/data/adb/magic_mount/custom` 和 `/data/adb/magic_mount/custom.lua` 不再受支持，也不会被读取。
+请在重启前手动将旧规则转换为钩子，并将脚本移入 `/data/adb/magic_mount/lua/`。
+WebUI 已移除忽略列表和自定义 bind 管理，且绝不会编辑脚本。
 
-```text
-# 忽略某个模块来源文件
-ignore /data/adb/modules/example/system/app/Example.apk
+按文件名升序加载 `/data/adb/magic_mount/lua/` 中所有直接子级的普通 `.lua` 文件，
+例如 `10-skip.lua`、`20-bind.lua`；不扫描子目录，也不加载符号链接文件。
+目录不存在表示没有钩子；目录访问、读取或脚本加载错误会终止执行，不会被忽略。
+每个脚本使用独立 Lua VM，全局变量不会在脚本间泄漏。两个钩子均可省略。
+例如创建 `/data/adb/magic_mount/lua/10-custom.lua`：
 
-# 将来源只读 bind 到目标
-bind "/data/local/tmp/source file" "/system/etc/target file"
+```lua
+function before()
+    if modules["example"] then
+        modules["example"].skip = true
+    end
+end
 
-# 递归包含其他规则文件；add 与 file 语义相同
-file /data/adb/magic_mount/extra.rules
-add /data/adb/magic_mount/more.rules
+function after()
+    bind("/data/local/tmp/source file", "/system/etc/hosts")
+end
 ```
 
-规则支持单引号、双引号、包含空白的路径和行尾注释。控制字符会被过滤；递归 include
-使用独立 visited 集合，因此循环引用不会无限递归。
+所有 `before()` 按文件名顺序在模块收集和挂载前运行。`modules` 按模块 ID 索引，每项包含
+`id`、`name`、`version`、`author`、`description`、`mode`、`is_mounted`、`enabled`、
+`source_path`、`rules`（含 `default_mode` 和 `paths`）以及可修改的布尔值 `skip`。
+任一脚本设为 `skip = true` 即跳过该模块，其他脚本不能通过 `false` 重新启用；
+`false` 也不能覆盖 `disable`、`remove` 或 `skip_mount` 标记的排除效果。
+`moduledir` 是模块根目录（`/data/adb/modules`）。所有 `after()` 仅在 Magic Mount 成功后
+按文件名顺序运行，只提供 `bind(source, target)` 挂载 API，没有 `ignore` 或跳过模块的 API。
+仅当全部 `after()` 成功后才应用排队的 bind。错误包含脚本路径，并终止当前阶段：
+加载、语法或 `before` 错误会在挂载前终止；`after` 错误会取消全部排队的 bind，
+但不会回滚已完成的 Magic Mount。路径不能为空或包含控制字符。
+脚本是可信的本地配置，没有运行时间或内存配额。
 
-自定义 bind 的目标必须是绝对路径，不能包含 `..`。目标不存在时，程序会从最近存在的
-非根祖先构造临时镜像；任意 remount 或登记失败都会 detach 回滚。
+Lua 提供安全的基础库及 table、string、math、utf8 库，不提供 `os`、`io`、`package`、
+`debug` 或文件加载器。bind 目标必须是绝对路径，不能包含 `..` 路径分量；目标不存在时，
+会从最近存在的非根祖先构造临时镜像。bind 保持只读，任意 remount 或登记失败都会 detach 回滚。
 
 ## 开发
 
@@ -99,6 +118,9 @@ export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
 ```shell
 cargo xtask build
 ```
+
+Android lint 与最低支持的 API 26 对齐：
+`cargo ndk --platform 26 -t arm64-v8a -t armeabi-v7a clippy -- -D warnings`。
 
 构建产物将位于：
 

@@ -42,6 +42,22 @@ pub struct AppModule {
     rules: ModuleRules,
 }
 
+impl AppModule {
+    pub fn mount_path(&self) -> &Path {
+        Path::new(&self.source_path)
+    }
+
+    pub const fn is_mountable(&self) -> bool {
+        self.is_mounted
+    }
+
+    pub fn skip_mount(&mut self) {
+        self.is_mounted = false;
+        self.mode = "ignore".into();
+        self.rules.default_mode = "ignore".into();
+    }
+}
+
 fn read_prop<P>(path: P) -> Result<FxHashMap<String, String>>
 where
     P: AsRef<Path>,

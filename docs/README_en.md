@@ -17,29 +17,48 @@ The author will update this project less frequently due to academic commitments.
 
 ---
 
-## Custom rules
+## Custom Lua hooks
 
-Rules file: `/data/adb/magic_mount/custom`
+Lua 5.4 hooks replace the old text DSL and declarative rules. **Breaking change:**
+`/data/adb/magic_mount/custom` and `/data/adb/magic_mount/custom.lua` are no longer supported or read.
+Manually convert old rules into hooks and move scripts into `/data/adb/magic_mount/lua/` before rebooting.
+The WebUI no longer manages ignore lists or custom binds and never edits scripts.
 
-```text
-# Ignore a source file from a module
-ignore /data/adb/modules/example/system/app/Example.apk
+All direct regular `.lua` files in `/data/adb/magic_mount/lua/` are loaded in ascending filename order
+(for example, `10-skip.lua`, then `20-bind.lua`). Subdirectories and symlink files are not scanned or loaded.
+A missing directory means no hooks; directory, read, and script-load errors abort instead of being ignored.
+Each script has its own Lua VM: globals do not leak between scripts. Either hook may be omitted.
+For example, create `/data/adb/magic_mount/lua/10-custom.lua`:
 
-# Read-only bind a source to a target
-bind "/data/local/tmp/source file" "/system/etc/target file"
+```lua
+function before()
+    if modules["example"] then
+        modules["example"].skip = true
+    end
+end
 
-# Recursively include other rule files; add and file are equivalent
-file /data/adb/magic_mount/extra.rules
-add /data/adb/magic_mount/more.rules
+function after()
+    bind("/data/local/tmp/source file", "/system/etc/hosts")
+end
 ```
 
-Rules support single quotes, double quotes, paths containing whitespace, and trailing comments.
-Control characters are removed. Recursive includes use a per-parse visited set, so include cycles do
-not recurse indefinitely.
+All `before()` hooks run in filename order before module collection and mounting. `modules` is keyed by
+module ID; each entry exposes `id`, `name`, `version`, `author`, `description`, `mode`, `is_mounted`,
+`enabled`, `source_path`, `rules` (`default_mode` and `paths`), and a mutable `skip` boolean.
+If any script sets `skip = true`, that module is excluded; another script cannot reenable it with `false`.
+Setting `skip = false` also cannot override `disable`, `remove`, or `skip_mount` markers.
+`moduledir` is the modules root directory (`/data/adb/modules`).
+All `after()` hooks run in filename order only after successful Magic Mount. They expose only
+`bind(source, target)` as a mount API, with no `ignore` or module-skip API. Queued binds are applied only
+after every `after()` hook succeeds. Errors identify the script path and abort the current stage:
+load, syntax, or `before` errors stop before mounting; an `after` error cancels all queued binds but
+does not roll back completed Magic Mount operations. Paths must be nonempty and contain no control
+characters. Scripts are trusted local configuration, with no execution-time or memory quota.
 
-A custom bind target must be absolute and cannot contain `..`. When the target is missing, the tool
-builds a temporary mirror from the nearest existing non-root ancestor. Any remount or registration
-failure detaches the mount and rolls the operation back.
+Lua has safe base, table, string, math, and UTF-8 libraries; `os`, `io`, `package`, `debug`, and
+file loaders are unavailable. Bind targets must be absolute and contain no `..` components. If a
+target is missing, a temporary mirror is built from the nearest existing non-root ancestor. Binds
+remain read-only; a remount or registration failure detaches the mount and rolls the operation back.
 
 ## Configuration
 

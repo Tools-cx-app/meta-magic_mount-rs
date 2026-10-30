@@ -8,8 +8,6 @@ export const DEFAULT_CONFIG = {
   umount: true,
   partitions: [],
   extra_mount: [],
-  ignoreList: [],
-  customMounts: [],
 };
 
 export const module_id = import.meta.env.MODULE_ID;

@@ -3,7 +3,7 @@
 
 use rustix::mount::{UnmountFlags, unmount};
 
-use crate::{defs, errors::Result, ksucalls, mount_list};
+use crate::{errors::Result, ksucalls, mount_list};
 
 fn init_logger() {
     #[cfg(not(target_os = "android"))]
@@ -34,11 +34,6 @@ fn init_logger() {
     }
 }
 
-fn init_list() {
-    super::parser::COMMAND_LIST
-        .get_or_init(|| super::parser::parser_custom(defs::CUSTOM_LIST_PATH));
-}
-
 fn init_hook() {
     let hook = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |e| {
@@ -61,7 +56,6 @@ pub fn pre_init() {
     init_logger();
     init_hook();
     ksucalls::check_ksu();
-    init_list();
 
     if ksucalls::check_late_load() || std::env::var("KSU_LATE_LOAD").is_ok() {
         log::info!("late load mode!!");

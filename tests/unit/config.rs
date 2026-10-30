@@ -69,7 +69,7 @@ fn extra_mount_config_round_trip() {
     let mut config = Config::load(tmp.path().join("config.toml")).unwrap();
     config.apply_api_payload(serde_json::from_value(json!({})).unwrap());
     assert_eq!(
-        serde_json::to_value(config.into_api(vec![], vec![])).unwrap()["extra_mount"],
+        serde_json::to_value(config.into_api()).unwrap()["extra_mount"],
         json!(["my_product"])
     );
 }
@@ -96,18 +96,6 @@ fn test_decode_hex_invalid_length_error() {
 }
 
 #[test]
-fn test_format_custom_path() {
-    assert_eq!(
-        Config::format_custom_path("/system/bin/sh"),
-        "/system/bin/sh"
-    );
-    assert_eq!(
-        Config::format_custom_path("/data/local/my module name"),
-        "\"/data/local/my module name\""
-    );
-}
-
-#[test]
 fn test_apply_api_payload() {
     let mut config = Config::default();
     let payload = ApiConfigPayload {
@@ -116,8 +104,6 @@ fn test_apply_api_payload() {
         extra_mount: None,
         umount: Some(true),
         disable_umount: None,
-        ignore_list: None,
-        custom_mounts: None,
     };
 
     config.apply_api_payload(payload);
@@ -140,8 +126,6 @@ fn test_apply_api_payload_disable_umount() {
         extra_mount: None,
         umount: None,
         disable_umount: Some(true),
-        ignore_list: None,
-        custom_mounts: None,
     };
 
     config.apply_api_payload(payload);
@@ -172,24 +156,6 @@ fn test_load_or_default_fallback() {
 }
 
 #[test]
-fn test_write_custom_list_serialization() {
-    let tmp_dir = tempfile::tempdir().unwrap();
-    let list_file_path = tmp_dir.path().join("custom.list");
-    let ignore_list = vec!["/system/app".to_string()];
-    let custom_mounts = vec![ApiCustomMount {
-        source: "/data/local/test app".to_string(),
-        target: "/system/priv-app".to_string(),
-    }];
-
-    assert!(Config::write_custom_list(&list_file_path, &ignore_list, &custom_mounts).is_ok());
-    let file_content = fs::read_to_string(&list_file_path).unwrap();
-    let lines: Vec<&str> = file_content.lines().collect();
-    assert_eq!(lines.len(), 2);
-    assert_eq!(lines[0], "ignore /system/app");
-    assert_eq!(lines[1], "bind \"/data/local/test app\" /system/priv-app");
-}
-
-#[test]
 fn test_into_api_struct_mapping() {
     let config = Config {
         mountsource: "KSU".to_string(),
@@ -197,10 +163,20 @@ fn test_into_api_struct_mapping() {
         extra_mount: vec![],
         umount: false,
     };
-    let api_config = config.into_api(vec!["/data/local/tmp".to_string()], vec![]);
+    let api_config = config.into_api();
     assert_eq!(api_config.mountsource, "KSU");
     assert_eq!(api_config.partitions, vec!["system"]);
     assert!(!api_config.umount);
     assert!(api_config.disable_umount);
-    assert_eq!(api_config.ignore_list[0], "/data/local/tmp");
+    assert_eq!(
+        serde_json::to_value(api_config).unwrap(),
+        json!({
+            "moduledir": defs::MODULE_PATH.trim_end_matches('/'),
+            "mountsource": "KSU",
+            "partitions": ["system"],
+            "extra_mount": [],
+            "umount": false,
+            "disable_umount": true,
+        })
+    );
 }

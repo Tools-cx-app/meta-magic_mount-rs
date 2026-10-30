@@ -70,7 +70,7 @@ fn main() -> Result<()> {
     let extra_mount = config.extra_mount_partitions(std::path::Path::new("/"));
     let mut scan_partitions = config.partitions.clone();
     scan_partitions.extend(extra_mount.iter().cloned());
-    let modules = scanner::list_modules(MODULE_PATH, &scan_partitions);
+    let mut modules = scanner::list_modules(MODULE_PATH, &scan_partitions);
 
     if let Some(command) = cli.command {
         match command {
@@ -100,6 +100,19 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
+    let hooks = parser::LuaParser::load(
+        std::path::Path::new(defs::CUSTOM_SCRIPT_PATH),
+        &modules,
+        std::path::Path::new(MODULE_PATH),
+    )?;
+    let skipped = hooks.before(&mut modules)?;
+    let root = magic_mount::collect_module_files(
+        std::path::Path::new(MODULE_PATH),
+        &config.partitions,
+        &extra_mount,
+        &skipped,
+    )?;
+
     let _ = std::fs::write(defs::SCANNED_LIST, &serde_json::to_string_pretty(&modules)?);
 
     log::info!("Magic Mount Starting");
@@ -123,16 +136,13 @@ fn main() -> Result<()> {
         std::process::exit(1);
     }
 
-    let magic_mount_result = magic_mount::magic_mount(
-        MODULE_PATH,
-        &config.mountsource,
-        &config.partitions,
-        &extra_mount,
-        config.umount,
-        &mounts,
-    );
+    let magic_mount_result =
+        magic_mount::magic_mount(root, &config.mountsource, config.umount, &mounts);
     let bind_mount_result = if magic_mount_result.is_ok() {
-        Some(bind_mount(config.umount, &mounts))
+        Some((|| -> Result<()> {
+            let commands = hooks.after()?;
+            bind_mount(&commands, config.umount, &mounts)
+        })())
     } else {
         None
     };

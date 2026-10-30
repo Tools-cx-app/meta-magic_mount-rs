@@ -43,7 +43,7 @@ jobs:
       - name: Install build dependencies
         run: cargo install cargo-ndk --locked
       - name: Clippy code
-        run: cargo ndk -t arm64-v8a -t armeabi-v7a clippy -- -D warnings
+        run: cargo ndk --platform 26 -t arm64-v8a -t armeabi-v7a clippy -- -D warnings
   format:
     runs-on: ubuntu-latest
     steps:

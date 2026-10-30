@@ -3,18 +3,11 @@
  * SPDX-License-Identifier: GPL-v3
  */
 
-export interface CustomMount {
-  source: string;
-  target: string;
-}
-
 export interface AppConfig {
   mountsource: string;
   umount: boolean;
   partitions: string[];
   extra_mount: string[];
-  ignoreList: string[];
-  customMounts: CustomMount[];
 }
 
 export interface Module {

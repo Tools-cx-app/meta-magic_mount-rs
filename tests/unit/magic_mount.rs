@@ -5,7 +5,6 @@ use super::*;
 
 #[test]
 fn extra_mount_collects_top_level_modules_and_honors_exclusions() {
-    COMMAND_LIST.get_or_init(Vec::new);
     let tmp = tempfile::tempdir().unwrap();
     for (id, marker) in [
         ("first", None),
@@ -30,11 +29,11 @@ fn extra_mount_collects_top_level_modules_and_honors_exclusions() {
     fs::write(tmp.path().join("first/my_product/replaced/.replace"), "").unwrap();
     let extra = vec!["my_product".to_string()];
     assert!(
-        collect_module_files(tmp.path(), &[], &[])
+        collect_module_files(tmp.path(), &[], &[], &FxHashSet::default())
             .unwrap()
             .is_none()
     );
-    let root = collect_module_files(tmp.path(), &[], &extra)
+    let root = collect_module_files(tmp.path(), &[], &extra, &FxHashSet::default())
         .unwrap()
         .unwrap();
     let partition = &root.children["my_product"];
@@ -60,7 +59,7 @@ fn extra_mount_collects_top_level_modules_and_honors_exclusions() {
     assert_eq!(mounted, ["first", "second"]);
     fs::create_dir_all(tmp.path().join("first/system/etc")).unwrap();
     fs::write(tmp.path().join("first/system/etc/system_file"), "system").unwrap();
-    let root = collect_module_files(tmp.path(), &[], &extra)
+    let root = collect_module_files(tmp.path(), &[], &extra, &FxHashSet::default())
         .unwrap()
         .unwrap();
     assert!(

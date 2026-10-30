@@ -13,7 +13,6 @@ import {
 } from "../../../locales";
 import {
   MiuixCard,
-  MiuixDialog,
   MiuixSmallTitle,
   MiuixSwitch,
   MiuixButton,
@@ -27,22 +26,17 @@ import {
   Translate,
   Theme,
   FolderFill,
-  Delete,
   Layers,
-  MoveFile,
   Add,
   Link,
   Photos,
 } from "miuix-vue/icons";
 
 import RemoveableLabel from "../components/RemoveableLabel.vue";
-import BindCard from "../components/BindCard.vue";
-import IgnoredCard from "../components/IgnoredCard.vue";
 import MiuixDropdownPreference from "../components/DropdownPreference.vue";
 
 import { configStore } from "../../../lib/stores/configStore";
 import { DEFAULT_CONFIG } from "../../../lib/constants";
-import type { CustomMount } from "../../../lib/types";
 import { uiStore } from "../../../lib/stores/uiStore";
 import { isValidExtraMount } from "../../../lib/extraMount";
 
@@ -53,7 +47,6 @@ const lang_code = ref<string[]>([]);
 const lang_dropdown_index = ref(0);
 const partition = ref("");
 const extraMount = ref("");
-const ignorepath = ref("");
 
 const current_lang = ref(0);
 
@@ -74,10 +67,6 @@ const language_set = computed({
     switchLocale(lang_code.value[val]);
   },
 });
-
-const customMountDraft = ref<CustomMount>({ source: "", target: "" });
-const editingCustomMountIndex = ref<number | null>(null);
-const dialogVisible = ref(false);
 
 const initialConfigStr = ref("");
 
@@ -137,12 +126,6 @@ function handle_add_partition() {
   updateConfig("partitions", configStore.config.partitions);
 }
 
-function handle_add_ignorepath() {
-  configStore.config.ignoreList.push(ignorepath.value);
-  ignorepath.value = "";
-  updateConfig("ignoreList", configStore.config.ignoreList);
-}
-
 function addExtraMount() {
   const name = extraMount.value.trim();
   if (!isValidExtraMount(name)) {
@@ -167,11 +150,6 @@ function removePartition(index: number) {
   updateConfig("partitions", configStore.config.partitions);
 }
 
-function removeIgnorepath(index: number) {
-  configStore.config.ignoreList.splice(index, 1);
-  updateConfig("ignoreList", configStore.config.ignoreList);
-}
-
 async function saveConfig() {
   const success = await configStore.saveConfig();
   if (success) {
@@ -194,57 +172,6 @@ function updateConfig<K extends keyof typeof configStore.config>(
   value: (typeof configStore.config)[K],
 ) {
   configStore.setConfig({ ...configStore.config, [key]: value });
-}
-
-function openAddCustomMountDialog() {
-  editingCustomMountIndex.value = null;
-  customMountDraft.value = { source: "", target: "" };
-  dialogVisible.value = true;
-}
-
-function openEditCustomMountDialog(index: number) {
-  editingCustomMountIndex.value = index;
-  customMountDraft.value = { ...configStore.config.customMounts[index] };
-  dialogVisible.value = true;
-}
-function closeCustomMountDialog() {
-  dialogVisible.value = false;
-}
-
-function deleteCustomMountDialog() {
-  if (editingCustomMountIndex.value !== null) {
-    updateConfig(
-      "customMounts",
-      configStore.config.customMounts.filter(
-        (_, index) => index !== editingCustomMountIndex.value,
-      ),
-    );
-    closeCustomMountDialog();
-  }
-}
-
-function saveCustomMountDialog() {
-  const draft = {
-    source: customMountDraft.value.source.trim(),
-    target: customMountDraft.value.target.trim(),
-  };
-
-  if (!draft.source || !draft.target) {
-    return;
-  }
-
-  if (editingCustomMountIndex.value === null) {
-    updateConfig("customMounts", [...configStore.config.customMounts, draft]);
-  } else {
-    updateConfig(
-      "customMounts",
-      configStore.config.customMounts.map((mount, index) =>
-        index === editingCustomMountIndex.value ? draft : mount,
-      ),
-    );
-  }
-
-  closeCustomMountDialog();
 }
 </script>
 
@@ -375,64 +302,6 @@ function saveCustomMountDialog() {
       </div>
     </MiuixCard>
     <MiuixCard class="ex-card">
-      <MiuixBasicComponent
-        :title="t('config.ignoreList')"
-        :summary="t('config.ignoreListDesc')"
-      >
-        <template #start>
-          <MiuixIcon :icon="Delete" />
-        </template>
-      </MiuixBasicComponent>
-      <div v-if="configStore.config.ignoreList.length > 0" class="chip-list">
-        <IgnoredCard
-          v-for="(path, index) in configStore.config.ignoreList"
-          :key="index"
-          :path="path"
-          @remove="removeIgnorepath(index)"
-        />
-      </div>
-      <div style="display: flex; padding: 0 16px 16px">
-        <MiuixInput
-          v-model="ignorepath"
-          label="/data/adb/modules/..."
-          single-line
-        />
-        <MiuixIconButton v-if="ignorepath" @click="handle_add_ignorepath()">
-          <MiuixIcon :icon="Add" :size="24" />
-        </MiuixIconButton>
-      </div>
-    </MiuixCard>
-    <MiuixCard class="ex-card">
-      <MiuixBasicComponent
-        :title="t('config.customMounts')"
-        :summary="t('config.customMountsDesc')"
-      >
-        <template #start>
-          <MiuixIcon :icon="MoveFile" />
-        </template>
-        <template #end>
-          <MiuixIconButton @click="openAddCustomMountDialog">
-            <MiuixIcon :icon="Add" />
-          </MiuixIconButton>
-        </template>
-      </MiuixBasicComponent>
-      <div
-        v-if="configStore.config.customMounts.length > 0"
-        style="padding: 16px"
-      >
-        <BindCard
-          v-for="(mount, index) in configStore.config.customMounts"
-          :key="index"
-          :source-label="t('config.customMountSource')"
-          :source="mount.source"
-          :target-label="t('config.customMountTarget')"
-          :target="mount.target"
-          @edit="openEditCustomMountDialog(index)"
-        />
-      </div>
-    </MiuixCard>
-
-    <MiuixCard class="ex-card">
       <div style="padding: 12px; display: flex; gap: 12px">
         <MiuixButton style="flex: 1" @click="resetConfig">
           {{ t("config.reset") }}
@@ -447,54 +316,6 @@ function saveCustomMountDialog() {
         </MiuixButton>
       </div>
     </MiuixCard>
-
-    <MiuixDialog
-      v-model="dialogVisible"
-      :title="
-        editingCustomMountIndex === null
-          ? t('config.customMountDialogAdd')
-          : t('config.customMountDialogEdit')
-      "
-    >
-      <div class="custom-mount-dialog-fields">
-        <MiuixInput
-          v-model="customMountDraft.source"
-          :label="t('config.customMountSource')"
-          placeholder="/data/adb/modules/test/bin/unit"
-          single-line
-          class="full-width-field"
-        />
-        <MiuixInput
-          v-model="customMountDraft.target"
-          :label="t('config.customMountTarget')"
-          placeholder="/product/bin/unit"
-          single-line
-          class="full-width-field"
-        />
-      </div>
-      <div class="dialog-actions">
-        <div
-          v-if="editingCustomMountIndex !== null"
-          class="dialog-actions-left"
-        >
-          <MiuixIconButton @click="deleteCustomMountDialog">
-            <MiuixIcon :icon="Delete" :size="24" color="var(--m-color-error)" />
-          </MiuixIconButton>
-        </div>
-        <div class="dialog-actions-right">
-          <MiuixButton style="flex: 1" @click="closeCustomMountDialog">
-            {{ t("common.cancel") }}
-          </MiuixButton>
-          <MiuixButton
-            style="flex: 1"
-            type="primary"
-            @click="saveCustomMountDialog"
-          >
-            {{ t("config.customMountDialogSave") }}
-          </MiuixButton>
-        </div>
-      </div>
-    </MiuixDialog>
   </div>
 </template>
 
@@ -515,31 +336,5 @@ function saveCustomMountDialog() {
   flex-wrap: wrap;
   gap: 8px;
   padding: 16px;
-}
-.custom-mount-dialog-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 8px 0;
-}
-
-.dialog-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 16px;
-  margin-top: 8px;
-  border-top: 1px solid var(--m-color-outline-variant);
-}
-
-.dialog-actions-left {
-  display: flex;
-  gap: 8px;
-}
-
-.dialog-actions-right {
-  display: flex;
-  gap: 8px;
-  width: 100%;
 }
 </style>
