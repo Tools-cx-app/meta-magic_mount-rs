@@ -108,3 +108,59 @@ fn test_list_modules_empty_dir() {
     let tmp_dir = tempfile::tempdir().unwrap();
     assert!(list_modules(tmp_dir.path(), &[]).is_empty());
 }
+
+#[test]
+fn modules_status_preserves_lua_snapshot_by_id() {
+    let root = tempfile::tempdir().unwrap();
+    for id in ["skipped", "mounted"] {
+        let path = root.path().join(id);
+        fs::create_dir_all(path.join("system")).unwrap();
+        fs::write(path.join("module.prop"), create_valid_prop_content(id)).unwrap();
+    }
+    let hooks_dir = root.path().join("lua");
+    fs::create_dir(&hooks_dir).unwrap();
+    fs::write(
+        hooks_dir.join("skip.lua"),
+        "function before() modules.skipped.skip = true end",
+    )
+    .unwrap();
+    let mut boot_modules = list_modules(root.path(), &[]);
+    let hooks = crate::parser::LuaParser::load(&hooks_dir, &boot_modules, root.path()).unwrap();
+    hooks.before(&mut boot_modules).unwrap();
+    let snapshot = root.path().join("scan.ret");
+    fs::write(&snapshot, serde_json::to_vec(&boot_modules).unwrap()).unwrap();
+
+    // Rename a mounted module and disable it for next boot; its current mount remains.
+    fs::write(
+        root.path().join("mounted/module.prop"),
+        create_valid_prop_content("mounted").replace("Test Module", "Renamed Module"),
+    )
+    .unwrap();
+    fs::write(root.path().join("mounted/disable"), "").unwrap();
+    fs::create_dir_all(root.path().join("new_module/system")).unwrap();
+    fs::write(
+        root.path().join("new_module/module.prop"),
+        create_valid_prop_content("new_module"),
+    )
+    .unwrap();
+
+    let shown = show_modules(list_modules(root.path(), &[]), &snapshot).unwrap();
+    let skipped = shown.iter().find(|module| module.id == "skipped").unwrap();
+    assert!(!skipped.is_mounted);
+    assert_eq!(skipped.mode, "ignore");
+    assert_eq!(skipped.rules.default_mode, "ignore");
+    assert!(skipped.enabled);
+    let mounted = shown.iter().find(|module| module.id == "mounted").unwrap();
+    assert!(mounted.is_mounted);
+    assert_eq!(mounted.mode, "magic");
+    assert_eq!(mounted.rules.default_mode, "magic");
+    assert_eq!(mounted.name, "Renamed Module");
+    assert!(!mounted.enabled);
+    let new_module = shown
+        .iter()
+        .find(|module| module.id == "new_module")
+        .unwrap();
+    assert!(!new_module.is_mounted);
+    assert_eq!(new_module.mode, "ignore");
+    assert_eq!(new_module.rules.default_mode, "ignore");
+}

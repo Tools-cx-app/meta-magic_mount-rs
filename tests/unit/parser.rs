@@ -3,193 +3,249 @@
 
 use super::*;
 
-#[test]
-fn lexer_handles_spaces_quotes_and_empty_tokens() {
-    assert_eq!(LexParser::tokenize(""), Some(vec![]));
-    assert_eq!(
-        LexParser::tokenize("bind '/source path' \"/target path\""),
-        Some(vec![
-            "bind".into(),
-            "/source path".into(),
-            "/target path".into()
-        ])
-    );
-    assert_eq!(
-        LexParser::tokenize("ignore ''"),
-        Some(vec!["ignore".into(), "".into()])
-    );
-    assert_eq!(LexParser::tokenize("bind '/broken /dst"), None);
+fn module(id: &str, path: &Path) -> AppModule {
+    serde_json::from_value(serde_json::json!({
+        "id": id, "name": id, "version": "1", "author": "test", "description": "test",
+        "mode": "magic", "is_mounted": true, "enabled": true,
+        "source_path": path, "rules": {"default_mode": "magic", "paths": {}}
+    }))
+    .unwrap()
 }
 
 #[test]
-fn parse_bind_valid() {
-    assert_eq!(
-        Parser::parse_line("bind /src /dst extra"),
-        Some(Command::Bind {
-            source: "/src".into(),
-            target: "/dst".into()
-        })
-    );
-    assert_eq!(
-        Parser::parse_line("bind '/source path' \"/target path\""),
-        Some(Command::Bind {
-            source: "/source path".into(),
-            target: "/target path".into()
-        })
-    );
-    assert_eq!(Parser::parse_line("bind /src"), None);
-    assert_eq!(Parser::parse_line("binder /src /dst"), None);
-    assert_eq!(Parser::parse_line("bind /src /dst 'broken"), None);
-}
-
-#[test]
-fn parse_ignore_and_include() {
-    assert_eq!(
-        Parser::parse_line("ignore '/quoted path'"),
-        Some(Command::Ignore {
-            source: "/quoted path".into()
-        })
-    );
-    assert_eq!(
-        Parser::parse_line("file '/path with spaces'"),
-        Some(Command::Include {
-            path: "/path with spaces".into()
-        })
-    );
-    assert_eq!(
-        Parser::parse_line("add /path"),
-        Some(Command::Include {
-            path: "/path".into()
-        })
-    );
-    assert_eq!(Parser::parse_line("ignore"), None);
-    assert_eq!(Parser::parse_line("file ''"), None);
-}
-
-#[test]
-fn parse_multiple_commands_and_skip_invalid_lines() {
-    assert_eq!(
-        parse("# comment\nbind /src /dst\nignore /ignored\nbind '/app/data' '/mnt/data'\n"),
-        vec![
-            MountType::Mount {
-                source: "/src".into(),
-                target: "/dst".into()
-            },
-            MountType::Ignore {
-                source: "/ignored".into()
-            },
-            MountType::Mount {
-                source: "/app/data".into(),
-                target: "/mnt/data".into()
-            },
-        ]
-    );
-    assert!(parse("").is_empty());
-    assert_eq!(
-        parse(
-            "binder /bad /bad\nbind '/broken /bad\nbind '/mixed\" /bad\nbind '' /bad\nignore ''\nbind /src /dst"
-        ),
-        vec![MountType::Mount {
-            source: "/src".into(),
-            target: "/dst".into()
-        }]
-    );
-    assert_eq!(
-        parse("ignore /path\x00with\x01control"),
-        vec![MountType::Ignore {
-            source: "/pathwithcontrol".into()
-        }]
-    );
-}
-
-#[test]
-fn parser_custom_file_not_found() {
-    assert!(parser_custom("/nonexistent/path/to/file").is_empty());
-}
-
-#[test]
-fn parser_custom_repeated_calls_have_independent_includes() {
+fn directory_loads_all_scripts_in_order_with_independent_hooks() {
     let dir = tempfile::tempdir().unwrap();
-    let root = dir.path().join("root");
-    let child = dir.path().join("child");
-    fs::write(&child, "bind /a /b\n").unwrap();
-    fs::write(&root, format!("file {}\n", child.display())).unwrap();
-    let expected = vec![MountType::Mount {
-        source: "/a".into(),
-        target: "/b".into(),
-    }];
-    assert_eq!(parser_custom(&root), expected);
-    assert_eq!(parser_custom(&root), expected);
-}
-
-#[test]
-fn parser_custom_skips_duplicate_and_cyclic_includes() {
-    let dir = tempfile::tempdir().unwrap();
-    let root = dir.path().join("root");
-    let child = dir.path().join("child");
+    // Create in reverse order to distinguish filename order from discovery order.
     fs::write(
-        &root,
-        format!(
-            "bind /first /one\nfile {}\nadd {}\nbind /last /end\n",
-            child.display(),
-            child.display()
-        ),
+        dir.path().join("20-second.lua"),
+        r#"
+        assert(private == nil)
+        local ran = false
+        function before() ran = true end
+        function after()
+            assert(ran)
+            bind('/second', '/system/second')
+        end
+    "#,
     )
     .unwrap();
-    fs::write(&child, format!("ignore /inside\nfile {}\n", root.display())).unwrap();
+    fs::write(
+        dir.path().join("10-first.lua"),
+        r#"
+        private = 'first only'
+        local ran = false
+        function before() ran = true end
+        function after()
+            assert(ran and private == 'first only')
+            bind('/first', '/system/first')
+        end
+    "#,
+    )
+    .unwrap();
+    let parser = LuaParser::load(dir.path(), &[], dir.path()).unwrap();
+    parser.before(&mut []).unwrap();
     assert_eq!(
-        parser_custom(&root),
+        parser.after().unwrap(),
         vec![
-            MountType::Mount {
+            BindMount {
                 source: "/first".into(),
-                target: "/one".into()
+                target: "/system/first".into()
             },
-            MountType::Ignore {
-                source: "/inside".into()
-            },
-            MountType::Mount {
-                source: "/last".into(),
-                target: "/end".into()
+            BindMount {
+                source: "/second".into(),
+                target: "/system/second".into()
             },
         ]
     );
 }
 
 #[test]
-fn parser_custom_canonicalizes_include_aliases() {
-    let dir = tempfile::tempdir().unwrap();
-    let root = dir.path().join("root");
-    let child = dir.path().join("child");
-    fs::write(&child, "ignore /once\n").unwrap();
+fn directory_ignores_non_lua_nested_symlink_and_legacy_files() {
+    let root = tempfile::tempdir().unwrap();
+    let dir = root.path().join("lua");
+    fs::create_dir(&dir).unwrap();
+    for path in [
+        root.path().join("custom"),
+        root.path().join("custom.lua"),
+        dir.join("rules.txt"),
+    ] {
+        fs::write(path, "error('must not load')").unwrap();
+    }
+    fs::create_dir(dir.join("nested.lua")).unwrap();
     fs::write(
-        &root,
-        format!(
-            "file {}\nadd {}\n",
-            child.display(),
-            dir.path().join("./child").display()
-        ),
+        dir.join("nested.lua/child.lua"),
+        "error('must not recurse')",
     )
     .unwrap();
+    std::os::unix::fs::symlink(root.path().join("custom.lua"), dir.join("alias.lua")).unwrap();
+    fs::write(
+        dir.join("hooks.lua"),
+        "function after() bind('/valid', '/target') end",
+    )
+    .unwrap();
+    let parser = LuaParser::load(&dir, &[], root.path()).unwrap();
     assert_eq!(
-        parser_custom(&root),
-        vec![MountType::Ignore {
-            source: "/once".into()
+        parser.after().unwrap(),
+        vec![BindMount {
+            source: "/valid".into(),
+            target: "/target".into()
         }]
+    );
+    assert!(LuaParser::load(&root.path().join("custom.lua"), &[], root.path()).is_err());
+}
+
+#[test]
+fn missing_directory_is_optional_but_invalid_scripts_report_path() {
+    let dir = tempfile::tempdir().unwrap();
+    let parser = LuaParser::load(&dir.path().join("missing"), &[], dir.path()).unwrap();
+    assert!(parser.before(&mut []).unwrap().is_empty());
+    assert!(parser.after().unwrap().is_empty());
+    let path = dir.path().join("broken.lua");
+    fs::write(&path, "function before(").unwrap();
+    let error = LuaParser::load(dir.path(), &[], dir.path()).err().unwrap();
+    assert!(format!("{error:#}").contains(&path.display().to_string()));
+    fs::write(&path, "before = false").unwrap();
+    assert!(LuaParser::load(dir.path(), &[], dir.path()).is_err());
+}
+
+#[test]
+fn before_skip_from_any_script_wins_and_updates_all_after_contexts() {
+    let dir = tempfile::tempdir().unwrap();
+    let first_path = dir.path().join("first");
+    let second_path = dir.path().join("second");
+    let mut modules = vec![module("first", &first_path), module("second", &second_path)];
+    modules[1].skip_mount();
+    fs::write(
+        dir.path().join("10-skip.lua"),
+        r#"
+        function before() modules.first.skip = true end
+        function after()
+            assert(modules.first.skip and not modules.first.is_mounted)
+            bind('/skipped', '/checked')
+        end
+    "#,
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join("20-keep.lua"),
+        r#"
+        function before() modules.first.skip = false; modules.second.skip = false end
+        function after()
+            assert(modules.first.skip and modules.second.skip)
+            bind('/markers', '/respected')
+        end
+    "#,
+    )
+    .unwrap();
+    let parser = LuaParser::load(dir.path(), &modules, dir.path()).unwrap();
+    let skipped = parser.before(&mut modules).unwrap();
+    assert_eq!(skipped, FxHashSet::from_iter([first_path, second_path]));
+    assert!(modules.iter().all(|module| !module.is_mountable()));
+    assert_eq!(
+        parser.after().unwrap(),
+        vec![
+            BindMount {
+                source: "/skipped".into(),
+                target: "/checked".into()
+            },
+            BindMount {
+                source: "/markers".into(),
+                target: "/respected".into()
+            },
+        ]
     );
 }
 
 #[test]
-fn mount_type_display() {
+fn before_skip_excludes_module_files_without_persistent_markers() {
+    let root = tempfile::tempdir().unwrap();
+    for id in ["first", "second"] {
+        let path = root.path().join(id);
+        fs::create_dir_all(path.join("my_product/etc")).unwrap();
+        fs::write(path.join("my_product/etc").join(id), id).unwrap();
+        fs::write(
+            path.join("module.prop"),
+            format!("id={id}\nname={id}\nversion=1\nauthor=test\ndescription=test\n"),
+        )
+        .unwrap();
+    }
+    let dir = root.path().join("lua");
+    fs::create_dir(&dir).unwrap();
+    fs::write(
+        dir.join("skip.lua"),
+        "function before() assert(modules.first.author == 'test'); modules.first.skip = true end",
+    )
+    .unwrap();
+    let partitions = vec!["my_product".to_string()];
+    let mut modules = crate::scanner::list_modules(root.path(), &partitions);
+    let parser = LuaParser::load(&dir, &modules, root.path()).unwrap();
+    let skipped = parser.before(&mut modules).unwrap();
+    let root_node =
+        crate::magic_mount::collect_module_files(root.path(), &[], &partitions, &skipped)
+            .unwrap()
+            .unwrap();
+    let files = &root_node.children["my_product"].children["etc"].children;
+    assert!(!files.contains_key("first"));
+    assert!(files.contains_key("second"));
+    assert!(!root.path().join("first/skip_mount").exists());
+}
+
+#[test]
+fn hook_errors_cancel_stage_and_identify_script() {
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(
+        dir.path().join("10-valid.lua"),
+        "function after() bind('/source', '/target') end",
+    )
+    .unwrap();
+    let path = dir.path().join("20-failure.lua");
+    for body in [
+        "function after() bind('/s', '/ok'); error('abort') end",
+        "function after() bind('/s', '/system/../bad') end",
+        "function after() bind('/s', 'relative') end",
+        "function after() bind('', '/target') end",
+        "function after() bind('/bad\\000path', '/target') end",
+        "function after() bind('', '') end",
+        "function after() bind('/bad\\000path', 'relative') end",
+        "function after() bind('/s', '/bad\\npath') end",
+        "function after() bind('/s', '/bad\\000path') end",
+        "function after() ignore('/source') end",
+    ] {
+        fs::write(&path, body).unwrap();
+        let parser = LuaParser::load(dir.path(), &[], dir.path()).unwrap();
+        let error = parser.after().unwrap_err();
+        assert!(
+            format!("{error:#}").contains(&path.display().to_string()),
+            "wrong failing script for {body:?}: {error:#}"
+        );
+    }
+    fs::write(&path, "function before() bind('/s', '/t') end").unwrap();
+    let parser = LuaParser::load(dir.path(), &[], dir.path()).unwrap();
+    let error = parser.before(&mut []).unwrap_err();
+    assert!(format!("{error:#}").contains(&path.display().to_string()));
+}
+
+#[test]
+fn hooks_cannot_access_process_or_file_apis() {
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(
+        dir.path().join("sandbox.lua"),
+        r#"
+        function before()
+            assert(os == nil and io == nil and package == nil and debug == nil)
+            assert(dofile == nil and loadfile == nil and bind == nil)
+        end
+        function after() bind('/safe', '/target') end
+    "#,
+    )
+    .unwrap();
+    let parser = LuaParser::load(dir.path(), &[], dir.path()).unwrap();
+    parser.before(&mut []).unwrap();
     assert_eq!(
-        MountType::Mount {
-            source: "s".into(),
-            target: "t".into()
-        }
-        .to_string(),
-        "s -> t"
-    );
-    assert_eq!(
-        MountType::Ignore { source: "x".into() }.to_string(),
-        "ignored x"
+        parser.after().unwrap(),
+        vec![BindMount {
+            source: "/safe".into(),
+            target: "/target".into()
+        }]
     );
 }

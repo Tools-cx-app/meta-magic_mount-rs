@@ -17,6 +17,8 @@ pub enum Error {
     RegularDirectory { path: String },
     #[error("Invalid module ID: '{module_id:?}'. Must match /^[a-zA-Z][a-zA-Z0-9._-]+$/")]
     InvalidModuleID { module_id: String },
+    #[error("Invalid Bind path: '{path}'")]
+    InvalidBindPath { path: String },
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error(transparent)]
@@ -29,6 +31,8 @@ pub enum Error {
     Rustix(#[from] rustix::io::Errno),
     #[error(transparent)]
     Regex(#[from] regex_lite::Error),
+    #[error(transparent)]
+    Mlua(#[from] mlua::Error),
     #[error(transparent)]
     Hex(#[from] hex::FromHexError),
 }

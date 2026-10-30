@@ -6,7 +6,7 @@ use const_format::concatcp;
 const ADB: &str = "/data/adb";
 pub const MODULE_PATH: &str = concatcp!(ADB, "/modules");
 const MAGIC_MOUNT: &str = concatcp!(ADB, "/magic_mount");
-pub const CUSTOM_LIST_PATH: &str = concatcp!(MAGIC_MOUNT, "/custom");
+pub const CUSTOM_SCRIPT_PATH: &str = concatcp!(MAGIC_MOUNT, "/lua/");
 pub const SELINUX_XATTR: &str = "security.selinux";
 pub const DISABLE_FILE_NAME: &str = "disable";
 pub const REMOVE_FILE_NAME: &str = "remove";

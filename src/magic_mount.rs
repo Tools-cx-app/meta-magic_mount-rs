@@ -12,7 +12,7 @@ use std::{
 
 use anyhow::Context;
 use extattr::lgetxattr;
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 use rustix::{
     fs::{Gid, Mode, Uid, chmod, chown},
     mount::{
@@ -27,7 +27,6 @@ use crate::{
     errors::{Error, Result},
     ksucalls::send_unmountable,
     mount_list,
-    parser::COMMAND_LIST,
     utils::{ensure_dir_exists, lgetfilecon, lsetfilecon, validate_module_id},
 };
 
@@ -165,11 +164,8 @@ impl Node {
     where
         P: AsRef<Path>,
     {
-        let list = COMMAND_LIST.get().unwrap();
         let path = path.as_ref().to_string_lossy();
-        list.iter()
-            .any(|s| matches!(s, crate::parser::MountType::Ignore { source } if source == &path))
-            || path.ends_with(".replace")
+        path.ends_with(".replace")
     }
 
     pub fn new_root<S>(name: S) -> Self
@@ -312,6 +308,7 @@ pub fn collect_module_files(
     module_dir: &Path,
     extra_partitions: &[String],
     extra_mount: &[String],
+    skipped: &FxHashSet<PathBuf>,
 ) -> Result<Option<Node>> {
     let mut root = Node::new_root("");
     let mut system = Node::new_root("system");
@@ -322,6 +319,11 @@ pub fn collect_module_files(
 
     for entry in module_root.read_dir()?.flatten() {
         if !entry.file_type()?.is_dir() {
+            continue;
+        }
+
+        if skipped.contains(&entry.path()) {
+            log::debug!("skipped module {} by Lua before", entry.path().display());
             continue;
         }
 
@@ -717,18 +719,13 @@ impl MagicMount<'_> {
     }
 }
 
-pub fn magic_mount<P>(
-    module_dir: P,
+pub fn magic_mount(
+    root: Option<Node>,
     mount_source: &str,
-    extra_partitions: &[String],
-    extra_mount: &[String],
     umount: bool,
     mounts: &mount_list::MountList,
-) -> Result<()>
-where
-    P: AsRef<Path>,
-{
-    if let Some(root) = collect_module_files(module_dir.as_ref(), extra_partitions, extra_mount)? {
+) -> Result<()> {
+    if let Some(root) = root {
         log::debug!("collected: {root:?}");
         let tmp_root = Path::new("/debug_ramdisk");
         let tmp_dir = tmp_root.join("workdir");

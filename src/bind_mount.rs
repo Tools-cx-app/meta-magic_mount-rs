@@ -10,11 +10,8 @@ use std::{
 use rustix::mount::{MountFlags, UnmountFlags, mount_bind, mount_move, mount_remount, unmount};
 
 use crate::{
-    errors::Result,
-    ksucalls::send_unmountable,
-    magic_mount::mount_mirror,
-    mount_list,
-    parser::{COMMAND_LIST, MountType},
+    errors::Result, ksucalls::send_unmountable, magic_mount::mount_mirror, mount_list,
+    parser::BindMount,
 };
 
 fn mirror_paths(target: &Path) -> Result<(PathBuf, PathBuf)> {
@@ -195,16 +192,12 @@ fn mount_target(source: &Path, target: &Path, mounts: &mount_list::MountList) ->
     }
 }
 
-pub fn bind_mount(umount: bool, mounts: &mount_list::MountList) -> Result<()> {
-    let commands = COMMAND_LIST
-        .get()
-        .ok_or_else(|| Error::new(ErrorKind::NotFound, "mount command list is not initialized"))?;
-
-    for command in commands {
-        let MountType::Mount { source, target } = command else {
-            continue;
-        };
-
+pub fn bind_mount(
+    commands: &[BindMount],
+    umount: bool,
+    mounts: &mount_list::MountList,
+) -> Result<()> {
+    for BindMount { source, target } in commands {
         log::debug!("bind mount: {source} -> {target}");
 
         let source = Path::new(source);

@@ -2,156 +2,212 @@
 // SPDX-License-Identifier: GPL-v3
 
 use std::{
-    fmt, fs,
-    path::{Path, PathBuf},
-    sync::OnceLock,
+    fs,
+    io::ErrorKind,
+    path::{Component, Path, PathBuf},
 };
 
+use anyhow::Context;
+use mlua::{Function, Lua, LuaOptions, LuaSerdeExt, StdLib, Table, Value, chunk::ChunkMode};
 use rustc_hash::FxHashSet;
 
-pub static COMMAND_LIST: OnceLock<Vec<MountType>> = OnceLock::new();
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum MountType {
-    Mount { source: String, target: String },
-    Ignore { source: String },
-}
-
-impl fmt::Display for MountType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Mount { source, target } => f.write_str(&format!("{source} -> {target}")),
-            Self::Ignore { source } => f.write_str(&format!("ignored {source}")),
-        }
-    }
-}
-
-pub fn parser_custom<P>(path: P) -> Vec<MountType>
-where
-    P: AsRef<Path>,
-{
-    Parser::default().parse_file(path.as_ref())
-}
-
-#[cfg(test)]
-fn parse(content: &str) -> Vec<MountType> {
-    Parser::default().parse_content(content)
-}
+use crate::{
+    errors::{Error, Result},
+    scanner::AppModule,
+};
 
 #[derive(Debug, PartialEq, Eq)]
-enum Command {
-    Bind { source: String, target: String },
-    Ignore { source: String },
-    Include { path: String },
+pub struct BindMount {
+    pub source: String,
+    pub target: String,
 }
 
-struct LexParser;
+fn validate_bind(source: &str, target: &str) -> Result<()> {
+    for path in [source, target] {
+        if path.is_empty() || path.chars().any(char::is_control) {
+            return Err(Error::InvalidBindPath {
+                path: path.to_string(),
+            });
+        }
+    }
+    if !Path::new(target).is_absolute()
+        || Path::new(target)
+            .components()
+            .any(|part| part == Component::ParentDir)
+    {
+        Err(Error::InvalidBindPath {
+            path: target.to_string(),
+        })
+    } else {
+        Ok(())
+    }
+}
 
-impl LexParser {
-    fn tokenize(input: &str) -> Option<Vec<String>> {
-        let mut tokens = Vec::new();
-        let mut current = String::new();
-        let mut in_quote: Option<char> = None;
-        let mut started = false;
+struct LuaScript {
+    path: PathBuf,
+    lua: Lua,
+    modules: Table,
+    before: Option<Function>,
+    after: Option<Function>,
+}
 
-        for ch in input.chars() {
-            match in_quote {
-                Some(quote) => {
-                    if ch == quote {
-                        in_quote = None;
-                    } else {
-                        current.push(ch);
-                    }
-                }
-                None => {
-                    if ch == '\'' || ch == '"' {
-                        in_quote = Some(ch);
-                        started = true;
-                    } else if ch.is_ascii_whitespace() {
-                        if started {
-                            tokens.push(std::mem::take(&mut current));
-                            started = false;
-                        }
-                    } else {
-                        current.push(ch);
-                        started = true;
-                    }
-                }
+impl LuaScript {
+    fn load(path: PathBuf, modules: &[AppModule], module_dir: &Path) -> Result<Self> {
+        let lua = Lua::new_with(
+            StdLib::TABLE | StdLib::STRING | StdLib::MATH | StdLib::UTF8,
+            LuaOptions::default(),
+        )?;
+        for name in ["dofile", "loadfile"] {
+            lua.globals().set(name, Value::Nil)?;
+        }
+        let module_info = lua.create_table()?;
+        for module in modules {
+            let Value::Table(info) = lua.to_value(module)? else {
+                unreachable!("AppModule serializes as a table");
+            };
+            info.set("skip", !module.is_mountable())?;
+            module_info.set(module.id.as_str(), info)?;
+        }
+        lua.globals().set("modules", module_info.clone())?;
+        lua.globals()
+            .set("moduledir", module_dir.to_string_lossy().as_ref())?;
+        let content = fs::read_to_string(&path)?;
+        lua.load(&content)
+            .set_name(format!("@{}", path.display()))
+            .set_mode(ChunkMode::Text)
+            .exec()?;
+        let before = lua
+            .globals()
+            .get::<Option<Function>>("before")
+            .context("before must be a function")?;
+        let after = lua
+            .globals()
+            .get::<Option<Function>>("after")
+            .context("after must be a function")?;
+        Ok(Self {
+            path,
+            lua,
+            modules: module_info,
+            before,
+            after,
+        })
+    }
+
+    fn before(&self, modules: &mut [AppModule]) -> Result<()> {
+        if let Some(before) = &self.before {
+            before.call::<()>(())?;
+        }
+        for module in modules {
+            let info: Table = self
+                .modules
+                .raw_get(module.id.as_str())
+                .with_context(|| format!("missing module info: {}", module.id))?;
+            match info.raw_get::<Value>("skip")? {
+                Value::Boolean(true) => module.skip_mount(),
+                Value::Boolean(false) => {}
+                _ => log::warn!("modules[{:?}].skip must be a boolean", module.id),
             }
         }
-        if in_quote.is_some() {
-            return None;
+        Ok(())
+    }
+
+    fn sync_modules(&self, modules: &[AppModule]) -> anyhow::Result<()> {
+        for module in modules {
+            let info: Table = self.modules.raw_get(module.id.as_str())?;
+            info.raw_set("skip", !module.is_mountable())?;
+            info.raw_set("is_mounted", module.is_mountable())?;
         }
-        if started {
-            tokens.push(current);
-        }
-        Some(tokens)
+        Ok(())
+    }
+
+    fn after(&self, commands: &mut Vec<BindMount>) -> anyhow::Result<()> {
+        self.lua.scope(|scope| {
+            let bind = scope.create_function_mut(|_, (source, target): (String, String)| {
+                validate_bind(&source, &target).map_err(mlua::Error::external)?;
+                commands.push(BindMount { source, target });
+                Ok(())
+            })?;
+            self.lua.globals().set("bind", bind)?;
+            let result = self
+                .after
+                .as_ref()
+                .map_or(Ok(()), |after| after.call::<()>(()));
+            self.lua.globals().set("bind", Value::Nil)?;
+            result
+        })?;
+        Ok(())
     }
 }
 
-#[derive(Default)]
-struct Parser {
-    seen: FxHashSet<PathBuf>,
+pub struct LuaParser {
+    scripts: Vec<LuaScript>,
 }
 
-impl Parser {
-    // ponytail: add new commands here and in parse_content; the lexer stays command-agnostic.
-    fn parse_line(line: &str) -> Option<Command> {
-        let tokens = LexParser::tokenize(line)?;
-        let path = |index: usize| -> Option<String> {
-            let value: String = tokens
-                .get(index)?
-                .chars()
-                .filter(|c| !c.is_control())
-                .collect();
-            (!value.is_empty()).then_some(value)
-        };
-        match tokens.first()?.as_str() {
-            "bind" => Some(Command::Bind {
-                source: path(1)?,
-                target: path(2)?,
-            }),
-            "ignore" => Some(Command::Ignore { source: path(1)? }),
-            "file" | "add" => Some(Command::Include { path: path(1)? }),
-            _ => None,
-        }
-    }
-
-    fn parse_content(&mut self, content: &str) -> Vec<MountType> {
-        let mut types = Vec::new();
-        for line in content
-            .lines()
-            .map(str::trim)
-            .filter(|line| !line.is_empty() && !line.starts_with('#'))
-        {
-            match Self::parse_line(line) {
-                Some(Command::Bind { source, target }) => {
-                    types.push(MountType::Mount { source, target })
-                }
-                Some(Command::Ignore { source }) => types.push(MountType::Ignore { source }),
-                Some(Command::Include { path }) => types.extend(self.parse_file(Path::new(&path))),
-                None => log::debug!("failed to parse {line}"),
+impl LuaParser {
+    pub fn load(path: &Path, modules: &[AppModule], module_dir: &Path) -> anyhow::Result<Self> {
+        let entries = match fs::read_dir(path) {
+            Ok(entries) => entries,
+            Err(error) if error.kind() == ErrorKind::NotFound => {
+                return Ok(Self {
+                    scripts: Vec::new(),
+                });
             }
-        }
-        types
-    }
-
-    fn parse_file(&mut self, path: &Path) -> Vec<MountType> {
-        let identity = fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
-        if !self.seen.insert(identity) {
-            log::warn!(
-                "detected same file, skip {} for solving loop",
-                path.display()
-            );
-            return Vec::new();
-        }
-        match fs::read_to_string(path) {
-            Ok(content) => self.parse_content(&content),
             Err(error) => {
-                log::warn!("failed to read {}: {error}", path.display());
-                Vec::new()
+                return Err(error)
+                    .with_context(|| format!("reading Lua directory {}", path.display()));
+            }
+        };
+        let mut paths = Vec::new();
+        for entry in entries {
+            let entry =
+                entry.with_context(|| format!("reading Lua directory {}", path.display()))?;
+            let script = entry.path();
+            if script
+                .extension()
+                .is_some_and(|extension| extension == "lua")
+                && entry.file_type()?.is_file()
+            {
+                paths.push(script);
             }
         }
+        paths.sort_unstable();
+        let mut scripts = Vec::with_capacity(paths.len());
+        for path in paths {
+            let script = LuaScript::load(path.clone(), modules, module_dir)
+                .with_context(|| format!("loading Lua hooks {}", path.display()))?;
+            scripts.push(script);
+        }
+        Ok(Self { scripts })
+    }
+
+    pub fn before(&self, modules: &mut [AppModule]) -> anyhow::Result<FxHashSet<PathBuf>> {
+        for script in &self.scripts {
+            script
+                .before(modules)
+                .with_context(|| format!("Lua before hook failed: {}", script.path.display()))?;
+        }
+        let mut skipped = FxHashSet::default();
+        for module in modules.iter() {
+            if !module.is_mountable() {
+                skipped.insert(module.mount_path().to_path_buf());
+            }
+        }
+        for script in &self.scripts {
+            script
+                .sync_modules(modules)
+                .with_context(|| format!("updating Lua module info: {}", script.path.display()))?;
+        }
+        Ok(skipped)
+    }
+
+    pub fn after(&self) -> anyhow::Result<Vec<BindMount>> {
+        let mut commands = Vec::new();
+        for script in &self.scripts {
+            script
+                .after(&mut commands)
+                .with_context(|| format!("Lua after hook failed: {}", script.path.display()))?;
+        }
+        Ok(commands)
     }
 }
 
