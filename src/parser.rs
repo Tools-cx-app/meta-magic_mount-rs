@@ -24,14 +24,14 @@ pub struct BindMount {
 
 fn validate_bind(source: &str, target: &str) -> Result<()> {
     for path in [source, target] {
-        if !path.is_empty() && !path.chars().any(char::is_control) {
+        if path.is_empty() || path.chars().any(char::is_control) {
             return Err(Error::InvalidBindPath {
                 path: path.to_string(),
             });
         }
     }
-    if Path::new(target).is_absolute()
-        && !Path::new(target)
+    if !Path::new(target).is_absolute()
+        || Path::new(target)
             .components()
             .any(|part| part == Component::ParentDir)
     {

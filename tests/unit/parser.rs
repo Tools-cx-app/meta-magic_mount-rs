@@ -205,12 +205,19 @@ fn hook_errors_cancel_stage_and_identify_script() {
         "function after() bind('/s', 'relative') end",
         "function after() bind('', '/target') end",
         "function after() bind('/bad\\000path', '/target') end",
+        "function after() bind('', '') end",
+        "function after() bind('/bad\\000path', 'relative') end",
+        "function after() bind('/s', '/bad\\npath') end",
+        "function after() bind('/s', '/bad\\000path') end",
         "function after() ignore('/source') end",
     ] {
         fs::write(&path, body).unwrap();
         let parser = LuaParser::load(dir.path(), &[], dir.path()).unwrap();
         let error = parser.after().unwrap_err();
-        assert!(format!("{error:#}").contains(&path.display().to_string()));
+        assert!(
+            format!("{error:#}").contains(&path.display().to_string()),
+            "wrong failing script for {body:?}: {error:#}"
+        );
     }
     fs::write(&path, "function before() bind('/s', '/t') end").unwrap();
     let parser = LuaParser::load(dir.path(), &[], dir.path()).unwrap();
