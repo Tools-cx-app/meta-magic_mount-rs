@@ -13,7 +13,6 @@
         "cargo"
       ],
       "groupName": "rust-dependencies",
-      "rangeStrategy": "bump",
       "matchUpdateTypes": "major",
       "labels": [
         "rust",
@@ -25,7 +24,6 @@
         "cargo"
       ],
       "groupName": "rust-dependencies-minor",
-      "rangeStrategy": "bump",
       "matchUpdateTypes": "minor",
       "labels": [
         "rust",
@@ -37,7 +35,6 @@
         "cargo"
       ],
       "groupName": "rust-dependencies-patch",
-      "rangeStrategy": "bump",
       "matchUpdateTypes": "patch",
       "labels": [
         "rust",
