@@ -153,26 +153,26 @@ where
     modules
 }
 
-pub fn show_modules(modules: Vec<AppModule>) -> Result<Vec<AppModule>> {
-    let orgi = std::fs::read_to_string(defs::SCANNED_LIST)?;
+pub fn show_modules(mut modules: Vec<AppModule>, snapshot_path: &Path) -> Result<Vec<AppModule>> {
+    let orgi = fs::read_to_string(snapshot_path)?;
     let orgi_modules: Vec<AppModule> = serde_json::from_str(&orgi)?;
 
-    let mounted_modules: Vec<String> = orgi_modules
-        .iter()
-        .filter(|s| s.is_mounted)
-        .map(|s| s.name.clone())
+    let mut mounted_modules: FxHashMap<_, _> = orgi_modules
+        .into_iter()
+        .map(|module| (module.id, (module.is_mounted, module.mode, module.rules)))
         .collect();
 
-    let mut ret = Vec::new();
-
-    for mut i in modules {
-        if mounted_modules.contains(&i.name) {
-            i.is_mounted = true;
+    for module in &mut modules {
+        if let Some((is_mounted, mode, rules)) = mounted_modules.remove(&module.id) {
+            module.is_mounted = is_mounted;
+            module.mode = mode;
+            module.rules = rules;
+        } else {
+            module.skip_mount();
         }
-        ret.push(i);
     }
 
-    Ok(ret)
+    Ok(modules)
 }
 
 pub fn list_modules<P>(module_dir: P, extra: &[String]) -> Vec<AppModule>

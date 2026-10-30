@@ -89,7 +89,10 @@ fn main() -> Result<()> {
             Commands::Modules => {
                 println!(
                     "{}",
-                    serde_json::to_string_pretty(&scanner::show_modules(modules)?)?
+                    serde_json::to_string_pretty(&scanner::show_modules(
+                        modules,
+                        std::path::Path::new(defs::SCANNED_LIST),
+                    )?)?
                 );
             }
             Commands::Version => {

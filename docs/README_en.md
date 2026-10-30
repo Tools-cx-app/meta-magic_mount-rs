@@ -55,6 +55,11 @@ load, syntax, or `before` errors stop before mounting; an `after` error cancels 
 does not roll back completed Magic Mount operations. Paths must be nonempty and contain no control
 characters. Scripts are trusted local configuration, with no execution-time or memory quota.
 
+The `modules` command and WebUI restore `is_mounted`, `mode`, and `rules` from the startup snapshot,
+matched by module ID. Lua-skipped modules and modules added after that snapshot show as unmounted.
+Names, versions, and enabled flags still reflect current module files; changing them does not change
+the mount state recorded for this boot.
+
 Lua has safe base, table, string, math, and UTF-8 libraries; `os`, `io`, `package`, `debug`, and
 file loaders are unavailable. Bind targets must be absolute and contain no `..` components. If a
 target is missing, a temporary mirror is built from the nearest existing non-root ancestor. Binds
