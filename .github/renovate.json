@@ -3,14 +3,46 @@
   "extends": [
     "config:recommended"
   ],
-  "ignoreDeps": ["typescript","pnpm"],
+  "ignoreDeps": [
+    "typescript",
+    "pnpm"
+  ],
   "packageRules": [
     {
       "matchManagers": [
         "cargo"
       ],
       "groupName": "rust-dependencies",
-      "rangeStrategy": "bump"
+      "rangeStrategy": "bump",
+      "matchUpdateTypes": "major",
+      "labels": [
+        "rust",
+        "major"
+      ]
+    },
+    {
+      "matchManagers": [
+        "cargo"
+      ],
+      "groupName": "rust-dependencies-minor",
+      "rangeStrategy": "bump",
+      "matchUpdateTypes": "minor",
+      "labels": [
+        "rust",
+        "minor"
+      ]
+    },
+    {
+      "matchManagers": [
+        "cargo"
+      ],
+      "groupName": "rust-dependencies-patch",
+      "rangeStrategy": "bump",
+      "matchUpdateTypes": "patch",
+      "labels": [
+        "rust",
+        "patch"
+      ]
     },
     {
       "matchManagers": [
