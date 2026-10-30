@@ -10,12 +10,12 @@ use std::{
 };
 
 use anyhow::Context;
-use parking_lot::{const_mutex, Mutex};
+use parking_lot::Mutex;
 
 use crate::errors::Result;
 
 static DRIVER_FD: OnceLock<RawFd> = OnceLock::new();
-static LIST: Mutex<Vec<PathBuf>> = const_mutex(Vec::new());
+static LIST: Mutex<Vec<PathBuf>> = Mutex::new(Vec::new());
 
 const GET_INFO: u32 = libc::_IOR::<GetInfoCmd>(b'K' as u32, 2) as u32;
 // These UAPI requests encode size 0 despite accepting command buffers.
@@ -210,5 +210,3 @@ pub fn unmount() -> Result<()> {
 
     Ok(())
 }
-
-
