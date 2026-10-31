@@ -69,3 +69,79 @@ fn extra_mount_collects_top_level_modules_and_honors_exclusions() {
     );
     assert!(root.children.contains_key("my_product"));
 }
+
+#[test]
+fn remove_marker_collects_only_directories_and_overrides_replace() {
+    let tmp = tempfile::tempdir().unwrap();
+    let module = tmp.path().join("example");
+    fs::create_dir_all(module.join("system/app/Removed")).unwrap();
+    fs::create_dir_all(module.join("my_product/etc/Removed")).unwrap();
+    fs::write(module.join("module.prop"), "id=example\n").unwrap();
+    for path in ["system/app/Removed", "my_product/etc/Removed"] {
+        let dir = module.join(path);
+        fs::write(dir.join(".remove"), "").unwrap();
+        fs::write(dir.join(".replace"), "").unwrap();
+        fs::write(dir.join("ignored"), "must not be mounted").unwrap();
+    }
+    fs::write(module.join("system/app/ordinary.remove"), "ordinary file").unwrap();
+    symlink("Removed", module.join("system/app/link")).unwrap();
+    let root = collect_module_files(
+        tmp.path(),
+        &[],
+        &["my_product".to_string()],
+        &FxHashSet::default(),
+    )
+    .unwrap()
+    .unwrap();
+    let app = &root.children["system"].children["app"];
+    for node in [
+        &app.children["Removed"],
+        &root.children["my_product"].children["etc"].children["Removed"],
+    ] {
+        assert_eq!(node.file_type, NodeFileType::Directory);
+        assert!(node.remove);
+        assert!(node.replace);
+        assert!(node.children.is_empty());
+    }
+    assert!(!app.children["ordinary.remove"].remove);
+    assert!(!app.children["ordinary.remove"].skip);
+    assert_eq!(app.children["link"].file_type, NodeFileType::Symlink);
+    assert!(!app.children["link"].remove);
+}
+
+#[test]
+fn remove_marker_omits_directory_from_parent_mirror() {
+    let tmp = tempfile::tempdir().unwrap();
+    let module = tmp.path().join("module");
+    let real = tmp.path().join("real");
+    let work = tmp.path().join("work");
+    for base in [&module, &real] {
+        fs::create_dir_all(base.join("app/Removed")).unwrap();
+        fs::write(base.join("app/Removed/content"), "unchanged").unwrap();
+    }
+    fs::write(module.join("app/Removed/.remove"), "").unwrap();
+    fs::write(module.join("app/Removed/.replace"), "").unwrap();
+    fs::create_dir_all(module.join("app/Dangling")).unwrap();
+    fs::write(module.join("app/Dangling/.remove"), "").unwrap();
+    symlink("missing", real.join("app/Dangling")).unwrap();
+    fs::create_dir_all(work.join("app")).unwrap();
+    let mut root = Node::new_root("");
+    assert!(root.collect_module_files(&module).unwrap());
+    let mounts = mount_list::MountList::new(tmp.path().join("mounts")).unwrap();
+    let mut mount = MagicMount::new(&root.children["app"], &real, &work, true, false, &mounts);
+    mount.mount_path(true).unwrap();
+    assert!(!work.join("app/Removed").exists());
+    assert!(work.join("app/Dangling").symlink_metadata().is_err());
+    assert_eq!(
+        fs::read_link(real.join("app/Dangling")).unwrap(),
+        Path::new("missing")
+    );
+    assert_eq!(
+        fs::read_to_string(real.join("app/Removed/content")).unwrap(),
+        "unchanged"
+    );
+    assert_eq!(
+        fs::read_to_string(module.join("app/Removed/content")).unwrap(),
+        "unchanged"
+    );
+}

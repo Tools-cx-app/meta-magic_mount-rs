@@ -68,6 +68,7 @@ pub struct Node {
     // the module that owned this node
     pub module_path: Option<PathBuf>,
     pub replace: bool,
+    pub remove: bool,
     pub skip: bool,
 }
 
@@ -108,6 +109,9 @@ impl Node {
         if self.replace {
             write!(f, " [REPLACE]")?;
         }
+        if self.remove {
+            write!(f, " [REMOVE]")?;
+        }
         if self.skip {
             write!(f, " [SKIP]")?;
         }
@@ -125,6 +129,10 @@ impl Node {
     where
         P: AsRef<Path>,
     {
+        if self.remove {
+            return Ok(true);
+        }
+
         let dir = module_dir.as_ref();
         let mut has_file = false;
         for entry in dir.read_dir()?.flatten() {
@@ -164,8 +172,11 @@ impl Node {
     where
         P: AsRef<Path>,
     {
-        let path = path.as_ref().to_string_lossy();
-        path.ends_with(".replace")
+        let path = path.as_ref();
+        path.to_string_lossy().ends_with(".replace")
+            || path
+                .file_name()
+                .is_some_and(|name| name == defs::REMOVE_DIR_FILE_NAME)
     }
 
     pub fn new_root<S>(name: S) -> Self
@@ -178,6 +189,7 @@ impl Node {
             children: FxHashMap::default(),
             module_path: None,
             replace: false,
+            remove: false,
             skip: false,
         }
     }
@@ -195,9 +207,14 @@ impl Node {
             };
 
             let replace = file_type == NodeFileType::Directory && Self::dir_is_replace(&path);
+            let remove = file_type == NodeFileType::Directory
+                && path.join(defs::REMOVE_DIR_FILE_NAME).exists();
             let skip = Self::dir_is_skip(&path);
             if replace {
                 log::debug!("{} need replace", path.display());
+            }
+            if remove {
+                log::debug!("{} need remove", path.display());
             }
             if skip {
                 log::debug!("{} was skip", path.display());
@@ -208,6 +225,7 @@ impl Node {
                 children: FxHashMap::default(),
                 module_path: Some(path),
                 replace,
+                remove,
                 skip,
             });
         }
@@ -366,6 +384,7 @@ pub fn collect_module_files(
                     let mut node = Node::new_root(partition);
                     node.module_path = Some(path.clone());
                     node.replace = Node::dir_is_replace(&path);
+                    node.remove = path.join(defs::REMOVE_DIR_FILE_NAME).exists();
                     node.skip = Node::dir_is_skip(&path);
                     node
                 });
@@ -547,6 +566,11 @@ impl MagicMount<'_> {
 
     #[allow(clippy::too_many_lines)]
     fn directory(&mut self) -> Result<()> {
+        if self.node.remove {
+            log::debug!("dir {} is removed", self.path.display());
+            return Ok(());
+        }
+
         let mut tmpfs = !self.has_tmpfs && self.node.replace && self.node.module_path.is_some();
 
         if !self.has_tmpfs && !tmpfs {
@@ -556,6 +580,7 @@ impl MagicMount<'_> {
                 let need = match node.file_type {
                     NodeFileType::Symlink => true,
                     NodeFileType::Whiteout => real_path.exists(),
+                    NodeFileType::Directory if node.remove => real_path.symlink_metadata().is_ok(),
                     _ => {
                         if let Ok(metadata) = real_path.symlink_metadata() {
                             let file_type = NodeFileType::from(metadata.file_type());

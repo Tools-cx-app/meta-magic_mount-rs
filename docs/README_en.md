@@ -92,6 +92,15 @@ extra_mount = []
 Settings can also be changed on the Web UI configuration page (recommended). Both MiuiX and MD3 provide a “Top-level Partition Mounts” editor to add and remove `extra_mount` partition names. Save and reboot to apply changes.
 
 ---
+## Directory markers
+
+Create an empty marker file in the corresponding module directory and reboot:
+
+- `.replace`: replace the target directory with the module contents, without retaining its original contents.
+- `.remove`: hide the entire target directory and its contents. For example, `<module>/system/app/Foo/.remove` hides `/system/app/Foo`. Only directory nodes support this flag; regular files and symlinks do not. Original files are not deleted.
+
+`.remove` takes precedence over `.replace` in the same directory; that directory's module contents are not mounted. Neither marker file is mounted. Directories under `extra_mount` use the same markers. The module-root `remove` marker (without a dot) still requests module removal and is distinct from `.remove`.
+
 
 ## Development
 

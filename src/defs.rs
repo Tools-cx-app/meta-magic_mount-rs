@@ -13,6 +13,7 @@ pub const REMOVE_FILE_NAME: &str = "remove";
 pub const SKIP_MOUNT_FILE_NAME: &str = "skip_mount";
 pub const REPLACE_DIR_XATTR: &str = "trusted.overlay.opaque";
 pub const REPLACE_DIR_FILE_NAME: &str = ".replace";
+pub const REMOVE_DIR_FILE_NAME: &str = ".remove";
 pub const CONFIG_FILE: &str = concatcp!(MAGIC_MOUNT, "/config.toml");
 pub const MODULE_PROP: &str = concatcp!(MODULE_PATH, "/", env!("MODULE_ID"), "/module.prop");
 pub const SCANNED_LIST: &str = concatcp!(MAGIC_MOUNT, "/scan.ret");
