@@ -134,4 +134,5 @@ jobs:
         with:
           bot-token: ${{ secrets.BOT_TOKEN }}
           chat-id: ${{ secrets.CHAT_ID }}
+          tags: metamodule
           artifact-names: magic_mount_rs-*
