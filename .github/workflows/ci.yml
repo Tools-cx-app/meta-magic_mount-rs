@@ -134,4 +134,4 @@ jobs:
         with:
           bot-token: ${{ secrets.BOT_TOKEN }}
           chat-id: ${{ secrets.CHAT_ID }}
-          files: ./output/*.zip
+          artifact-names: meta-mm-*

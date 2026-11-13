@@ -123,5 +123,5 @@ jobs:
         with:
           bot-token: ${{ secrets.BOT_TOKEN }}
           chat-id: ${{ secrets.CHAT_ID }}
-          files: ./output/*.zip
+          artifact-names: magic_mount_rs-*
           is-release: "true"
