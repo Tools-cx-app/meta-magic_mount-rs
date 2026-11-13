@@ -128,10 +128,10 @@ jobs:
           name: meta-mm-${{ github.run_number }}
           path: output/*.zip
           if-no-files-found: error
-      - name: Upload to telegram 
+      - name: Upload to telegram
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         uses: Tools-cx-app/telegram-upload-bot@master
         with:
           bot-token: ${{ secrets.BOT_TOKEN }}
           chat-id: ${{ secrets.CHAT_ID }}
-          artifact-names: meta-mm-*
+          artifact-names: magic_mount_rs-*
