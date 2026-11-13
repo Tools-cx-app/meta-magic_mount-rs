@@ -48,7 +48,6 @@
       "groupName": "webui-dependencies"
     }
   ],
-  "skipArtifactsUpdate": true,
   "constraints": {
     "rust": "nightly"
   }
