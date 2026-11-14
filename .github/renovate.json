@@ -45,7 +45,8 @@
       "matchManagers": [
         "npm"
       ],
-      "groupName": "webui-dependencies"
+      "groupName": "webui-dependencies",
+      "minimumReleaseAge": "3 days"
     }
   ],
   "constraints": {
