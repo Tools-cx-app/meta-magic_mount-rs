@@ -19,6 +19,43 @@ pub enum Error {
     InvalidModuleID { module_id: String },
     #[error("Invalid Bind path: '{path}'")]
     InvalidBindPath { path: String },
+    #[error("invalid Lua header {field}: {reason}")]
+    LuaHeader {
+        field: &'static str,
+        reason: &'static str,
+    },
+    #[error("unsupported Lua API {value:?}; expected literal integer 1 or 2")]
+    LuaApi { value: String },
+    #[error("invalid rule path {path:?}: {reason}")]
+    RulePath { path: String, reason: &'static str },
+    #[error("Lua API {api} function {function}: {reason}")]
+    LuaContract {
+        api: u8,
+        function: String,
+        reason: &'static str,
+    },
+    #[error("Lua {phase} failed in {path} (MODULE={module:?}): {source}")]
+    LuaScript {
+        path: std::path::PathBuf,
+        phase: &'static str,
+        module: Option<String>,
+        #[source]
+        source: Box<Error>,
+    },
+    #[error("module {module:?} scanned more than once")]
+    DuplicateModuleScan { module: String },
+    #[error("module {module:?} rule preparation failed: {source}")]
+    ModuleRules {
+        module: String,
+        #[source]
+        source: Box<Error>,
+    },
+    #[error("cannot read rule source {path}: {source}")]
+    RuleSource {
+        path: std::path::PathBuf,
+        #[source]
+        source: Box<Error>,
+    },
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error(transparent)]

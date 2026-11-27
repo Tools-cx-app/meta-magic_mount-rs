@@ -5,6 +5,20 @@ use std::fs;
 
 use super::*;
 
+fn list_modules<P>(module_dir: P, extra: &[String]) -> Vec<AppModule>
+where
+    P: AsRef<Path>,
+{
+    let mut modules = scan_modules(module_dir);
+    for module in &mut modules {
+        let mounted = module.scan_allowed
+            && std::iter::once("system")
+                .chain(extra.iter().map(String::as_str))
+                .any(|partition| module.mount_path().join(partition).is_dir());
+        module.set_mount_state(mounted);
+    }
+    modules
+}
 fn create_valid_prop_content(id: &str) -> String {
     format!(
         "id={}\nname=Test Module\nversion=1.0.0\nauthor=Tester\ndescription=A test module\n",
@@ -116,17 +130,18 @@ fn modules_status_preserves_lua_snapshot_by_id() {
         let path = root.path().join(id);
         fs::create_dir_all(path.join("system")).unwrap();
         fs::write(path.join("module.prop"), create_valid_prop_content(id)).unwrap();
+        fs::write(path.join("system/content"), id).unwrap();
     }
     let hooks_dir = root.path().join("lua");
     fs::create_dir(&hooks_dir).unwrap();
     fs::write(
         hooks_dir.join("skip.lua"),
-        "function before() modules.skipped.skip = true end",
+        "API = 2\nMODULE = 'skipped'\nfunction load() skip() end",
     )
     .unwrap();
     let mut boot_modules = list_modules(root.path(), &[]);
-    let hooks = crate::parser::LuaParser::load(&hooks_dir, &boot_modules, root.path()).unwrap();
-    hooks.before(&mut boot_modules).unwrap();
+    let hooks = crate::parser::LuaParser::load(&hooks_dir, root.path()).unwrap();
+    crate::magic_mount::collect_module_files(&mut boot_modules, &[], &[], &hooks).unwrap();
     let snapshot = root.path().join("scan.ret");
     fs::write(&snapshot, serde_json::to_vec(&boot_modules).unwrap()).unwrap();
 

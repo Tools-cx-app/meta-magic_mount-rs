@@ -63,48 +63,49 @@ extra_mount = []
 
 ## 自定义 Lua 钩子
 
-Lua 5.4 钩子取代旧文本 DSL 和声明式规则。**不兼容变更：**
-`/data/adb/magic_mount/custom` 和 `/data/adb/magic_mount/custom.lua` 不再受支持，也不会被读取。
-请在重启前手动将旧规则转换为钩子，并将脚本移入 `/data/adb/magic_mount/lua/`。
-WebUI 已移除忽略列表和自定义 bind 管理，且绝不会编辑脚本。
+将 Lua 5.4 脚本放入 `/data/adb/magic_mount/lua/`，重启生效。只加载该目录直接子级的普通 `.lua` 文件，按文件名升序，不加载符号链接或子目录。目录不存在表示没有脚本，每个脚本有独立的 Lua VM。
 
-按文件名升序加载 `/data/adb/magic_mount/lua/` 中所有直接子级的普通 `.lua` 文件，
-例如 `10-skip.lua`、`20-bind.lua`；不扫描子目录，也不加载符号链接文件。
-目录不存在表示没有钩子；目录访问、读取或脚本加载错误会终止执行，不会被忽略。
-每个脚本使用独立 Lua VM，全局变量不会在脚本间泄漏。两个钩子均可省略。
-例如创建 `/data/adb/magic_mount/lua/10-custom.lua`：
+文件头必须声明 `API = 1` 或 `API = 2`；API 2 随后声明 `MODULE = "模块 ID"`。每个字面量声明独占一行，允许前导空行、Lua 注释和单双引号。API 和 MODULE 运行时只读。旧 `bind` 改为 `bind_mount`；旧 `modules[id].skip` 改为 API 2 的 `skip()`。旧 custom/custom.lua 不再读取，WebUI 不编辑脚本。
 
-```lua
+API 1 仅提供挂载函数 `bind_mount(source, target)`，在可选的 `before()/after()` 中调用：
+
+~~~lua
+API = 1
+
 function before()
-    if modules["example"] then
-        modules["example"].skip = true
-    end
+    bind_mount("/data/local/tmp/before.conf", "/system/etc/before.conf")
 end
 
 function after()
-    bind("/data/local/tmp/source file", "/system/etc/hosts")
+    bind_mount("/data/local/tmp/hosts", "/system/etc/hosts")
 end
-```
+~~~
 
-所有 `before()` 按文件名顺序在模块收集和挂载前运行。`modules` 按模块 ID 索引，每项包含
-`id`、`name`、`version`、`author`、`description`、`mode`、`is_mounted`、`enabled`、
-`source_path`、`rules`（含 `default_mode` 和 `paths`）以及可修改的布尔值 `skip`。
-任一脚本设为 `skip = true` 即跳过该模块，其他脚本不能通过 `false` 重新启用；
-`false` 也不能覆盖 `disable`、`remove` 或 `skip_mount` 标记的排除效果。
-`moduledir` 是模块根目录（`/data/adb/modules`）。所有 `after()` 仅在 Magic Mount 成功后
-按文件名顺序运行，只提供 `bind(source, target)` 挂载 API，没有 `ignore` 或跳过模块的 API。
-仅当全部 `after()` 成功后才应用排队的 bind。错误包含脚本路径，并终止当前阶段：
-加载、语法或 `before` 错误会在挂载前终止；`after` 错误会取消全部排队的 bind，
-但不会回滚已完成的 Magic Mount。路径不能为空或包含控制字符。
-脚本是可信的本地配置，没有运行时间或内存配额。
+全部 before 按文件名顺序排队。模块规则和挂载树准备成功后，在 Magic Mount 之前执行这些 bind；目标可能被后续 Magic Mount 覆盖。全部 after 仅在 Magic Mount 成功后运行，所有 after 成功才执行其 bind。目标必须是绝对路径，路径不能为空、包含控制字符或 `..` 分量。bind 保持只读；目标不存在时，从最近存在的非根祖先创建临时镜像。
 
-`modules` 命令及 WebUI 按模块 ID 从启动快照还原 `is_mounted`、`mode` 和 `rules`，
-因此 Lua 跳过的模块显示为未挂载。启动后新增、尚未进入快照的模块也显示为未挂载；
-名称、版本和启用状态仍来自当前模块文件，修改这些信息不会改变本次启动的挂载状态。
+API 2 根据 module.prop 的 ID 匹配 MODULE，不假设目录名等于 ID。扫描模块挂载内容前，从 `LUAS: FxHashMap` 按模块 ID 查找脚本并调用无参数 `load()`，同一模块的脚本按文件名执行。未安装或带 disable、remove、skip_mount 标记的模块不执行 load。仅在 API 2 的 load 内提供：
 
-Lua 提供安全的基础库及 table、string、math、utf8 库，不提供 `os`、`io`、`package`、
-`debug` 或文件加载器。bind 目标必须是绝对路径，不能包含 `..` 路径分量；目标不存在时，
-会从最近存在的非根祖先构造临时镜像。bind 保持只读，任意 remount 或登记失败都会 detach 回滚。
+- `skip()`：跳过整个模块的挂载内容扫描与挂载，取消该模块全部规则，忽略后续规则，并停止同模块后续脚本。无参数且幂等；用 `return` 提前结束当前 Lua 回调。不创建 skip_mount 文件。
+- `block(path)`：仅排除当前模块提供的文件或目录，保留系统原内容和其他模块贡献。
+- `replace(source, target)`：源是绝对路径的普通文件或目录，目标是模块相对路径。目录整体替换，源不能是符号链接或特殊设备，同路径最后一次声明生效。
+- `remove(path)`：在最终挂载视图中隐藏文件、符号链接或目录，包括其他模块同路径贡献，不删除磁盘原内容。不支持移除分区根目录。
+
+~~~lua
+API = 2
+MODULE = "example_module"
+
+function load()
+    block("system/etc/unwanted.conf")
+    replace("/data/local/tmp/hosts", "system/etc/hosts")
+    remove("system/app/Example")
+end
+~~~
+
+跳过整个模块时，将 load 的函数体改为 `skip(); return`。相对路径以模块根目录为基准，包含 `system/` 或已配置的 extra_mount 分区名，例如 `my_product/etc/example.xml`。拒绝绝对目标、空路径、控制字符及 `..`。skip 优先于全部规则，其余优先级为 remove > block > replace，父级 block/remove 支配后代。没有 system/ 的模块也能通过规则贡献挂载。模块按 ID 排序，普通冲突保留先到贡献；block/replace 在本模块合并前生效，remove 在最终树生效。
+
+`moduledir` 是模块根目录（/data/adb/modules）。Lua 提供基础库及 table/string/math/utf8，不提供 os/io/package/debug、文件加载器、rawset 和 setmetatable。加载、before、load 或挂载树准备错误会在挂载前终止；after 错误取消该阶段 bind，不回滚已完成的 Magic Mount。可信本地脚本没有时间或内存配额。
+
+modules 命令和 WebUI 按模块 ID 从启动快照恢复 is_mounted、mode 和 rules；查询不执行脚本。skip 模块保留在列表中并显示未挂载，只影响本次启动。快照描述启动计划，不是逐文件挂载成功审计。
 
 ## 开发
 
