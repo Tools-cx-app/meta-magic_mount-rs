@@ -1,0 +1,109 @@
+{
+  "lang": { "display": "Português (Brasil)" },
+  "common": {
+    "appName": "Magic Mount",
+    "saving": "Salvando...",
+    "theme": "Alternar tema",
+    "language": "Idioma",
+    "themeAuto": "Automático (sistema)",
+    "themeLight": "Modo claro",
+    "themeDark": "Modo escuro",
+    "cancel": "Cancelar",
+    "reboot": "Reiniciar",
+    "rebootTitle": "Reiniciar o sistema?",
+    "rebootConfirm": "Tem certeza de que deseja reiniciar o dispositivo?",
+    "rebootFailed": "Falha ao reiniciar"
+  },
+  "tabs": {
+    "status": "Status",
+    "config": "Configuração",
+    "modules": "Módulos",
+    "info": "Informações"
+  },
+  "status": {
+    "storageTitle": "Estratégia de backend",
+    "sysInfoTitle": "Detalhes do sistema",
+    "deviceTitle": "Informações do dispositivo",
+    "moduleTitle": "Módulos",
+    "moduleActive": "Módulos ativos",
+    "mountSource": "Origem da montagem",
+    "modelLabel": "Modelo",
+    "androidLabel": "Android",
+    "kernelLabel": "Kernel",
+    "kernel": "Kernel",
+    "selinuxLabel": "SELinux",
+    "selinux": "SELinux",
+    "loadError": "Falha ao carregar o status do sistema",
+    "refresh": "Atualizar"
+  },
+  "config": {
+    "extraMount": "Montagens de partição de nível superior",
+    "extraMountDesc": "Mescla <module>/my_product/ em /my_product/. Informe o nome de uma única partição, não um caminho. O diretório de destino deve existir e /system/my_product não pode ter nenhuma entrada, incluindo links simbólicos quebrados. Salve e reinicie para aplicar.",
+    "extraMountInvalid": "Informe o nome de uma única partição: caminhos, ., .., system e caracteres NUL não são permitidos.",
+    "title": "Configuração",
+    "umountLabel": "Ativar desmontagem",
+    "umountOff": "Padrão",
+    "umountOn": "Ativado",
+    "mountSource": "Origem da montagem",
+    "mountSourceDesc": "Namespace global de origem da montagem (ex.: KSU)",
+    "partitions": "Partições extras",
+    "partitionsDesc": "Adicionar partições para montar",
+    "autoPlaceholder": "Seleção automática se vazio",
+    "reload": "Recarregar",
+    "save": "Salvar configuração",
+    "reset": "Redefinir",
+    "apply": "Aplicar",
+    "loadSuccess": "Configuração carregada com sucesso",
+    "loadError": "Falha ao carregar a configuração",
+    "loadDefault": "Configuração padrão carregada",
+    "saveSuccess": "Configuração salva",
+    "saveFailed": "Falha ao salvar a configuração",
+    "uiStyle": "Estilo da interface",
+    "styleChanged": "Estilo alterado",
+    "monetTheme": "Ativar Monet"
+  },
+  "modules": {
+    "title": "Módulos ativos",
+    "desc": "Os módulos listados aqui são detectados e gerenciados pelo Magic Mount.",
+    "scanning": "Verificando...",
+    "reload": "Atualizar",
+    "save": "Salvar alterações",
+    "empty": "Nenhum módulo ativo encontrado",
+    "scanError": "Falha ao verificar os módulos",
+    "saveSuccess": "Salvo",
+    "saveFailed": "Falha ao salvar",
+    "searchPlaceholder": "Pesquisar módulos...",
+    "filterLabel": "Filtrar:",
+    "filterAll": "Todos",
+    "modes": {
+      "overlay": "OverlayFS",
+      "magic": "Magic Mount",
+      "umount": "Desmontar",
+      "short": {
+        "overlay": "Overlay",
+        "magic": "Magic",
+        "ignore": "Ignorar"
+      }
+    },
+    "emptyState": "Nenhum módulo encontrado.",
+    "umountHiddenHint": "Módulos desmontados estão ocultos.",
+    "toggleError": "Falha ao alternar",
+    "authorLabel": "Autor",
+    "descriptionLabel": "Descrição",
+    "unknownLabel": "Desconhecido",
+    "noDescriptionLabel": "Sem descrição"
+  },
+  "info": {
+    "title": "Sobre",
+    "projectLink": "Repositório",
+    "donate": "Doar",
+    "contributors": "Contribuidores",
+    "loading": "Carregando contribuidores...",
+    "loadFail": "Falha ao carregar (limite de requisições da API)",
+    "noBio": "Nenhuma biografia disponível"
+  },
+  "content": {
+    "welcome": "Bem-vindo ao",
+    "mmrs": "Magic Mount-rs"
+  }
+}
