@@ -83,7 +83,7 @@ end
 
 全部 before 按文件名顺序排队。模块规则和挂载树准备成功后，在 Magic Mount 之前执行这些 bind；目标可能被后续 Magic Mount 覆盖。全部 after 仅在 Magic Mount 成功后运行，所有 after 成功才执行其 bind。目标必须是绝对路径，路径不能为空、包含控制字符或 `..` 分量。bind 保持只读；目标不存在时，从最近存在的非根祖先创建临时镜像。
 
-API 2 根据 module.prop 的 ID 匹配 MODULE，不假设目录名等于 ID。扫描模块挂载内容前，从 `LUAS: FxHashMap` 按模块 ID 查找脚本并调用无参数 `load()`，同一模块的脚本按文件名执行。未安装或带 disable、remove、skip_mount 标记的模块不执行 load。仅在 API 2 的 load 内提供：
+API 2 根据 module.prop 的 ID 匹配 MODULE，不假设目录名等于 ID。扫描模块挂载内容前，按模块 ID 查找匹配的脚本并调用无参数 `load()`，同一模块的脚本按文件名执行。未安装或带 disable、remove、skip_mount 标记的模块不执行 load。仅在 API 2 的 load 内提供：
 
 - `skip()`：跳过整个模块的挂载内容扫描与挂载，取消该模块全部规则，忽略后续规则，并停止同模块后续脚本。无参数且幂等；用 `return` 提前结束当前 Lua 回调。不创建 skip_mount 文件。
 - `block(path)`：仅排除当前模块提供的文件或目录，保留系统原内容和其他模块贡献。

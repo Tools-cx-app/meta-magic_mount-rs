@@ -5,11 +5,11 @@ mod bind_mount;
 mod config;
 mod defs;
 mod errors;
+mod extension;
 mod ksucalls;
 mod magic_mount;
 mod misc;
 mod mount_list;
-mod parser;
 mod scanner;
 mod utils;
 
@@ -25,6 +25,7 @@ use crate::{
     config::{Config, handle_gen_config, handle_save_config, handle_show_config},
     defs::MODULE_PATH,
     errors::Result,
+    extension::{BindPhase, Extensions},
     ksucalls::unmount,
     misc::{cleanup, emulated_soft_reboot},
 };
@@ -101,11 +102,11 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    let hooks = parser::LuaParser::load(
+    let hooks = Extensions::load(
         std::path::Path::new(defs::CUSTOM_SCRIPT_PATH),
         std::path::Path::new(MODULE_PATH),
     )?;
-    let before_commands = hooks.before()?;
+    let before_commands = hooks.bind_mounts(BindPhase::Before)?;
     let root =
         magic_mount::collect_module_files(&mut modules, &config.partitions, &extra_mount, &hooks)?;
 
@@ -136,7 +137,7 @@ fn main() -> Result<()> {
         .and_then(|()| magic_mount::magic_mount(root, &config.mountsource, config.umount, &mounts));
     let bind_mount_result = if magic_mount_result.is_ok() {
         Some((|| -> Result<()> {
-            let commands = hooks.after()?;
+            let commands = hooks.bind_mounts(BindPhase::After)?;
             bind_mount(&commands, config.umount, &mounts)
         })())
     } else {

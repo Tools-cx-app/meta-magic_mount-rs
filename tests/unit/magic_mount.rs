@@ -8,7 +8,7 @@ fn collect_module_files(
     partitions: &[String],
     extra: &[String],
 ) -> Result<Option<Node>> {
-    let hooks = LuaParser::load(&module_dir.join("lua"), module_dir)?;
+    let hooks = Extensions::load(&module_dir.join("lua"), module_dir)?;
     let mut modules = crate::scanner::scan_modules(module_dir);
     super::collect_module_files(&mut modules, partitions, extra, &hooks)
 }
@@ -57,7 +57,7 @@ fn extra_mount_collects_top_level_modules_and_honors_exclusions() {
         );
     }
     assert!(partition.children["replaced"].replace);
-    let hooks = LuaParser::load(&tmp.path().join("lua"), tmp.path()).unwrap();
+    let hooks = Extensions::load(&tmp.path().join("lua"), tmp.path()).unwrap();
     let mut modules = crate::scanner::scan_modules(tmp.path());
     super::collect_module_files(&mut modules, &[], &extra, &hooks).unwrap();
     let modules = serde_json::to_value(modules).unwrap();
@@ -190,7 +190,7 @@ fn lua_rules_filter_each_module_before_merge_and_remove_globally() {
     let scripts = root.path().join("lua");
     fs::create_dir(&scripts).unwrap();
     fs::write(scripts.join("rules.lua"), format!("API = 2\nMODULE = 'aa'\nfunction load() block('system//etc/./shared'); block('system/etc/blocked_dir'); replace('{0}', 'system/etc/new'); replace('{0}', 'system/etc/shared'); remove('system/etc/remove_me'); remove('system/app/Absent') end", source.display())).unwrap();
-    let hooks = LuaParser::load(&scripts, root.path()).unwrap();
+    let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = crate::scanner::scan_modules(root.path());
     let tree = super::collect_module_files(&mut modules, &[], &[], &hooks)
         .unwrap()
@@ -235,7 +235,7 @@ fn rules_only_modules_support_directories_extra_mount_and_last_replace() {
         ),
     )
     .unwrap();
-    let hooks = LuaParser::load(&scripts, root.path()).unwrap();
+    let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = crate::scanner::scan_modules(root.path());
     let tree = super::collect_module_files(&mut modules, &[], &["my_product".into()], &hooks)
         .unwrap()
@@ -265,7 +265,7 @@ fn remove_only_creates_tree_and_hides_dangling_links_in_mirror() {
     let scripts = root.path().join("lua");
     fs::create_dir(&scripts).unwrap();
     fs::write(scripts.join("rules.lua"), "API = 2\nMODULE = 'example'\nfunction load() remove('system/etc/link'); remove('system/etc/directory'); remove('system/etc/directory/child') end").unwrap();
-    let hooks = LuaParser::load(&scripts, root.path()).unwrap();
+    let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = crate::scanner::scan_modules(root.path());
     let tree = super::collect_module_files(&mut modules, &[], &[], &hooks)
         .unwrap()
@@ -325,7 +325,7 @@ fn replacement_sources_and_partition_targets_are_validated() {
             ),
         )
         .unwrap();
-        let hooks = LuaParser::load(&scripts, root.path()).unwrap();
+        let hooks = Extensions::load(&scripts, root.path()).unwrap();
         let mut modules = crate::scanner::scan_modules(root.path());
         assert!(super::collect_module_files(&mut modules, &[], &[], &hooks).is_err());
     }
@@ -334,7 +334,7 @@ fn replacement_sources_and_partition_targets_are_validated() {
         "API = 2\nMODULE = 'example'\nfunction load() remove('system') end",
     )
     .unwrap();
-    let hooks = LuaParser::load(&scripts, root.path()).unwrap();
+    let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = crate::scanner::scan_modules(root.path());
     assert!(super::collect_module_files(&mut modules, &[], &[], &hooks).is_err());
 }
@@ -353,7 +353,7 @@ fn directory_replace_discards_original_children_and_honors_descendant_rules() {
     let scripts = root.path().join("lua");
     fs::create_dir(&scripts).unwrap();
     fs::write(scripts.join("rules.lua"), format!("API = 2\nMODULE = 'example'\nfunction load() replace('{}', 'system/etc/destination'); block('system/etc/destination/blocked'); replace('/missing', 'system/etc/destination/blocked'); remove('system/etc/destination/removed'); replace('/missing', 'system/etc/destination/removed') end", source.display())).unwrap();
-    let hooks = LuaParser::load(&scripts, root.path()).unwrap();
+    let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = crate::scanner::scan_modules(root.path());
     let tree = super::collect_module_files(&mut modules, &[], &[], &hooks)
         .unwrap()

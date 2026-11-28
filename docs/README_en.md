@@ -39,7 +39,7 @@ end
 
 All before callbacks enqueue binds in filename order. Once rules and the mount tree are prepared, those binds execute before Magic Mount, which may cover their targets. All after callbacks run only after successful Magic Mount; binds execute only if every after succeeds. Targets must be absolute. Empty paths, control characters, and `..` components are forbidden. Binds remain read-only; missing targets use a temporary mirror from the nearest existing non-root ancestor.
 
-API 2 matches MODULE against the ID in module.prop, regardless of directory name. Before scanning module mount content, look up the ID in `LUAS: FxHashMap` and invoke `load()` with no arguments. Matching scripts run in filename order. Missing modules or modules with disable, remove, or skip_mount markers do not invoke load. Only API 2 load provides:
+API 2 matches MODULE against the ID in module.prop, regardless of directory name. Before scanning module mount content, find the scripts for that module ID and invoke `load()` with no arguments. Matching scripts run in filename order. Missing modules or modules with disable, remove, or skip_mount markers do not invoke load. Only API 2 load provides:
 
 - `skip()`: skip all mount content scanning and mounting for this module. Cancel all its rules, ignore later rules, and stop later scripts for the same module. Takes no arguments and is idempotent; use `return` to leave the current Lua callback. No skip_mount file is created.
 - `block(path)`: exclude only this module contribution at a file or directory path; original system content and other modules contributions remain.

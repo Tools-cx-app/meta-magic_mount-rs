@@ -25,9 +25,9 @@ use rustix::{
 use crate::{
     defs,
     errors::{Error, Result},
+    extension::{Extensions, ModulePlan},
     ksucalls::send_unmountable,
     mount_list,
-    parser::{LuaParser, ModulePlan},
     scanner::AppModule,
     utils::{ensure_dir_exists, lgetfilecon, lsetfilecon},
 };
@@ -437,7 +437,7 @@ pub fn collect_module_files(
     modules: &mut [AppModule],
     extra_partitions: &[String],
     extra_mount: &[String],
-    hooks: &LuaParser,
+    hooks: &Extensions,
 ) -> Result<Option<Node>> {
     let mut root = Node::new_root("");
     let mut removals = Vec::new();

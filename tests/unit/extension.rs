@@ -1,6 +1,8 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: GPL-v3
 
+use std::fs;
+
 use super::*;
 
 #[test]
@@ -23,8 +25,7 @@ fn api2_skip_runs_before_module_content_scan() {
     )
     .unwrap();
     let mut modules = crate::scanner::scan_modules(root.path());
-    let hooks = LuaParser::load(&scripts, root.path()).unwrap();
-    assert!(hooks.LUAS.contains_key("example"));
+    let hooks = Extensions::load(&scripts, root.path()).unwrap();
     assert!(
         crate::magic_mount::collect_module_files(&mut modules, &[], &[], &hooks)
             .unwrap()
@@ -66,10 +67,10 @@ API = 1
     "#,
     )
     .unwrap();
-    let parser = LuaParser::load(dir.path(), dir.path()).unwrap();
-    parser.before().unwrap();
+    let extensions = Extensions::load(dir.path(), dir.path()).unwrap();
+    extensions.bind_mounts(BindPhase::Before).unwrap();
     assert_eq!(
-        parser.after().unwrap(),
+        extensions.bind_mounts(BindPhase::After).unwrap(),
         vec![
             BindMount {
                 source: "/first".into(),
@@ -107,29 +108,34 @@ fn directory_ignores_non_lua_nested_symlink_and_legacy_files() {
         "API = 1\nfunction after() bind_mount('/valid', '/target') end",
     )
     .unwrap();
-    let parser = LuaParser::load(&dir, root.path()).unwrap();
+    let extensions = Extensions::load(&dir, root.path()).unwrap();
     assert_eq!(
-        parser.after().unwrap(),
+        extensions.bind_mounts(BindPhase::After).unwrap(),
         vec![BindMount {
             source: "/valid".into(),
             target: "/target".into()
         }]
     );
-    assert!(LuaParser::load(&root.path().join("custom.lua"), root.path()).is_err());
+    assert!(Extensions::load(&root.path().join("custom.lua"), root.path()).is_err());
 }
 
 #[test]
 fn missing_directory_is_optional_but_invalid_scripts_report_path() {
     let dir = tempfile::tempdir().unwrap();
-    let parser = LuaParser::load(&dir.path().join("missing"), dir.path()).unwrap();
-    assert!(parser.before().unwrap().is_empty());
-    assert!(parser.after().unwrap().is_empty());
+    let extensions = Extensions::load(&dir.path().join("missing"), dir.path()).unwrap();
+    assert!(
+        extensions
+            .bind_mounts(BindPhase::Before)
+            .unwrap()
+            .is_empty()
+    );
+    assert!(extensions.bind_mounts(BindPhase::After).unwrap().is_empty());
     let path = dir.path().join("broken.lua");
     fs::write(&path, "API = 1\nfunction before(").unwrap();
-    let error = LuaParser::load(dir.path(), dir.path()).err().unwrap();
+    let error = Extensions::load(dir.path(), dir.path()).err().unwrap();
     assert!(format!("{error:#}").contains(&path.display().to_string()));
     fs::write(&path, "API = 1\nbefore = false").unwrap();
-    assert!(LuaParser::load(dir.path(), dir.path()).is_err());
+    assert!(Extensions::load(dir.path(), dir.path()).is_err());
 }
 
 #[test]
@@ -154,8 +160,8 @@ fn hook_errors_cancel_stage_and_identify_script() {
         "API = 1\nfunction after() ignore('/source') end",
     ] {
         fs::write(&path, body).unwrap();
-        let parser = LuaParser::load(dir.path(), dir.path()).unwrap();
-        let error = parser.after().unwrap_err();
+        let extensions = Extensions::load(dir.path(), dir.path()).unwrap();
+        let error = extensions.bind_mounts(BindPhase::After).unwrap_err();
         assert!(
             format!("{error:#}").contains(&path.display().to_string()),
             "wrong failing script for {body:?}: {error:#}"
@@ -166,8 +172,8 @@ fn hook_errors_cancel_stage_and_identify_script() {
         "API = 1\nfunction before() block('system/etc/a') end",
     )
     .unwrap();
-    let parser = LuaParser::load(dir.path(), dir.path()).unwrap();
-    let error = parser.before().unwrap_err();
+    let extensions = Extensions::load(dir.path(), dir.path()).unwrap();
+    let error = extensions.bind_mounts(BindPhase::Before).unwrap_err();
     assert!(format!("{error:#}").contains(&path.display().to_string()));
 }
 
@@ -186,10 +192,10 @@ API = 1
     "#,
     )
     .unwrap();
-    let parser = LuaParser::load(dir.path(), dir.path()).unwrap();
-    parser.before().unwrap();
+    let extensions = Extensions::load(dir.path(), dir.path()).unwrap();
+    extensions.bind_mounts(BindPhase::Before).unwrap();
     assert_eq!(
-        parser.after().unwrap(),
+        extensions.bind_mounts(BindPhase::After).unwrap(),
         vec![BindMount {
             source: "/safe".into(),
             target: "/target".into()
@@ -221,7 +227,7 @@ fn headers_versions_constants_and_callbacks_are_checked() {
         "API = 2\nMODULE = 'example'\nskip()\nfunction load() end",
     ] {
         fs::write(&path, content).unwrap();
-        let error = LuaParser::load(dir.path(), dir.path())
+        let error = Extensions::load(dir.path(), dir.path())
             .err()
             .unwrap_or_else(|| panic!("accepted invalid script: {content}"));
         assert!(format!("{error:#}").contains(&path.display().to_string()));
@@ -231,9 +237,9 @@ fn headers_versions_constants_and_callbacks_are_checked() {
         "--[=[\nAPI = 999\n]=]\nAPI = 1\n-- comment\nfunction before() assert(API == 1) end",
     )
     .unwrap();
-    LuaParser::load(dir.path(), dir.path())
+    Extensions::load(dir.path(), dir.path())
         .unwrap()
-        .before()
+        .bind_mounts(BindPhase::Before)
         .unwrap();
 }
 
@@ -241,9 +247,15 @@ fn headers_versions_constants_and_callbacks_are_checked() {
 fn api1_collects_separate_before_and_after_queues() {
     let dir = tempfile::tempdir().unwrap();
     fs::write(dir.path().join("hooks.lua"), "API = 1\nfunction before() bind_mount('/before', '/target') end\nfunction after() assert(bind == nil and skip == nil and modules == nil); bind_mount('/after', '/target') end").unwrap();
-    let parser = LuaParser::load(dir.path(), dir.path()).unwrap();
-    assert_eq!(parser.before().unwrap()[0].source, "/before");
-    assert_eq!(parser.after().unwrap()[0].source, "/after");
+    let extensions = Extensions::load(dir.path(), dir.path()).unwrap();
+    assert_eq!(
+        extensions.bind_mounts(BindPhase::Before).unwrap()[0].source,
+        "/before"
+    );
+    assert_eq!(
+        extensions.bind_mounts(BindPhase::After).unwrap()[0].source,
+        "/after"
+    );
 }
 
 #[test]
@@ -282,10 +294,10 @@ fn api2_validates_path_arguments_and_only_runs_for_eligible_modules() {
             format!("API = 2\nMODULE = 'example'\nfunction load() {body} end"),
         )
         .unwrap();
-        let parser = LuaParser::load(&scripts, root.path()).unwrap();
+        let extensions = Extensions::load(&scripts, root.path()).unwrap();
         let mut modules = crate::scanner::scan_modules(root.path());
-        let error =
-            crate::magic_mount::collect_module_files(&mut modules, &[], &[], &parser).unwrap_err();
+        let error = crate::magic_mount::collect_module_files(&mut modules, &[], &[], &extensions)
+            .unwrap_err();
         assert!(
             format!("{error:#}").contains(&path.display().to_string()),
             "{body}: {error:#}"
@@ -298,10 +310,10 @@ fn api2_validates_path_arguments_and_only_runs_for_eligible_modules() {
     .unwrap();
     for marker in ["disable", "remove", "skip_mount"] {
         fs::write(module.join(marker), "").unwrap();
-        let parser = LuaParser::load(&scripts, root.path()).unwrap();
+        let extensions = Extensions::load(&scripts, root.path()).unwrap();
         let mut modules = crate::scanner::scan_modules(root.path());
         assert!(
-            crate::magic_mount::collect_module_files(&mut modules, &[], &[], &parser)
+            crate::magic_mount::collect_module_files(&mut modules, &[], &[], &extensions)
                 .unwrap()
                 .is_none()
         );
@@ -312,10 +324,10 @@ fn api2_validates_path_arguments_and_only_runs_for_eligible_modules() {
         "API = 2\nMODULE = 'not_installed'\nfunction load() error('must not run') end",
     )
     .unwrap();
-    let parser = LuaParser::load(&scripts, root.path()).unwrap();
+    let extensions = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = crate::scanner::scan_modules(root.path());
     assert!(
-        crate::magic_mount::collect_module_files(&mut modules, &[], &[], &parser)
+        crate::magic_mount::collect_module_files(&mut modules, &[], &[], &extensions)
             .unwrap()
             .is_none()
     );
@@ -325,15 +337,27 @@ fn api2_validates_path_arguments_and_only_runs_for_eligible_modules() {
 fn domain_errors_remain_typed_with_script_context() {
     let dir = tempfile::tempdir().unwrap();
     fs::write(dir.path().join("bad.lua"), "API = 3").unwrap();
-    let error = LuaParser::load(dir.path(), dir.path()).err().unwrap();
+    let error = Extensions::load(dir.path(), dir.path()).err().unwrap();
     match error {
         Error::LuaScript { source, .. } => assert!(matches!(*source, Error::LuaApi { .. })),
         error => panic!("missing typed script context: {error}"),
     }
-    assert!(matches!(
-        relative_path("../escape", &[]),
-        Err(Error::RulePath { .. })
-    ));
+    fs::write(
+        dir.path().join("bad.lua"),
+        "API = 1\nfunction before() bind_mount('../escape', '/target') end",
+    )
+    .unwrap();
+    let extensions = Extensions::load(dir.path(), dir.path()).unwrap();
+    let error = extensions.bind_mounts(BindPhase::Before).unwrap_err();
+    let Error::LuaScript { source, .. } = error else {
+        panic!("missing script context: {error}");
+    };
+    let Error::Mlua(error) = *source else {
+        panic!("missing callback error: {source}");
+    };
+    assert!(
+        matches!(error.downcast_ref::<Error>(), Some(Error::RulePath { path, .. }) if path == "../escape")
+    );
 }
 
 #[test]
@@ -353,7 +377,7 @@ fn skip_cancels_all_module_rules_and_does_not_persist_between_boots() {
     fs::create_dir(&scripts).unwrap();
     fs::write(scripts.join("10-rules.lua"), "API = 2\nMODULE = 'example'\nfunction load() replace('/missing-source', 'my_product/etc/content'); remove('my_product/etc/content'); block('my_product/etc/blocked') end").unwrap();
     fs::write(scripts.join("20-skip.lua"), "API = 2\nMODULE = 'example'\nfunction load() skip(); replace('/another-missing', 'my_product/ignored'); remove('my_product/etc/content') end").unwrap();
-    let hooks = LuaParser::load(&scripts, root.path()).unwrap();
+    let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = crate::scanner::scan_modules(root.path());
     let extra = vec!["my_product".into()];
     let tree = crate::magic_mount::collect_module_files(&mut modules, &[], &extra, &hooks)
@@ -380,7 +404,7 @@ fn skip_cancels_all_module_rules_and_does_not_persist_between_boots() {
         "API = 2\nMODULE = 'example'\nfunction load() end",
     )
     .unwrap();
-    let hooks = LuaParser::load(&scripts, root.path()).unwrap();
+    let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = crate::scanner::scan_modules(root.path());
     crate::magic_mount::collect_module_files(&mut modules, &[], &extra, &hooks).unwrap();
     assert!(modules[0].is_mountable());
