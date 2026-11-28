@@ -42,13 +42,16 @@ impl Runtime {
             extra_mount,
             mut modules,
         } = self;
-        let hooks = Extensions::load(
-            Path::new(paths::CUSTOM_SCRIPT_PATH),
-            Path::new(paths::MODULE_PATH),
-        )?;
+        let modules_dir = Path::new(paths::MODULE_PATH);
+        let hooks = Extensions::load(Path::new(paths::CUSTOM_SCRIPT_PATH), modules_dir)?;
         let before_commands = hooks.bind_mounts(BindPhase::Before)?;
-        let root =
-            mount::collect_module_files(&mut modules, &config.partitions, &extra_mount, &hooks)?;
+        let root = mount::collect_module_files(
+            modules_dir,
+            &mut modules,
+            &config.partitions,
+            &extra_mount,
+            &hooks,
+        )?;
 
         let _ = std::fs::write(
             paths::SCANNED_LIST,

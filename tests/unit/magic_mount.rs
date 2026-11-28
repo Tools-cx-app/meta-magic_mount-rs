@@ -13,7 +13,7 @@ fn collect_module_files(
 ) -> Result<Option<Node>> {
     let hooks = Extensions::load(&module_dir.join("lua"), module_dir)?;
     let mut modules = scan_modules(module_dir);
-    mount::collect_module_files(&mut modules, partitions, extra, &hooks)
+    mount::collect_module_files(module_dir, &mut modules, partitions, extra, &hooks)
 }
 
 #[test]
@@ -62,7 +62,7 @@ fn extra_mount_collects_top_level_modules_and_honors_exclusions() {
     assert!(partition.children["replaced"].replace);
     let hooks = Extensions::load(&tmp.path().join("lua"), tmp.path()).unwrap();
     let mut modules = scan_modules(tmp.path());
-    mount::collect_module_files(&mut modules, &[], &extra, &hooks).unwrap();
+    mount::collect_module_files(tmp.path(), &mut modules, &[], &extra, &hooks).unwrap();
     let modules = serde_json::to_value(modules).unwrap();
     let mounted: Vec<_> = modules
         .as_array()
@@ -174,6 +174,42 @@ fn write_module(root: &Path, directory: &str, id: &str) -> PathBuf {
 }
 
 #[test]
+fn metainstall_blocklist_skips_exact_module_ids_before_lua_and_collection() {
+    let root = tempfile::tempdir().unwrap();
+    let installer = root.path().join(env!("MODULE_ID"));
+    fs::create_dir(&installer).unwrap();
+    fs::write(
+        installer.join("metainstall.sh"),
+        "# BLOCKLIST=\"SelfMountExtra\"\nBLOCKLIST=\"OtherID  SelfMount\" # SelfMountExtra\n",
+    )
+    .unwrap();
+    for (directory, id) in [
+        ("renamed", "SelfMount"),
+        ("SelfMount", "SelfMountExtra"),
+        ("shorter", "Self"),
+    ] {
+        let module = write_module(root.path(), directory, id);
+        fs::create_dir(module.join("system")).unwrap();
+        fs::write(module.join("system").join(id), id).unwrap();
+    }
+    let scripts = root.path().join("lua");
+    fs::create_dir(&scripts).unwrap();
+    fs::write(
+        scripts.join("blocked.lua"),
+        "API = 2\nMODULE = 'SelfMount'\nfunction load() error('blocklisted module was scanned') end",
+    )
+    .unwrap();
+
+    let tree = collect_module_files(root.path(), &[], &[])
+        .unwrap()
+        .unwrap();
+    let files = &tree.children["system"].children;
+    assert!(!files.contains_key("SelfMount"));
+    assert!(files.contains_key("SelfMountExtra"));
+    assert!(files.contains_key("Self"));
+}
+
+#[test]
 fn lua_rules_filter_each_module_before_merge_and_remove_globally() {
     let root = tempfile::tempdir().unwrap();
     let first = write_module(root.path(), "directory_a", "aa");
@@ -195,7 +231,7 @@ fn lua_rules_filter_each_module_before_merge_and_remove_globally() {
     fs::write(scripts.join("rules.lua"), format!("API = 2\nMODULE = 'aa'\nfunction load() block('system//etc/./shared'); block('system/etc/blocked_dir'); replace('{0}', 'system/etc/new'); replace('{0}', 'system/etc/shared'); remove('system/etc/remove_me'); remove('system/app/Absent') end", source.display())).unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = scan_modules(root.path());
-    let tree = mount::collect_module_files(&mut modules, &[], &[], &hooks)
+    let tree = mount::collect_module_files(root.path(), &mut modules, &[], &[], &hooks)
         .unwrap()
         .unwrap();
     let etc = &tree.children["system"].children["etc"];
@@ -240,9 +276,15 @@ fn rules_only_modules_support_directories_extra_mount_and_last_replace() {
     .unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = scan_modules(root.path());
-    let tree = mount::collect_module_files(&mut modules, &[], &["my_product".into()], &hooks)
-        .unwrap()
-        .unwrap();
+    let tree = mount::collect_module_files(
+        root.path(),
+        &mut modules,
+        &[],
+        &["my_product".into()],
+        &hooks,
+    )
+    .unwrap()
+    .unwrap();
     let replaced = &tree.children["system"].children["etc"].children["renamed"];
     assert_eq!(replaced.name, "renamed");
     assert!(replaced.replace);
@@ -270,7 +312,7 @@ fn remove_only_creates_tree_and_hides_dangling_links_in_mirror() {
     fs::write(scripts.join("rules.lua"), "API = 2\nMODULE = 'example'\nfunction load() remove('system/etc/link'); remove('system/etc/directory'); remove('system/etc/directory/child') end").unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = scan_modules(root.path());
-    let tree = mount::collect_module_files(&mut modules, &[], &[], &hooks)
+    let tree = mount::collect_module_files(root.path(), &mut modules, &[], &[], &hooks)
         .unwrap()
         .unwrap();
     let node = &tree.children["system"].children["etc"];
@@ -330,7 +372,7 @@ fn replacement_sources_and_partition_targets_are_validated() {
         .unwrap();
         let hooks = Extensions::load(&scripts, root.path()).unwrap();
         let mut modules = scan_modules(root.path());
-        assert!(mount::collect_module_files(&mut modules, &[], &[], &hooks).is_err());
+        assert!(mount::collect_module_files(root.path(), &mut modules, &[], &[], &hooks).is_err());
     }
     fs::write(
         scripts.join("rules.lua"),
@@ -339,7 +381,7 @@ fn replacement_sources_and_partition_targets_are_validated() {
     .unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = scan_modules(root.path());
-    assert!(mount::collect_module_files(&mut modules, &[], &[], &hooks).is_err());
+    assert!(mount::collect_module_files(root.path(), &mut modules, &[], &[], &hooks).is_err());
 }
 
 #[test]
@@ -358,7 +400,7 @@ fn directory_replace_discards_original_children_and_honors_descendant_rules() {
     fs::write(scripts.join("rules.lua"), format!("API = 2\nMODULE = 'example'\nfunction load() replace('{}', 'system/etc/destination'); block('system/etc/destination/blocked'); replace('/missing', 'system/etc/destination/blocked'); remove('system/etc/destination/removed'); replace('/missing', 'system/etc/destination/removed') end", source.display())).unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = scan_modules(root.path());
-    let tree = mount::collect_module_files(&mut modules, &[], &[], &hooks)
+    let tree = mount::collect_module_files(root.path(), &mut modules, &[], &[], &hooks)
         .unwrap()
         .unwrap();
     let destination = &tree.children["system"].children["etc"].children["destination"];

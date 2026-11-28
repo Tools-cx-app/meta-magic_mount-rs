@@ -141,7 +141,8 @@ fn modules_status_preserves_lua_snapshot_by_id() {
     .unwrap();
     let mut boot_modules = list_modules(root.path(), &[]);
     let hooks = crate::framework::extension::Extensions::load(&hooks_dir, root.path()).unwrap();
-    crate::framework::mount::collect_module_files(&mut boot_modules, &[], &[], &hooks).unwrap();
+    crate::framework::mount::collect_module_files(root.path(), &mut boot_modules, &[], &[], &hooks)
+        .unwrap();
     let snapshot = root.path().join("scan.ret");
     fs::write(&snapshot, serde_json::to_vec(&boot_modules).unwrap()).unwrap();
 

@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: GPL-v3
 
 use std::collections::hash_map::Entry;
+use std::fs;
 use std::os::unix::fs::{FileTypeExt, MetadataExt};
 use std::path::{Path, PathBuf};
 
 use extattr::lgetxattr;
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 use rustix::path::Arg;
 
 use super::tree::{Node, NodeFileType, merge_nodes};
@@ -187,18 +188,51 @@ fn collect_contribution(
     Ok(contribution)
 }
 
+fn read_blocklist(modules_dir: &Path) -> FxHashSet<String> {
+    let path = modules_dir.join(env!("MODULE_ID")).join("metainstall.sh");
+    let script = match fs::read_to_string(&path) {
+        Ok(script) => script,
+        Err(error) => {
+            log::warn!("Cannot read BLOCKLIST from {}: {error}", path.display());
+            return FxHashSet::default();
+        }
+    };
+    let ids = script.lines().find_map(|line| {
+        let value = line.trim_start().strip_prefix("BLOCKLIST=")?;
+        match value.chars().next() {
+            Some(quote @ ('\'' | '"')) => value[1..].split_once(quote).map(|(ids, _)| ids),
+            _ => Some(value.split_ascii_whitespace().next().unwrap_or_default()),
+        }
+    });
+    let Some(ids) = ids else {
+        log::warn!("Missing BLOCKLIST assignment in {}", path.display());
+        return FxHashSet::default();
+    };
+    ids.split_ascii_whitespace().map(str::to_owned).collect()
+}
+
 /// Applies a module's rules before merging its contribution into the shared tree.
 pub fn collect_module_files(
+    modules_dir: &Path,
     modules: &mut [AppModule],
     extra_partitions: &[String],
     extra_mount: &[String],
     hooks: &Extensions,
 ) -> Result<Option<Node>> {
+    let blocklist = read_blocklist(modules_dir);
     let mut root = Node::new_root("");
     let mut removals = Vec::new();
     let mut has_file = false;
     modules.sort_by(|a, b| a.id.cmp(&b.id));
     for module in modules {
+        if blocklist.contains(&module.id) {
+            log::info!(
+                "Skipping module '{}': listed in metainstall.sh BLOCKLIST",
+                module.id
+            );
+            module.skip_mount();
+            continue;
+        }
         if !module.scan_allowed() {
             continue;
         }

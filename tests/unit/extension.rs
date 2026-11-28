@@ -48,7 +48,7 @@ fn api2_skip_runs_before_module_content_scan() {
     let mut modules = scan_modules(root.path());
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
     assert!(
-        collect_module_files(&mut modules, &[], &[], &hooks)
+        collect_module_files(root.path(), &mut modules, &[], &[], &hooks)
             .unwrap()
             .is_none()
     );
@@ -317,7 +317,8 @@ fn api2_validates_path_arguments_and_only_runs_for_eligible_modules() {
         .unwrap();
         let extensions = Extensions::load(&scripts, root.path()).unwrap();
         let mut modules = scan_modules(root.path());
-        let error = collect_module_files(&mut modules, &[], &[], &extensions).unwrap_err();
+        let error =
+            collect_module_files(root.path(), &mut modules, &[], &[], &extensions).unwrap_err();
         assert!(
             format!("{error:#}").contains(&path.display().to_string()),
             "{body}: {error:#}"
@@ -333,7 +334,7 @@ fn api2_validates_path_arguments_and_only_runs_for_eligible_modules() {
         let extensions = Extensions::load(&scripts, root.path()).unwrap();
         let mut modules = scan_modules(root.path());
         assert!(
-            collect_module_files(&mut modules, &[], &[], &extensions)
+            collect_module_files(root.path(), &mut modules, &[], &[], &extensions)
                 .unwrap()
                 .is_none()
         );
@@ -347,7 +348,7 @@ fn api2_validates_path_arguments_and_only_runs_for_eligible_modules() {
     let extensions = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = scan_modules(root.path());
     assert!(
-        collect_module_files(&mut modules, &[], &[], &extensions)
+        collect_module_files(root.path(), &mut modules, &[], &[], &extensions)
             .unwrap()
             .is_none()
     );
@@ -400,7 +401,7 @@ fn skip_cancels_all_module_rules_and_does_not_persist_between_boots() {
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = scan_modules(root.path());
     let extra = vec!["my_product".into()];
-    let tree = collect_module_files(&mut modules, &[], &extra, &hooks)
+    let tree = collect_module_files(root.path(), &mut modules, &[], &extra, &hooks)
         .unwrap()
         .unwrap();
     assert!(!modules[0].is_mountable());
@@ -426,6 +427,6 @@ fn skip_cancels_all_module_rules_and_does_not_persist_between_boots() {
     .unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
     let mut modules = scan_modules(root.path());
-    collect_module_files(&mut modules, &[], &extra, &hooks).unwrap();
+    collect_module_files(root.path(), &mut modules, &[], &extra, &hooks).unwrap();
     assert!(modules[0].is_mountable());
 }
