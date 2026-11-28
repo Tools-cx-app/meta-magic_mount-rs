@@ -13,7 +13,7 @@ export KSU_METAMODULE="mmrs"
 ui_print "- Using mmrs metainstall"
 
 # Define the module IDs that are not allowed to install (separated by spaces)
-BLOCKLIST="scene_swap_controller AAaTempSpoof"
+BLOCKLIST="scene_swap_controller AAaTempSpoof scene_systemless"
 
 # Fallback mechanism to fetch the current module ID from available environment variables
 CURRENT_MODULE="${KSU_MODULE:-$AP_MODULE}"
