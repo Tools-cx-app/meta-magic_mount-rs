@@ -6,6 +6,26 @@ use std::fs;
 use super::*;
 
 #[test]
+fn lua55_global_function_runs_as_a_mount_hook() {
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(
+        dir.path().join("global.lua"),
+        "API = 1
+global bind_mount
+global function before() bind_mount('/source', '/target') end",
+    )
+    .unwrap();
+    let extensions = Extensions::load(dir.path(), dir.path()).unwrap();
+    assert_eq!(
+        extensions.bind_mounts(BindPhase::Before).unwrap(),
+        [BindMount {
+            source: "/source".into(),
+            target: "/target".into(),
+        }]
+    );
+}
+
+#[test]
 fn api2_skip_runs_before_module_content_scan() {
     let root = tempfile::tempdir().unwrap();
     let module = root.path().join("different-directory");

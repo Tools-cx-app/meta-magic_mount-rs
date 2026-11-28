@@ -19,7 +19,7 @@ The author will update this project less frequently due to academic commitments.
 
 ## Custom Lua hooks
 
-Place Lua 5.4 scripts in `/data/adb/magic_mount/lua/` and reboot. Only direct regular `.lua` files are loaded, in filename order; symlinks and subdirectories are excluded. A missing directory means no scripts. Each script uses an independent Lua VM.
+Place Lua 5.5 scripts in `/data/adb/magic_mount/lua/` and reboot. Only direct regular `.lua` files are loaded, in filename order; symlinks and subdirectories are excluded. A missing directory means no scripts. Each script uses an independent Lua VM.
 
 Start each file with `API = 1` or `API = 2`; API 2 must then declare `MODULE = "module ID"`. Each literal declaration occupies its own line; leading whitespace, Lua comments, and both quote styles are supported. API and MODULE are immutable. Migrate `bind` to `bind_mount` and `modules[id].skip` to API 2 `skip()`. Legacy custom/custom.lua files are not read; the WebUI does not edit scripts.
 

@@ -63,7 +63,7 @@ extra_mount = []
 
 ## 自定义 Lua 钩子
 
-将 Lua 5.4 脚本放入 `/data/adb/magic_mount/lua/`，重启生效。只加载该目录直接子级的普通 `.lua` 文件，按文件名升序，不加载符号链接或子目录。目录不存在表示没有脚本，每个脚本有独立的 Lua VM。
+将 Lua 5.5 脚本放入 `/data/adb/magic_mount/lua/`，重启生效。只加载该目录直接子级的普通 `.lua` 文件，按文件名升序，不加载符号链接或子目录。目录不存在表示没有脚本，每个脚本有独立的 Lua VM。
 
 文件头必须声明 `API = 1` 或 `API = 2`；API 2 随后声明 `MODULE = "模块 ID"`。每个字面量声明独占一行，允许前导空行、Lua 注释和单双引号。API 和 MODULE 运行时只读。旧 `bind` 改为 `bind_mount`；旧 `modules[id].skip` 改为 API 2 的 `skip()`。旧 custom/custom.lua 不再读取，WebUI 不编辑脚本。
 

@@ -49,7 +49,7 @@ const_format = "0.2.36"
 hex = "0.4.3"
 parking_lot = "0.13.0"
 mlua = { version = "0.12.2", features = [
-  "lua54",
+  "lua55",
   "vendored",
   "serde",
   "anyhow",
