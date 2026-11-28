@@ -129,8 +129,9 @@ Build artifacts will be located at:
 
 ## Acknowledgements
 
-* [5ec1cff/KernelSU](https://github.com/5ec1cff/KernelSU/blob/52f1f575ce2bd0ca46ebf644fd00a838af9f344e/userspace/ksud/src/magic_mount.rs): original implementation
-* [YuzakiKokuban](https://github.com/YuzakiKokuban) Webui modifications
+* [5ec1cff/KernelSU](https://github.com/5ec1cff/KernelSU/blob/52f1f575ce2bd0ca46ebf644fd00a838af9f344e/userspace/ksud/src/magic_mount.rs) — Original Magic Mount implementation
+* [YuzakiKokuban](https://github.com/YuzakiKokuban) — WebUI improvements
+* [shadow3aaa/fas-rs](https://github.com/shadow3aaa/fas-rs) — Reference for the layout of the configuration and Lua extension modules
 
 ## License
 

@@ -8,7 +8,7 @@ use std::path::{Component, Path};
 
 use mlua::{Function, Lua, MultiValue, Value};
 
-use crate::errors::{Error, Result};
+use crate::framework::error::{Error, Result};
 
 pub(super) use v1::ApiV1;
 pub use v1::{BindMount, BindPhase};

@@ -4,6 +4,7 @@
 use std::fs;
 
 use super::*;
+use crate::framework::{mount::collect_module_files, scanner::scan_modules};
 
 #[test]
 fn lua55_global_function_runs_as_a_mount_hook() {
@@ -44,10 +45,10 @@ fn api2_skip_runs_before_module_content_scan() {
         "API = 2\nMODULE = 'example'\nfunction load() error('must not run') end",
     )
     .unwrap();
-    let mut modules = crate::scanner::scan_modules(root.path());
+    let mut modules = scan_modules(root.path());
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
     assert!(
-        crate::magic_mount::collect_module_files(&mut modules, &[], &[], &hooks)
+        collect_module_files(&mut modules, &[], &[], &hooks)
             .unwrap()
             .is_none()
     );
@@ -315,9 +316,8 @@ fn api2_validates_path_arguments_and_only_runs_for_eligible_modules() {
         )
         .unwrap();
         let extensions = Extensions::load(&scripts, root.path()).unwrap();
-        let mut modules = crate::scanner::scan_modules(root.path());
-        let error = crate::magic_mount::collect_module_files(&mut modules, &[], &[], &extensions)
-            .unwrap_err();
+        let mut modules = scan_modules(root.path());
+        let error = collect_module_files(&mut modules, &[], &[], &extensions).unwrap_err();
         assert!(
             format!("{error:#}").contains(&path.display().to_string()),
             "{body}: {error:#}"
@@ -331,9 +331,9 @@ fn api2_validates_path_arguments_and_only_runs_for_eligible_modules() {
     for marker in ["disable", "remove", "skip_mount"] {
         fs::write(module.join(marker), "").unwrap();
         let extensions = Extensions::load(&scripts, root.path()).unwrap();
-        let mut modules = crate::scanner::scan_modules(root.path());
+        let mut modules = scan_modules(root.path());
         assert!(
-            crate::magic_mount::collect_module_files(&mut modules, &[], &[], &extensions)
+            collect_module_files(&mut modules, &[], &[], &extensions)
                 .unwrap()
                 .is_none()
         );
@@ -345,9 +345,9 @@ fn api2_validates_path_arguments_and_only_runs_for_eligible_modules() {
     )
     .unwrap();
     let extensions = Extensions::load(&scripts, root.path()).unwrap();
-    let mut modules = crate::scanner::scan_modules(root.path());
+    let mut modules = scan_modules(root.path());
     assert!(
-        crate::magic_mount::collect_module_files(&mut modules, &[], &[], &extensions)
+        collect_module_files(&mut modules, &[], &[], &extensions)
             .unwrap()
             .is_none()
     );
@@ -398,9 +398,9 @@ fn skip_cancels_all_module_rules_and_does_not_persist_between_boots() {
     fs::write(scripts.join("10-rules.lua"), "API = 2\nMODULE = 'example'\nfunction load() replace('/missing-source', 'my_product/etc/content'); remove('my_product/etc/content'); block('my_product/etc/blocked') end").unwrap();
     fs::write(scripts.join("20-skip.lua"), "API = 2\nMODULE = 'example'\nfunction load() skip(); replace('/another-missing', 'my_product/ignored'); remove('my_product/etc/content') end").unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
-    let mut modules = crate::scanner::scan_modules(root.path());
+    let mut modules = scan_modules(root.path());
     let extra = vec!["my_product".into()];
-    let tree = crate::magic_mount::collect_module_files(&mut modules, &[], &extra, &hooks)
+    let tree = collect_module_files(&mut modules, &[], &extra, &hooks)
         .unwrap()
         .unwrap();
     assert!(!modules[0].is_mountable());
@@ -425,7 +425,7 @@ fn skip_cancels_all_module_rules_and_does_not_persist_between_boots() {
     )
     .unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
-    let mut modules = crate::scanner::scan_modules(root.path());
-    crate::magic_mount::collect_module_files(&mut modules, &[], &extra, &hooks).unwrap();
+    let mut modules = scan_modules(root.path());
+    collect_module_files(&mut modules, &[], &extra, &hooks).unwrap();
     assert!(modules[0].is_mountable());
 }

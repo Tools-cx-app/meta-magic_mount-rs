@@ -1,33 +1,15 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: GPL-v3
 
+mod api;
+
 use std::{fmt, fs, path::Path};
 
 use anyhow::Context;
-use hex::decode;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 
-use crate::{defs, errors::Result};
-
-#[derive(Debug, Serialize)]
-pub struct ApiConfig {
-    pub moduledir: String,
-    pub mountsource: String,
-    pub partitions: Vec<String>,
-    pub extra_mount: Vec<String>,
-    pub umount: bool,
-    pub disable_umount: bool,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct ApiConfigPayload {
-    pub mountsource: Option<String>,
-    pub partitions: Option<Vec<String>>,
-    pub extra_mount: Option<Vec<String>>,
-    pub umount: Option<bool>,
-    pub disable_umount: Option<bool>,
-}
+use super::Result;
+pub(crate) use api::{handle_gen_config, handle_save_config, handle_show_config};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
@@ -140,68 +122,8 @@ impl Config {
         fs::write(path, content).context("failed to write config file")?;
         Ok(())
     }
-
-    fn into_api(self) -> ApiConfig {
-        let umount_enabled = self.umount_enabled();
-
-        ApiConfig {
-            moduledir: defs::MODULE_PATH.trim_end_matches('/').to_string(),
-            mountsource: self.mountsource,
-            partitions: self.partitions,
-            extra_mount: self.extra_mount,
-            umount: umount_enabled,
-            disable_umount: !umount_enabled,
-        }
-    }
-
-    fn apply_api_payload(&mut self, payload: ApiConfigPayload) {
-        if let Some(mountsource) = payload.mountsource {
-            self.mountsource = mountsource;
-        }
-
-        if let Some(partitions) = payload.partitions {
-            self.partitions = partitions;
-        }
-
-        if let Some(extra_mount) = payload.extra_mount {
-            self.extra_mount = extra_mount;
-        }
-
-        if let Some(umount) = payload.umount {
-            self.set_umount_enabled(umount);
-        } else if let Some(disable_umount) = payload.disable_umount {
-            self.set_umount_enabled(!disable_umount);
-        }
-    }
 }
 
-pub fn handle_show_config() -> Result<()> {
-    let config = Config::load_or_default(defs::CONFIG_FILE);
-
-    println!("{}", serde_json::to_string(&config.into_api())?);
-    Ok(())
-}
-
-pub fn handle_save_config(payload_hex: &str) -> Result<()> {
-    let payload_json =
-        String::from_utf8(decode(payload_hex)?).context("decoded payload is not valid utf-8")?;
-    let payload: ApiConfigPayload =
-        serde_json::from_str(&payload_json).context("failed to parse config payload json")?;
-
-    let mut config = Config::load_or_default(defs::CONFIG_FILE);
-    config.apply_api_payload(payload);
-    config.save(defs::CONFIG_FILE)?;
-
-    println!("{}", json!({ "ok": true }));
-    Ok(())
-}
-
-pub fn handle_gen_config() -> Result<()> {
-    let config = Config::default();
-    config.save(defs::CONFIG_FILE)?;
-    println!("{}", json!({ "ok": true }));
-    Ok(())
-}
 #[cfg(test)]
-#[path = "../tests/unit/config.rs"]
+#[path = "../../../tests/unit/config.rs"]
 mod tests;

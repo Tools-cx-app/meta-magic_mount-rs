@@ -10,8 +10,8 @@ use std::cell::RefCell;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use self::core::Script;
-use crate::errors::{Error, Result};
-use crate::scanner::AppModule;
+use crate::framework::error::{Error, Result};
+use crate::framework::scanner::AppModule;
 use api::{ApiV1, ApiV2};
 pub use api::{BindMount, BindPhase, ModulePlan};
 
@@ -64,5 +64,5 @@ impl Extensions {
 }
 
 #[cfg(test)]
-#[path = "../../tests/unit/extension.rs"]
+#[path = "../../../tests/unit/extension.rs"]
 mod tests;

@@ -9,8 +9,8 @@ use mlua::{Function, Lua, MultiValue, Value};
 use rustc_hash::FxHashSet;
 
 use super::{Api, string_pair, validate_path};
-use crate::errors::{Error, Result};
-use crate::extension::core::Script;
+use crate::framework::error::{Error, Result};
+use crate::framework::extension::core::Script;
 
 #[derive(Debug, Default)]
 pub struct ModulePlan {
@@ -61,7 +61,7 @@ fn string_arg(mut args: MultiValue) -> mlua::Result<String> {
     }
 }
 
-pub(in crate::extension) struct ApiV2 {
+pub(in crate::framework::extension) struct ApiV2 {
     load: Function,
 }
 
@@ -88,7 +88,7 @@ impl Api for ApiV2 {
 }
 
 impl Script<ApiV2> {
-    pub(in crate::extension) fn load_module(
+    pub(in crate::framework::extension) fn load_module(
         &self,
         module: &str,
         plan: &mut ModulePlan,

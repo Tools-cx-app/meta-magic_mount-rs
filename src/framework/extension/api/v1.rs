@@ -6,8 +6,8 @@ use std::path::Path;
 use mlua::{Function, Lua, MultiValue, Value};
 
 use super::{Api, string_pair, validate_path};
-use crate::errors::{Error, Result};
-use crate::extension::core::Script;
+use crate::framework::error::{Error, Result};
+use crate::framework::extension::core::Script;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct BindMount {
@@ -21,7 +21,7 @@ pub enum BindPhase {
     After,
 }
 
-pub(in crate::extension) struct ApiV1 {
+pub(in crate::framework::extension) struct ApiV1 {
     before: Option<Function>,
     after: Option<Function>,
 }
@@ -39,7 +39,7 @@ impl Api for ApiV1 {
 }
 
 impl Script<ApiV1> {
-    pub(in crate::extension) fn bind_mounts(
+    pub(in crate::framework::extension) fn bind_mounts(
         &self,
         phase: BindPhase,
         commands: &mut Vec<BindMount>,

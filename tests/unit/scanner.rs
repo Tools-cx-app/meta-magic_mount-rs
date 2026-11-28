@@ -63,7 +63,7 @@ fn test_list_modules_integration() {
         create_valid_prop_content("test2"),
     )
     .unwrap();
-    fs::File::create(test2.join(defs::DISABLE_FILE_NAME)).unwrap();
+    fs::File::create(test2.join(paths::DISABLE_FILE_NAME)).unwrap();
 
     let test3 = module_dir.join("test3");
     fs::create_dir_all(test3.join("system")).unwrap();
@@ -72,7 +72,7 @@ fn test_list_modules_integration() {
         create_valid_prop_content("test3"),
     )
     .unwrap();
-    fs::File::create(test3.join(defs::SKIP_MOUNT_FILE_NAME)).unwrap();
+    fs::File::create(test3.join(paths::SKIP_MOUNT_FILE_NAME)).unwrap();
 
     let test4 = module_dir.join("test4");
     fs::create_dir_all(&test4).unwrap();
@@ -140,8 +140,8 @@ fn modules_status_preserves_lua_snapshot_by_id() {
     )
     .unwrap();
     let mut boot_modules = list_modules(root.path(), &[]);
-    let hooks = crate::extension::Extensions::load(&hooks_dir, root.path()).unwrap();
-    crate::magic_mount::collect_module_files(&mut boot_modules, &[], &[], &hooks).unwrap();
+    let hooks = crate::framework::extension::Extensions::load(&hooks_dir, root.path()).unwrap();
+    crate::framework::mount::collect_module_files(&mut boot_modules, &[], &[], &hooks).unwrap();
     let snapshot = root.path().join("scan.ret");
     fs::write(&snapshot, serde_json::to_vec(&boot_modules).unwrap()).unwrap();
 
@@ -178,4 +178,18 @@ fn modules_status_preserves_lua_snapshot_by_id() {
     assert!(!new_module.is_mounted);
     assert_eq!(new_module.mode, "ignore");
     assert_eq!(new_module.rules.default_mode, "ignore");
+}
+
+#[test]
+fn test_validate_module_id_valid() {
+    assert!(validate_module_id("testModule").is_ok());
+    assert!(validate_module_id("a.b-c_d").is_ok());
+}
+
+#[test]
+fn test_validate_module_id_invalid() {
+    assert!(validate_module_id("123test").is_err());
+    assert!(validate_module_id(".test").is_err());
+    assert!(validate_module_id("test@test").is_err());
+    assert!(validate_module_id("").is_err());
 }

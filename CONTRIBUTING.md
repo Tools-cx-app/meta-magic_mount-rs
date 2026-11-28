@@ -82,7 +82,11 @@ Build artifacts are written to `output/magic_mount_rs-*.zip`.
 
 ## Project layout
 
-- `src/`: core Rust implementation.
+- `src/main.rs` parses the CLI and dispatches commands.
+- `src/framework/` contains runtime orchestration, configuration, module scanning and versioned Lua extensions.
+- `src/framework/mount/` collects the module tree, executes Magic Mount and custom binds, and tracks mount points for soft reboot. Host tests exercise collection. Actual mounts require a rooted Android device.
+- `src/platform/` contains KernelSU, SELinux and module description operations.
+- `tests/unit/` contains host tests included by their owning Rust modules.
 - `xtask/`: build orchestration and helper tasks.
 - `module/`: packaging scripts and module assets.
 - `webui/`: frontend UI for configuration.

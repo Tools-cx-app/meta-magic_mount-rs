@@ -1,34 +1,15 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: GPL-v3
 
-mod bind_mount;
-mod config;
-mod defs;
-mod errors;
-mod extension;
-mod ksucalls;
-mod magic_mount;
-mod misc;
-mod mount_list;
-mod scanner;
-mod utils;
+mod framework;
+mod platform;
 
 #[cfg(test)]
 #[path = "../tests/unit/cli.rs"]
 mod cli_tests;
 
 use clap::{Parser, Subcommand};
-use rustix::mount::{MountFlags, mount};
-
-use crate::{
-    bind_mount::bind_mount,
-    config::{Config, handle_gen_config, handle_save_config, handle_show_config},
-    defs::MODULE_PATH,
-    errors::Result,
-    extension::{BindPhase, Extensions},
-    ksucalls::unmount,
-    misc::{cleanup, emulated_soft_reboot},
-};
+use framework::{Result, Runtime};
 
 #[derive(Debug, Parser)]
 #[command(
@@ -65,120 +46,20 @@ fn main() -> Result<()> {
 
     let cli = Cli::parse();
 
-    misc::pre_init();
-
-    let config = Config::load(defs::CONFIG_FILE)?;
-    let extra_mount = config.extra_mount_partitions(std::path::Path::new("/"));
-    let mut modules = scanner::scan_modules(MODULE_PATH);
-
-    if let Some(command) = cli.command {
-        match command {
-            Commands::ShowConfig => {
-                handle_show_config()?;
-            }
-            Commands::EmulatedSoftReboot => {
-                emulated_soft_reboot()?;
-            }
-            Commands::SaveConfig { payload } => {
-                handle_save_config(&payload)?;
-            }
-            Commands::GenConfig => {
-                handle_gen_config()?;
-            }
-            Commands::Modules => {
-                println!(
-                    "{}",
-                    serde_json::to_string_pretty(&scanner::show_modules(
-                        modules,
-                        std::path::Path::new(defs::SCANNED_LIST),
-                    )?)?
-                );
-            }
-            Commands::Version => {
-                println!("{{ \"version\": \"{}\" }}", env!("CARGO_PKG_VERSION"));
-            }
+    let runtime = Runtime::load()?;
+    match cli.command {
+        None => runtime.mount(),
+        Some(Commands::ShowConfig) => framework::handle_show_config(),
+        Some(Commands::EmulatedSoftReboot) => framework::emulated_soft_reboot(),
+        Some(Commands::SaveConfig { payload }) => framework::handle_save_config(&payload),
+        Some(Commands::GenConfig) => framework::handle_gen_config(),
+        Some(Commands::Modules) => {
+            println!("{}", serde_json::to_string_pretty(&runtime.modules()?)?);
+            Ok(())
         }
-
-        return Ok(());
-    }
-
-    let hooks = Extensions::load(
-        std::path::Path::new(defs::CUSTOM_SCRIPT_PATH),
-        std::path::Path::new(MODULE_PATH),
-    )?;
-    let before_commands = hooks.bind_mounts(BindPhase::Before)?;
-    let root =
-        magic_mount::collect_module_files(&mut modules, &config.partitions, &extra_mount, &hooks)?;
-
-    let _ = std::fs::write(defs::SCANNED_LIST, &serde_json::to_string_pretty(&modules)?);
-
-    log::info!("Magic Mount Starting");
-    log::info!("config info:\n{config}");
-
-    log::debug!(
-        "current selinux: {}",
-        std::fs::read_to_string("/proc/self/attr/current")?
-    );
-
-    let mounts = mount_list::MountList::persistent()?;
-
-    if let Err(e) = mount(
-        &config.mountsource,
-        "/debug_ramdisk",
-        "tmpfs",
-        MountFlags::empty(),
-        None,
-    ) {
-        log::error!("mount tmpfs failed: {e}");
-        std::process::exit(1);
-    }
-
-    let magic_mount_result = bind_mount(&before_commands, config.umount, &mounts)
-        .and_then(|()| magic_mount::magic_mount(root, &config.mountsource, config.umount, &mounts));
-    let bind_mount_result = if magic_mount_result.is_ok() {
-        Some((|| -> Result<()> {
-            let commands = hooks.bind_mounts(BindPhase::After)?;
-            bind_mount(&commands, config.umount, &mounts)
-        })())
-    } else {
-        None
-    };
-
-    cleanup();
-    unmount()?;
-
-    match magic_mount_result {
-        Ok(()) => {
-            log::info!("Magic Mount Completed Successfully");
-        }
-        Err(e) => {
-            log::error!("Magic Mount Failed");
-            log::error!("Dont run bind mount stage!!");
-            let e = anyhow::Error::from(e);
-            for cause in e.chain() {
-                log::error!("{cause:#?}");
-            }
-            log::error!("{:#?}", e.backtrace());
-            return Err(errors::Error::AnyHow(e));
+        Some(Commands::Version) => {
+            println!("{{ \"version\": \"{}\" }}", env!("CARGO_PKG_VERSION"));
+            Ok(())
         }
     }
-
-    if let Some(bind_mount_result) = bind_mount_result {
-        match bind_mount_result {
-            Ok(()) => {
-                log::info!("Bind mount Completed Successfully");
-            }
-            Err(e) => {
-                log::error!("Bind mount Failed");
-                let e = anyhow::Error::from(e);
-                for cause in e.chain() {
-                    log::error!("{cause:#?}");
-                }
-                log::error!("{:#?}", e.backtrace());
-                return Err(errors::Error::AnyHow(e));
-            }
-        }
-    }
-
-    Ok(())
 }

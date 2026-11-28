@@ -57,7 +57,7 @@ fn unmounts_deepest_paths_first_and_retains_failures() {
     unmount_from(&list, |target| {
         attempted.push(target.to_path_buf());
         if target == std::path::Path::new("/system") {
-            Err(crate::errors::Error::Io(io::Error::other("busy")))
+            Err(crate::framework::error::Error::Io(io::Error::other("busy")))
         } else {
             Ok(())
         }
@@ -79,7 +79,7 @@ fn removes_list_after_all_targets_unmount() {
     let list = temp.path().join("umount.list");
     fs::write(&list, "/system\n/vendor\n").unwrap();
 
-    unmount_from(&list, |_| Ok::<_, crate::errors::Error>(())).unwrap();
+    unmount_from(&list, |_| Ok::<_, crate::framework::error::Error>(())).unwrap();
 
     assert!(!list.exists());
 }

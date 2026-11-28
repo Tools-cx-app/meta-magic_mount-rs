@@ -142,8 +142,9 @@ Android lint 与最低支持的 API 26 对齐：
 
 ## 致谢
 
-*  [5ec1cff/KernelSU](https://github.com/5ec1cff/KernelSU/blob/52f1f575ce2bd0ca46ebf644fd00a838af9f344e/userspace/ksud/src/magic_mount.rs)：原始实现
-* [YuzakiKokuban](https://github.com/YuzakiKokuban) Webui修改
+* [5ec1cff/KernelSU](https://github.com/5ec1cff/KernelSU/blob/52f1f575ce2bd0ca46ebf644fd00a838af9f344e/userspace/ksud/src/magic_mount.rs) — Magic Mount 原始实现
+* [YuzakiKokuban](https://github.com/YuzakiKokuban) — WebUI 改进
+* [shadow3aaa/fas-rs](https://github.com/shadow3aaa/fas-rs) — 配置与 Lua 扩展的模块结构参考
 
 ## 许可证
 

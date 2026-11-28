@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: GPL-v3
 
 use super::*;
+use crate::framework::extension::{Extensions, ModulePlan};
+use crate::framework::{mount, paths, scanner::scan_modules};
+use std::os::unix::fs::symlink;
 
 fn collect_module_files(
     module_dir: &Path,
@@ -9,8 +12,8 @@ fn collect_module_files(
     extra: &[String],
 ) -> Result<Option<Node>> {
     let hooks = Extensions::load(&module_dir.join("lua"), module_dir)?;
-    let mut modules = crate::scanner::scan_modules(module_dir);
-    super::collect_module_files(&mut modules, partitions, extra, &hooks)
+    let mut modules = scan_modules(module_dir);
+    mount::collect_module_files(&mut modules, partitions, extra, &hooks)
 }
 
 #[test]
@@ -19,9 +22,9 @@ fn extra_mount_collects_top_level_modules_and_honors_exclusions() {
     for (id, marker) in [
         ("first", None),
         ("second", None),
-        ("disabled", Some(defs::DISABLE_FILE_NAME)),
-        ("removed", Some(defs::REMOVE_FILE_NAME)),
-        ("skipped", Some(defs::SKIP_MOUNT_FILE_NAME)),
+        ("disabled", Some(paths::DISABLE_FILE_NAME)),
+        ("removed", Some(paths::REMOVE_FILE_NAME)),
+        ("skipped", Some(paths::SKIP_MOUNT_FILE_NAME)),
     ] {
         let module = tmp.path().join(id);
         fs::create_dir_all(module.join("my_product/etc")).unwrap();
@@ -58,8 +61,8 @@ fn extra_mount_collects_top_level_modules_and_honors_exclusions() {
     }
     assert!(partition.children["replaced"].replace);
     let hooks = Extensions::load(&tmp.path().join("lua"), tmp.path()).unwrap();
-    let mut modules = crate::scanner::scan_modules(tmp.path());
-    super::collect_module_files(&mut modules, &[], &extra, &hooks).unwrap();
+    let mut modules = scan_modules(tmp.path());
+    mount::collect_module_files(&mut modules, &[], &extra, &hooks).unwrap();
     let modules = serde_json::to_value(modules).unwrap();
     let mounted: Vec<_> = modules
         .as_array()
@@ -140,7 +143,7 @@ fn remove_marker_omits_directory_from_parent_mirror() {
     root.collect_filtered(&module, Path::new(""), &ModulePlan::default())
         .unwrap();
     assert!(root.has_content());
-    let mounts = mount_list::MountList::new(tmp.path().join("mounts")).unwrap();
+    let mounts = MountList::new(tmp.path().join("mounts")).unwrap();
     let mut mount = MagicMount::new(&root.children["app"], &real, &work, true, false, &mounts);
     mount.mount_path(true).unwrap();
     assert!(!work.join("app/Removed").exists());
@@ -191,8 +194,8 @@ fn lua_rules_filter_each_module_before_merge_and_remove_globally() {
     fs::create_dir(&scripts).unwrap();
     fs::write(scripts.join("rules.lua"), format!("API = 2\nMODULE = 'aa'\nfunction load() block('system//etc/./shared'); block('system/etc/blocked_dir'); replace('{0}', 'system/etc/new'); replace('{0}', 'system/etc/shared'); remove('system/etc/remove_me'); remove('system/app/Absent') end", source.display())).unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
-    let mut modules = crate::scanner::scan_modules(root.path());
-    let tree = super::collect_module_files(&mut modules, &[], &[], &hooks)
+    let mut modules = scan_modules(root.path());
+    let tree = mount::collect_module_files(&mut modules, &[], &[], &hooks)
         .unwrap()
         .unwrap();
     let etc = &tree.children["system"].children["etc"];
@@ -236,8 +239,8 @@ fn rules_only_modules_support_directories_extra_mount_and_last_replace() {
     )
     .unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
-    let mut modules = crate::scanner::scan_modules(root.path());
-    let tree = super::collect_module_files(&mut modules, &[], &["my_product".into()], &hooks)
+    let mut modules = scan_modules(root.path());
+    let tree = mount::collect_module_files(&mut modules, &[], &["my_product".into()], &hooks)
         .unwrap()
         .unwrap();
     let replaced = &tree.children["system"].children["etc"].children["renamed"];
@@ -266,8 +269,8 @@ fn remove_only_creates_tree_and_hides_dangling_links_in_mirror() {
     fs::create_dir(&scripts).unwrap();
     fs::write(scripts.join("rules.lua"), "API = 2\nMODULE = 'example'\nfunction load() remove('system/etc/link'); remove('system/etc/directory'); remove('system/etc/directory/child') end").unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
-    let mut modules = crate::scanner::scan_modules(root.path());
-    let tree = super::collect_module_files(&mut modules, &[], &[], &hooks)
+    let mut modules = scan_modules(root.path());
+    let tree = mount::collect_module_files(&mut modules, &[], &[], &hooks)
         .unwrap()
         .unwrap();
     let node = &tree.children["system"].children["etc"];
@@ -279,7 +282,7 @@ fn remove_only_creates_tree_and_hides_dangling_links_in_mirror() {
     fs::write(real.join("etc/directory/child"), "untouched").unwrap();
     symlink("missing", real.join("etc/link")).unwrap();
     fs::create_dir_all(work.join("etc")).unwrap();
-    let mounts = mount_list::MountList::new(root.path().join("mounts")).unwrap();
+    let mounts = MountList::new(root.path().join("mounts")).unwrap();
     MagicMount::new(node, &real, &work, true, false, &mounts)
         .mount_path(true)
         .unwrap();
@@ -326,8 +329,8 @@ fn replacement_sources_and_partition_targets_are_validated() {
         )
         .unwrap();
         let hooks = Extensions::load(&scripts, root.path()).unwrap();
-        let mut modules = crate::scanner::scan_modules(root.path());
-        assert!(super::collect_module_files(&mut modules, &[], &[], &hooks).is_err());
+        let mut modules = scan_modules(root.path());
+        assert!(mount::collect_module_files(&mut modules, &[], &[], &hooks).is_err());
     }
     fs::write(
         scripts.join("rules.lua"),
@@ -335,8 +338,8 @@ fn replacement_sources_and_partition_targets_are_validated() {
     )
     .unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
-    let mut modules = crate::scanner::scan_modules(root.path());
-    assert!(super::collect_module_files(&mut modules, &[], &[], &hooks).is_err());
+    let mut modules = scan_modules(root.path());
+    assert!(mount::collect_module_files(&mut modules, &[], &[], &hooks).is_err());
 }
 
 #[test]
@@ -354,8 +357,8 @@ fn directory_replace_discards_original_children_and_honors_descendant_rules() {
     fs::create_dir(&scripts).unwrap();
     fs::write(scripts.join("rules.lua"), format!("API = 2\nMODULE = 'example'\nfunction load() replace('{}', 'system/etc/destination'); block('system/etc/destination/blocked'); replace('/missing', 'system/etc/destination/blocked'); remove('system/etc/destination/removed'); replace('/missing', 'system/etc/destination/removed') end", source.display())).unwrap();
     let hooks = Extensions::load(&scripts, root.path()).unwrap();
-    let mut modules = crate::scanner::scan_modules(root.path());
-    let tree = super::collect_module_files(&mut modules, &[], &[], &hooks)
+    let mut modules = scan_modules(root.path());
+    let tree = mount::collect_module_files(&mut modules, &[], &[], &hooks)
         .unwrap()
         .unwrap();
     let destination = &tree.children["system"].children["etc"].children["destination"];
@@ -371,4 +374,26 @@ fn directory_replace_discards_original_children_and_honors_descendant_rules() {
         fs::read_to_string(module.join("system/etc/destination/old")).unwrap(),
         "old"
     );
+}
+
+#[test]
+fn test_ensure_dir_exists_success() {
+    let tmp_dir = tempfile::tempdir().unwrap();
+    let target_dir = tmp_dir.path().join("test");
+    assert!(ensure_dir_exists(&target_dir).is_ok());
+    assert!(target_dir.is_dir());
+}
+
+#[test]
+fn test_ensure_dir_exists_failure_when_file_exists() {
+    let tmp_dir = tempfile::tempdir().unwrap();
+    let file_path = tmp_dir.path().join("test");
+    fs::write(&file_path, "test").unwrap();
+
+    match ensure_dir_exists(&file_path) {
+        Err(Error::RegularDirectory { path }) => {
+            assert_eq!(path, file_path.display().to_string());
+        }
+        _ => panic!("Expected Error::RegularDirectory"),
+    }
 }

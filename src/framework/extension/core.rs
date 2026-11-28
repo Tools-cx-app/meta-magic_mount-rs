@@ -10,7 +10,7 @@ use mlua::{Lua, LuaOptions, StdLib, Table, Value, chunk::ChunkMode};
 use super::Extensions;
 use super::api::Api;
 use super::header::{Header, header};
-use crate::errors::{Error, Result};
+use crate::framework::error::{Error, Result};
 
 fn script_error(path: &Path, phase: &'static str, module: Option<&str>, source: Error) -> Error {
     Error::LuaScript {

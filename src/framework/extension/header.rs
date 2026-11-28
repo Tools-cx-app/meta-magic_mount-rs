@@ -1,8 +1,8 @@
 // Copyright (C) 2026 meta-magic_mount-rs developers
 // SPDX-License-Identifier: GPL-v3
 
-use crate::errors::{Error, Result};
-use crate::utils::validate_module_id;
+use crate::framework::error::{Error, Result};
+use crate::framework::scanner::validate_module_id;
 
 pub(super) enum Header<'a> {
     V1,

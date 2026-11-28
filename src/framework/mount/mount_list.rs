@@ -11,9 +11,9 @@ use std::{
 
 use rustix::mount::{UnmountFlags, unmount};
 
-use crate::{
-    defs,
-    errors::{Error, Result},
+use crate::framework::{
+    error::{Error, Result},
+    paths,
 };
 
 pub struct MountList {
@@ -41,7 +41,7 @@ impl MountList {
     }
 
     pub fn persistent() -> Result<Self> {
-        Self::new(defs::UMOUNT_LIST)
+        Self::new(paths::UMOUNT_LIST)
     }
 
     pub fn record<T>(&self, target: T)
@@ -100,7 +100,7 @@ impl MountList {
     }
 
     pub fn unmount_persisted() -> Result<()> {
-        unmount_from(Path::new(defs::UMOUNT_LIST), |target| {
+        unmount_from(Path::new(paths::UMOUNT_LIST), |target| {
             unmount(target, UnmountFlags::DETACH).map_err(Error::from)
         })
     }
@@ -159,5 +159,5 @@ where
 }
 
 #[cfg(test)]
-#[path = "../tests/unit/mount_list.rs"]
+#[path = "../../../tests/unit/mount_list.rs"]
 mod tests;

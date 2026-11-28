@@ -9,10 +9,10 @@ use std::{
 
 use rustix::mount::{MountFlags, UnmountFlags, mount_bind, mount_move, mount_remount, unmount};
 
-use crate::{
-    errors::Result, extension::BindMount, ksucalls::send_unmountable, magic_mount::mount_mirror,
-    mount_list,
-};
+use super::mirror::mount_mirror;
+use super::mount_list::MountList;
+use crate::framework::{Result, extension::BindMount};
+use crate::platform::ksu::send_unmountable;
 
 fn mirror_paths(target: &Path) -> Result<(PathBuf, PathBuf)> {
     if !target.is_absolute()
@@ -104,11 +104,7 @@ fn report_rollback(success: bool, on_failure: impl FnOnce()) {
     }
 }
 
-fn mount_readonly(
-    source: &Path,
-    target: &Path,
-    leaked_mounts: Option<&mount_list::MountList>,
-) -> Result<()> {
+fn mount_readonly(source: &Path, target: &Path, leaked_mounts: Option<&MountList>) -> Result<()> {
     mount_bind(source, target)?;
     if let Err(error) = mount_remount(target, MountFlags::BIND | MountFlags::RDONLY, "") {
         let rollback = unmount(target, UnmountFlags::DETACH);
@@ -180,7 +176,7 @@ fn mount_missing_target(source: &Path, target: &Path) -> Result<PathBuf> {
     Ok(ancestor)
 }
 
-fn mount_target(source: &Path, target: &Path, mounts: &mount_list::MountList) -> Result<PathBuf> {
+fn mount_target(source: &Path, target: &Path, mounts: &MountList) -> Result<PathBuf> {
     match target.metadata() {
         Ok(_) => {
             let target = fs::canonicalize(target)?;
@@ -192,11 +188,7 @@ fn mount_target(source: &Path, target: &Path, mounts: &mount_list::MountList) ->
     }
 }
 
-pub fn bind_mount(
-    commands: &[BindMount],
-    umount: bool,
-    mounts: &mount_list::MountList,
-) -> Result<()> {
+pub fn bind_mount(commands: &[BindMount], umount: bool, mounts: &MountList) -> Result<()> {
     for BindMount { source, target } in commands {
         log::debug!("bind mount: {source} -> {target}");
 
@@ -217,5 +209,5 @@ pub fn bind_mount(
 }
 
 #[cfg(test)]
-#[path = "../tests/unit/bind_mount.rs"]
+#[path = "../../../tests/unit/bind_mount.rs"]
 mod tests;

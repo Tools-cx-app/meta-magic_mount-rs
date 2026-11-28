@@ -127,8 +127,9 @@ cargo xtask b
 
 ## Благодарности
 
-* [5ec1cff/KernelSU](https://github.com/5ec1cff/KernelSU/blob/52f1f575ce2bd0ca46ebf644fd00a838af9f344e/userspace/ksud/src/magic_mount.rs): оригинальная имплементация
-* [YuzakiKokuban](https://github.com/YuzakiKokuban) модификации webui
+* [5ec1cff/KernelSU](https://github.com/5ec1cff/KernelSU/blob/52f1f575ce2bd0ca46ebf644fd00a838af9f344e/userspace/ksud/src/magic_mount.rs) — Исходная реализация Magic Mount
+* [YuzakiKokuban](https://github.com/YuzakiKokuban) — Доработки WebUI
+* [shadow3aaa/fas-rs](https://github.com/shadow3aaa/fas-rs) — Ориентир при организации модулей конфигурации и расширений Lua
 
 ## Лицензия
 

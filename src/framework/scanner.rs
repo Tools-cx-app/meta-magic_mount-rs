@@ -4,10 +4,28 @@
 use std::{collections::BTreeMap, fs, io::Cursor, path::Path};
 
 use java_properties::PropertiesIter;
+use regex_lite::Regex;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
-use crate::{defs, errors::Result, utils::validate_module_id};
+use super::error::{Error, Result};
+use super::paths;
+
+/// Validate `module_id` format and security
+/// Module ID must match: ^[a-zA-Z][a-zA-Z0-9._-]+$
+/// - Must start with a letter (a-zA-Z)
+/// - Followed by one or more alphanumeric, dot, underscore, or hyphen characters
+/// - Minimum length: 2 characters
+pub fn validate_module_id(module_id: &str) -> Result<()> {
+    let re = Regex::new(r"^[a-zA-Z][a-zA-Z0-9._-]+$")?;
+    if re.is_match(module_id) {
+        Ok(())
+    } else {
+        Err(Error::InvalidModuleID {
+            module_id: module_id.to_string(),
+        })
+    }
+}
 
 #[derive(Debug)]
 struct ModuleRecord {
@@ -110,9 +128,9 @@ where
                 continue;
             }
 
-            let disabled = path.join(defs::DISABLE_FILE_NAME).exists()
-                || path.join(defs::REMOVE_FILE_NAME).exists();
-            let skip_mount = path.join(defs::SKIP_MOUNT_FILE_NAME).exists();
+            let disabled = path.join(paths::DISABLE_FILE_NAME).exists()
+                || path.join(paths::REMOVE_FILE_NAME).exists();
+            let skip_mount = path.join(paths::SKIP_MOUNT_FILE_NAME).exists();
 
             let prop_path = path.join("module.prop");
 
@@ -208,5 +226,5 @@ where
 }
 
 #[cfg(test)]
-#[path = "../tests/unit/scanner.rs"]
+#[path = "../../tests/unit/scanner.rs"]
 mod tests;
