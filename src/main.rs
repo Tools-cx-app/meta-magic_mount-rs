@@ -5,11 +5,11 @@ mod bind_mount;
 mod config;
 mod defs;
 mod errors;
+mod extension;
 mod ksucalls;
 mod magic_mount;
 mod misc;
 mod mount_list;
-mod parser;
 mod scanner;
 mod utils;
 
@@ -25,6 +25,7 @@ use crate::{
     config::{Config, handle_gen_config, handle_save_config, handle_show_config},
     defs::MODULE_PATH,
     errors::Result,
+    extension::{BindPhase, Extensions},
     ksucalls::unmount,
     misc::{cleanup, emulated_soft_reboot},
 };
@@ -68,9 +69,7 @@ fn main() -> Result<()> {
 
     let config = Config::load(defs::CONFIG_FILE)?;
     let extra_mount = config.extra_mount_partitions(std::path::Path::new("/"));
-    let mut scan_partitions = config.partitions.clone();
-    scan_partitions.extend(extra_mount.iter().cloned());
-    let mut modules = scanner::list_modules(MODULE_PATH, &scan_partitions);
+    let mut modules = scanner::scan_modules(MODULE_PATH);
 
     if let Some(command) = cli.command {
         match command {
@@ -103,18 +102,13 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    let hooks = parser::LuaParser::load(
+    let hooks = Extensions::load(
         std::path::Path::new(defs::CUSTOM_SCRIPT_PATH),
-        &modules,
         std::path::Path::new(MODULE_PATH),
     )?;
-    let skipped = hooks.before(&mut modules)?;
-    let root = magic_mount::collect_module_files(
-        std::path::Path::new(MODULE_PATH),
-        &config.partitions,
-        &extra_mount,
-        &skipped,
-    )?;
+    let before_commands = hooks.bind_mounts(BindPhase::Before)?;
+    let root =
+        magic_mount::collect_module_files(&mut modules, &config.partitions, &extra_mount, &hooks)?;
 
     let _ = std::fs::write(defs::SCANNED_LIST, &serde_json::to_string_pretty(&modules)?);
 
@@ -139,11 +133,11 @@ fn main() -> Result<()> {
         std::process::exit(1);
     }
 
-    let magic_mount_result =
-        magic_mount::magic_mount(root, &config.mountsource, config.umount, &mounts);
+    let magic_mount_result = bind_mount(&before_commands, config.umount, &mounts)
+        .and_then(|()| magic_mount::magic_mount(root, &config.mountsource, config.umount, &mounts));
     let bind_mount_result = if magic_mount_result.is_ok() {
         Some((|| -> Result<()> {
-            let commands = hooks.after()?;
+            let commands = hooks.bind_mounts(BindPhase::After)?;
             bind_mount(&commands, config.umount, &mounts)
         })())
     } else {

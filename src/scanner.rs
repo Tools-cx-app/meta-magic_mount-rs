@@ -4,7 +4,7 @@
 use std::{collections::BTreeMap, fs, io::Cursor, path::Path};
 
 use java_properties::PropertiesIter;
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{defs, errors::Result, utils::validate_module_id};
@@ -18,7 +18,6 @@ struct ModuleRecord {
     description: String,
     disabled: bool,
     skip_mount: bool,
-    has_mount_files: bool,
     source_path: String,
 }
 
@@ -40,6 +39,8 @@ pub struct AppModule {
     enabled: bool,
     source_path: String,
     rules: ModuleRules,
+    #[serde(skip)]
+    scan_allowed: bool,
 }
 
 impl AppModule {
@@ -47,6 +48,7 @@ impl AppModule {
         Path::new(&self.source_path)
     }
 
+    #[cfg(test)]
     pub const fn is_mountable(&self) -> bool {
         self.is_mounted
     }
@@ -55,6 +57,23 @@ impl AppModule {
         self.is_mounted = false;
         self.mode = "ignore".into();
         self.rules.default_mode = "ignore".into();
+        self.rules.paths.clear();
+    }
+
+    pub const fn scan_allowed(&self) -> bool {
+        self.scan_allowed
+    }
+
+    pub fn set_mount_state(&mut self, mounted: bool) {
+        self.is_mounted = mounted;
+        self.mode = if mounted { "magic" } else { "ignore" }.into();
+        self.rules.default_mode = self.mode.clone();
+    }
+
+    pub fn record_rule(&mut self, path: &Path, mode: &str) {
+        self.rules
+            .paths
+            .insert(path.to_string_lossy().into_owned(), mode.into());
     }
 }
 
@@ -73,7 +92,7 @@ where
     Ok(map)
 }
 
-fn collect_modules<P>(module_dir: P, extra: &[String]) -> Vec<ModuleRecord>
+fn collect_modules<P>(module_dir: P) -> Vec<ModuleRecord>
 where
     P: AsRef<Path>,
 {
@@ -89,18 +108,6 @@ where
 
             if !path.join("module.prop").exists() {
                 continue;
-            }
-
-            let mut modified = false;
-            let mut partitions = FxHashSet::default();
-            partitions.insert("system".to_string());
-            partitions.extend(extra.iter().cloned());
-
-            for partition in &partitions {
-                if entry.path().join(partition).is_dir() {
-                    modified = true;
-                    break;
-                }
             }
 
             let disabled = path.join(defs::DISABLE_FILE_NAME).exists()
@@ -142,7 +149,6 @@ where
                     description: description.clone(),
                     disabled,
                     skip_mount,
-                    has_mount_files: modified,
                     source_path: path.to_str().unwrap_or_default().to_string(),
                 });
             }
@@ -175,35 +181,32 @@ pub fn show_modules(mut modules: Vec<AppModule>, snapshot_path: &Path) -> Result
     Ok(modules)
 }
 
-pub fn list_modules<P>(module_dir: P, extra: &[String]) -> Vec<AppModule>
+/// Reads identities and exclusion markers without inspecting mount content.
+pub fn scan_modules<P>(module_dir: P) -> Vec<AppModule>
 where
     P: AsRef<Path>,
 {
-    collect_modules(module_dir, extra)
+    collect_modules(module_dir)
         .into_iter()
-        .map(|module| {
-            let is_mounted = module.has_mount_files && !module.disabled && !module.skip_mount;
-            let mode = if is_mounted { "magic" } else { "ignore" }.to_string();
-            let default_mode = mode.clone();
-
-            AppModule {
-                id: module.id,
-                name: module.name,
-                version: module.version,
-                author: module.author,
-                description: module.description,
-                mode,
-                is_mounted,
-                enabled: !module.disabled,
-                source_path: module.source_path,
-                rules: ModuleRules {
-                    default_mode,
-                    paths: BTreeMap::new(),
-                },
-            }
+        .map(|module| AppModule {
+            id: module.id,
+            name: module.name,
+            version: module.version,
+            author: module.author,
+            description: module.description,
+            mode: "ignore".into(),
+            is_mounted: false,
+            enabled: !module.disabled,
+            scan_allowed: !module.disabled && !module.skip_mount,
+            source_path: module.source_path,
+            rules: ModuleRules {
+                default_mode: "ignore".into(),
+                paths: BTreeMap::new(),
+            },
         })
         .collect()
 }
+
 #[cfg(test)]
 #[path = "../tests/unit/scanner.rs"]
 mod tests;

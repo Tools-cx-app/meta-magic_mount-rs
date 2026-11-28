@@ -10,8 +10,8 @@ use std::{
 use rustix::mount::{MountFlags, UnmountFlags, mount_bind, mount_move, mount_remount, unmount};
 
 use crate::{
-    errors::Result, ksucalls::send_unmountable, magic_mount::mount_mirror, mount_list,
-    parser::BindMount,
+    errors::Result, extension::BindMount, ksucalls::send_unmountable, magic_mount::mount_mirror,
+    mount_list,
 };
 
 fn mirror_paths(target: &Path) -> Result<(PathBuf, PathBuf)> {

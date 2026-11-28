@@ -12,7 +12,7 @@ use std::{
 
 use anyhow::Context;
 use extattr::lgetxattr;
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashMap;
 use rustix::{
     fs::{Gid, Mode, Uid, chmod, chown},
     mount::{
@@ -25,9 +25,11 @@ use rustix::{
 use crate::{
     defs,
     errors::{Error, Result},
+    extension::{Extensions, ModulePlan},
     ksucalls::send_unmountable,
     mount_list,
-    utils::{ensure_dir_exists, lgetfilecon, lsetfilecon, validate_module_id},
+    scanner::AppModule,
+    utils::{ensure_dir_exists, lgetfilecon, lsetfilecon},
 };
 
 static MOUNTDED_FILES: AtomicU32 = AtomicU32::new(0);
@@ -125,34 +127,96 @@ impl Node {
 }
 
 impl Node {
-    pub fn collect_module_files<P>(&mut self, module_dir: P) -> Result<bool>
-    where
-        P: AsRef<Path>,
-    {
+    fn from_path(name: &str, path: &Path) -> Result<Self> {
+        let metadata = path.symlink_metadata()?;
+        let file_type = if metadata.file_type().is_char_device() && metadata.rdev() == 0 {
+            NodeFileType::Whiteout
+        } else {
+            NodeFileType::from(metadata.file_type())
+        };
+        let directory = file_type == NodeFileType::Directory;
+        Ok(Self {
+            name: name.into(),
+            file_type,
+            children: FxHashMap::default(),
+            module_path: Some(path.into()),
+            replace: directory && Self::dir_is_replace(path),
+            remove: directory && path.join(defs::REMOVE_DIR_FILE_NAME).exists(),
+            skip: Self::dir_is_skip(path),
+        })
+    }
+
+    fn collect_filtered(
+        &mut self,
+        source: &Path,
+        relative: &Path,
+        plan: &ModulePlan,
+    ) -> Result<()> {
         if self.remove {
-            return Ok(true);
+            return Ok(());
         }
+        for entry in source.read_dir()? {
+            let entry = entry?;
+            let name = entry.file_name().to_string_lossy().into_owned();
+            let target = relative.join(&name);
+            if plan.blocks(&target)
+                || plan.removes(&target)
+                || plan.replacements.contains_key(&target)
+            {
+                continue;
+            }
+            let mut node = Self::from_path(&name, &entry.path())?;
+            if node.skip {
+                continue;
+            }
+            if node.file_type == NodeFileType::Directory {
+                node.collect_filtered(&entry.path(), &target, plan)?;
+            }
+            self.children.insert(name, node);
+        }
+        Ok(())
+    }
 
-        let dir = module_dir.as_ref();
-        let mut has_file = false;
-        for entry in dir.read_dir()?.flatten() {
-            let name = entry.file_name().to_string_lossy().to_string();
+    fn has_content(&self) -> bool {
+        self.remove
+            || self.replace
+            || self.file_type != NodeFileType::Directory
+            || self.children.values().any(Self::has_content)
+    }
 
-            let node = match self.children.entry(name.clone()) {
-                Entry::Occupied(o) => Some(o.into_mut()),
-                Entry::Vacant(v) => Self::new_module(&name, &entry).map(|it| v.insert(it)),
-            };
-
-            if let Some(node) = node {
-                has_file |= if node.file_type == NodeFileType::Directory {
-                    node.collect_module_files(dir.join(&node.name))? || node.replace
+    /// Creates logical parents using existing module directories or module-root metadata.
+    fn insert_rule(&mut self, path: &Path, node: Self, module_dir: &Path) -> Result<()> {
+        let mut parent = self;
+        let mut relative = PathBuf::new();
+        let mut parts = path.iter().peekable();
+        while let Some(part) = parts.next() {
+            let name = part.to_string_lossy().into_owned();
+            if parts.peek().is_none() {
+                parent.children.insert(name, node);
+                return Ok(());
+            }
+            relative.push(part);
+            parent = parent.children.entry(name.clone()).or_insert_with(|| {
+                let mut directory = Self::new_root(name);
+                let source = module_dir.join(&relative);
+                directory.module_path = Some(if source.is_dir() {
+                    source
                 } else {
-                    true
-                }
+                    module_dir.into()
+                });
+                directory
+            });
+            if parent.remove {
+                return Ok(());
+            }
+            if parent.file_type != NodeFileType::Directory {
+                return Err(Error::RulePath {
+                    path: relative.to_string_lossy().into_owned(),
+                    reason: "rule parent is not a directory",
+                });
             }
         }
-
-        Ok(has_file)
+        Ok(())
     }
 
     fn dir_is_replace<P>(path: P) -> bool
@@ -193,44 +257,28 @@ impl Node {
             skip: false,
         }
     }
+}
 
-    pub fn new_module<S>(name: &S, entry: &DirEntry) -> Option<Self>
-    where
-        S: ToString,
-    {
-        if let Ok(metadata) = entry.metadata() {
-            let path = entry.path();
-            let file_type = if metadata.file_type().is_char_device() && metadata.rdev() == 0 {
-                NodeFileType::Whiteout
-            } else {
-                NodeFileType::from(metadata.file_type())
-            };
-
-            let replace = file_type == NodeFileType::Directory && Self::dir_is_replace(&path);
-            let remove = file_type == NodeFileType::Directory
-                && path.join(defs::REMOVE_DIR_FILE_NAME).exists();
-            let skip = Self::dir_is_skip(&path);
-            if replace {
-                log::debug!("{} need replace", path.display());
+/// Keeps the first module's conflicting entries, matching the existing merge policy.
+fn merge_nodes(target: &mut Node, source: Node) {
+    if target.remove || target.file_type != NodeFileType::Directory {
+        return;
+    }
+    if target.module_path.is_none() {
+        target.module_path = source.module_path.clone();
+        target.replace = source.replace;
+        target.remove = source.remove;
+    }
+    if source.file_type != NodeFileType::Directory {
+        return;
+    }
+    for (name, child) in source.children {
+        match target.children.entry(name) {
+            Entry::Occupied(mut entry) => merge_nodes(entry.get_mut(), child),
+            Entry::Vacant(entry) => {
+                entry.insert(child);
             }
-            if remove {
-                log::debug!("{} need remove", path.display());
-            }
-            if skip {
-                log::debug!("{} was skip", path.display());
-            }
-            return Some(Self {
-                name: name.to_string(),
-                file_type,
-                children: FxHashMap::default(),
-                module_path: Some(path),
-                replace,
-                remove,
-                skip,
-            });
         }
-
-        None
     }
 }
 
@@ -322,76 +370,126 @@ where
     Ok(())
 }
 
-pub fn collect_module_files(
+/// Builds one module independently so block cannot erase another module's contribution.
+fn collect_contribution(
     module_dir: &Path,
-    extra_partitions: &[String],
+    plan: &ModulePlan,
     extra_mount: &[String],
-    skipped: &FxHashSet<PathBuf>,
-) -> Result<Option<Node>> {
-    let mut root = Node::new_root("");
-    let mut system = Node::new_root("system");
-    let module_root = module_dir;
-    let mut has_file = false;
-
-    log::debug!("begin collect module files: {}", module_root.display());
-
-    for entry in module_root.read_dir()?.flatten() {
-        if !entry.file_type()?.is_dir() {
-            continue;
-        }
-
-        if skipped.contains(&entry.path()) {
-            log::debug!("skipped module {} by Lua before", entry.path().display());
-            continue;
-        }
-
-        let id = entry.file_name().to_str().unwrap().to_string();
-        log::debug!("processing new module: {id}");
-
-        let prop = entry.path().join("module.prop");
-        if !prop.exists() {
-            log::debug!("skipped module {id}, because not found module.prop");
-            continue;
-        }
-        let string = fs::read_to_string(prop)?;
-        for line in string.lines() {
-            if line.starts_with("id")
-                && let Some((_, value)) = line.split_once('=')
-            {
-                validate_module_id(value)?;
-            }
-        }
-
-        if entry.path().join(defs::DISABLE_FILE_NAME).exists()
-            || entry.path().join(defs::REMOVE_FILE_NAME).exists()
-            || entry.path().join(defs::SKIP_MOUNT_FILE_NAME).exists()
+) -> Result<Node> {
+    let mut contribution = Node::new_root("");
+    for partition in std::iter::once("system").chain(extra_mount.iter().map(String::as_str)) {
+        let relative = Path::new(partition);
+        if plan.blocks(relative)
+            || plan.removes(relative)
+            || plan.replacements.contains_key(relative)
         {
-            log::debug!("skipped module {id}, due to disable/remove/skip_mount");
             continue;
         }
-
-        let mod_system = entry.path().join("system");
-        if mod_system.is_dir() {
-            log::debug!("collecting {}", mod_system.display());
-            has_file |= system.collect_module_files(&mod_system)?;
-        }
-
-        for partition in extra_mount {
-            let path = entry.path().join(partition);
-            if path.is_dir() {
-                log::debug!("collecting extra_mount {}", path.display());
-                let node = root.children.entry(partition.clone()).or_insert_with(|| {
-                    let mut node = Node::new_root(partition);
-                    node.module_path = Some(path.clone());
-                    node.replace = Node::dir_is_replace(&path);
-                    node.remove = path.join(defs::REMOVE_DIR_FILE_NAME).exists();
-                    node.skip = Node::dir_is_skip(&path);
-                    node
-                });
-                has_file |= node.collect_module_files(&path)? || node.replace;
-            }
+        let path = module_dir.join(relative);
+        if path.is_dir() {
+            let mut node = Node::from_path(partition, &path)?;
+            node.collect_filtered(&path, relative, plan)?;
+            contribution.children.insert(partition.into(), node);
         }
     }
+    for (target, source) in &plan.replacements {
+        if plan.blocks(target) || plan.removes(target) {
+            continue;
+        }
+        let metadata = source
+            .symlink_metadata()
+            .map_err(|source_error| Error::RuleSource {
+                path: source.clone(),
+                source: Box::new(source_error.into()),
+            })?;
+        if !metadata.is_file() && !metadata.is_dir() {
+            return Err(Error::RulePath {
+                path: source.to_string_lossy().into_owned(),
+                reason: "replace source must be a regular file or directory",
+            });
+        }
+        if target.components().count() == 1 && !metadata.is_dir() {
+            return Err(Error::RulePath {
+                path: target.to_string_lossy().into_owned(),
+                reason: "partition replacement must be a directory",
+            });
+        }
+        let name = target
+            .file_name()
+            .ok_or_else(|| Error::RulePath {
+                path: target.to_string_lossy().into_owned(),
+                reason: "replacement target missing name",
+            })?
+            .to_string_lossy();
+        let mut node = Node::from_path(&name, source)?;
+        node.skip = false;
+        if metadata.is_dir() {
+            node.replace = true;
+            node.collect_filtered(source, target, plan)?;
+        }
+        contribution.insert_rule(target, node, module_dir)?;
+    }
+    Ok(contribution)
+}
+
+/// Applies a module's rules before merging its contribution into the shared tree.
+pub fn collect_module_files(
+    modules: &mut [AppModule],
+    extra_partitions: &[String],
+    extra_mount: &[String],
+    hooks: &Extensions,
+) -> Result<Option<Node>> {
+    let mut root = Node::new_root("");
+    let mut removals = Vec::new();
+    let mut has_file = false;
+    modules.sort_by(|a, b| a.id.cmp(&b.id));
+    for module in modules {
+        if !module.scan_allowed() {
+            continue;
+        }
+        let plan = hooks.scan(module, extra_mount)?;
+        if plan.skip {
+            continue;
+        }
+        let contribution =
+            collect_contribution(module.mount_path(), &plan, extra_mount).map_err(|source| {
+                Error::ModuleRules {
+                    module: module.id.clone(),
+                    source: Box::new(source),
+                }
+            })?;
+        let mounted = contribution.has_content() || !plan.removed.is_empty();
+        module.set_mount_state(mounted);
+        has_file |= mounted;
+        merge_nodes(&mut root, contribution);
+        removals.extend(
+            plan.removed
+                .into_iter()
+                .map(|path| (path, module.mount_path().to_path_buf())),
+        );
+    }
+    // Apply global hides before system partition relocation, including paths absent from modules.
+    removals.sort_by(|a, b| a.0.cmp(&b.0));
+    for (path, metadata_source) in removals {
+        if path.components().count() <= 1 {
+            return Err(Error::RulePath {
+                path: path.to_string_lossy().into_owned(),
+                reason: "cannot remove a partition root",
+            });
+        }
+        let name = path.file_name().ok_or_else(|| Error::RulePath {
+            path: path.to_string_lossy().into_owned(),
+            reason: "remove target missing name",
+        })?;
+        let mut node = Node::new_root(name.to_string_lossy().into_owned());
+        node.file_type = NodeFileType::Whiteout;
+        node.remove = true;
+        root.insert_rule(&path, node, &metadata_source)?;
+    }
+    let mut system = root
+        .children
+        .remove("system")
+        .unwrap_or_else(|| Node::new_root("system"));
 
     if has_file {
         const BUILTIN_PARTITIONS: [(&str, bool); 4] = [
@@ -407,7 +505,12 @@ pub fn collect_module_files(
             if path_of_root.is_dir() && (!require_symlink || path_of_system.is_symlink()) {
                 let name = partition.to_string();
                 if let Some(node) = system.children.remove(&name) {
-                    root.children.entry(name).or_insert(node);
+                    match root.children.entry(name) {
+                        Entry::Occupied(mut entry) => merge_nodes(entry.get_mut(), node),
+                        Entry::Vacant(entry) => {
+                            entry.insert(node);
+                        }
+                    }
                 }
             }
         }
@@ -428,7 +531,12 @@ pub fn collect_module_files(
                 let name = partition.clone();
                 if let Some(node) = system.children.remove(&name) {
                     log::debug!("attach extra partition '{name}' to root");
-                    root.children.entry(name).or_insert(node);
+                    match root.children.entry(name) {
+                        Entry::Occupied(mut entry) => merge_nodes(entry.get_mut(), node),
+                        Entry::Vacant(entry) => {
+                            entry.insert(node);
+                        }
+                    }
                 }
             }
         }
@@ -579,7 +687,7 @@ impl MagicMount<'_> {
                 let real_path = self.path.join(name);
                 let need = match node.file_type {
                     NodeFileType::Symlink => true,
-                    NodeFileType::Whiteout => real_path.exists(),
+                    NodeFileType::Whiteout => real_path.symlink_metadata().is_ok(),
                     NodeFileType::Directory if node.remove => real_path.symlink_metadata().is_ok(),
                     _ => {
                         if let Ok(metadata) = real_path.symlink_metadata() {

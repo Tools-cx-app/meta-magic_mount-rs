@@ -19,51 +19,49 @@ The author will update this project less frequently due to academic commitments.
 
 ## Custom Lua hooks
 
-Lua 5.4 hooks replace the old text DSL and declarative rules. **Breaking change:**
-`/data/adb/magic_mount/custom` and `/data/adb/magic_mount/custom.lua` are no longer supported or read.
-Manually convert old rules into hooks and move scripts into `/data/adb/magic_mount/lua/` before rebooting.
-The WebUI no longer manages ignore lists or custom binds and never edits scripts.
+Place Lua 5.5 scripts in `/data/adb/magic_mount/lua/` and reboot. Only direct regular `.lua` files are loaded, in filename order; symlinks and subdirectories are excluded. A missing directory means no scripts. Each script uses an independent Lua VM.
 
-All direct regular `.lua` files in `/data/adb/magic_mount/lua/` are loaded in ascending filename order
-(for example, `10-skip.lua`, then `20-bind.lua`). Subdirectories and symlink files are not scanned or loaded.
-A missing directory means no hooks; directory, read, and script-load errors abort instead of being ignored.
-Each script has its own Lua VM: globals do not leak between scripts. Either hook may be omitted.
-For example, create `/data/adb/magic_mount/lua/10-custom.lua`:
+Start each file with `API = 1` or `API = 2`; API 2 must then declare `MODULE = "module ID"`. Each literal declaration occupies its own line; leading whitespace, Lua comments, and both quote styles are supported. API and MODULE are immutable. Migrate `bind` to `bind_mount` and `modules[id].skip` to API 2 `skip()`. Legacy custom/custom.lua files are not read; the WebUI does not edit scripts.
 
-```lua
+API 1 provides only the mount function `bind_mount(source, target)` inside optional `before()/after()` callbacks:
+
+~~~lua
+API = 1
+
 function before()
-    if modules["example"] then
-        modules["example"].skip = true
-    end
+    bind_mount("/data/local/tmp/before.conf", "/system/etc/before.conf")
 end
 
 function after()
-    bind("/data/local/tmp/source file", "/system/etc/hosts")
+    bind_mount("/data/local/tmp/hosts", "/system/etc/hosts")
 end
-```
+~~~
 
-All `before()` hooks run in filename order before module collection and mounting. `modules` is keyed by
-module ID; each entry exposes `id`, `name`, `version`, `author`, `description`, `mode`, `is_mounted`,
-`enabled`, `source_path`, `rules` (`default_mode` and `paths`), and a mutable `skip` boolean.
-If any script sets `skip = true`, that module is excluded; another script cannot reenable it with `false`.
-Setting `skip = false` also cannot override `disable`, `remove`, or `skip_mount` markers.
-`moduledir` is the modules root directory (`/data/adb/modules`).
-All `after()` hooks run in filename order only after successful Magic Mount. They expose only
-`bind(source, target)` as a mount API, with no `ignore` or module-skip API. Queued binds are applied only
-after every `after()` hook succeeds. Errors identify the script path and abort the current stage:
-load, syntax, or `before` errors stop before mounting; an `after` error cancels all queued binds but
-does not roll back completed Magic Mount operations. Paths must be nonempty and contain no control
-characters. Scripts are trusted local configuration, with no execution-time or memory quota.
+All before callbacks enqueue binds in filename order. Once rules and the mount tree are prepared, those binds execute before Magic Mount, which may cover their targets. All after callbacks run only after successful Magic Mount; binds execute only if every after succeeds. Targets must be absolute. Empty paths, control characters, and `..` components are forbidden. Binds remain read-only; missing targets use a temporary mirror from the nearest existing non-root ancestor.
 
-The `modules` command and WebUI restore `is_mounted`, `mode`, and `rules` from the startup snapshot,
-matched by module ID. Lua-skipped modules and modules added after that snapshot show as unmounted.
-Names, versions, and enabled flags still reflect current module files; changing them does not change
-the mount state recorded for this boot.
+API 2 matches MODULE against the ID in module.prop, regardless of directory name. Before scanning module mount content, find the scripts for that module ID and invoke `load()` with no arguments. Matching scripts run in filename order. Missing modules or modules with disable, remove, or skip_mount markers do not invoke load. Only API 2 load provides:
 
-Lua has safe base, table, string, math, and UTF-8 libraries; `os`, `io`, `package`, `debug`, and
-file loaders are unavailable. Bind targets must be absolute and contain no `..` components. If a
-target is missing, a temporary mirror is built from the nearest existing non-root ancestor. Binds
-remain read-only; a remount or registration failure detaches the mount and rolls the operation back.
+- `skip()`: skip all mount content scanning and mounting for this module. Cancel all its rules, ignore later rules, and stop later scripts for the same module. Takes no arguments and is idempotent; use `return` to leave the current Lua callback. No skip_mount file is created.
+- `block(path)`: exclude only this module contribution at a file or directory path; original system content and other modules contributions remain.
+- `replace(source, target)`: use an absolute regular file or directory as the source for a module-relative target. Directories replace the original contents. Source symlinks and special devices are rejected. The last declaration for a target wins.
+- `remove(path)`: hide a file, symlink, or directory in the final mount view, including other modules contributions, without deleting disk contents. Partition roots cannot be removed.
+
+~~~lua
+API = 2
+MODULE = "example_module"
+
+function load()
+    block("system/etc/unwanted.conf")
+    replace("/data/local/tmp/hosts", "system/etc/hosts")
+    remove("system/app/Example")
+end
+~~~
+
+To skip the entire module, use `skip(); return` as the load body. Relative paths start at the module root and include `system/` or a configured extra_mount partition, such as `my_product/etc/example.xml`. Absolute targets, empty paths, control characters, and `..` are rejected. skip overrides all rules; otherwise remove > block > replace, with ancestor block/remove covering descendants. Modules without system/ can still contribute rules. Modules are ordered by ID; ordinary conflicts retain the first contribution. block/replace apply before module merging, remove applies to the final tree.
+
+`moduledir` is the modules root (/data/adb/modules). Lua provides base, table, string, math, and utf8 libraries, without os/io/package/debug, file loaders, rawset, or setmetatable. Loading, before, load, or tree preparation errors stop before mounting. An after error cancels that stage binds without rolling back completed Magic Mount. Trusted local scripts have no time or memory quotas.
+
+The modules command and WebUI restore is_mounted, mode, and rules from the startup snapshot by ID without executing scripts. Skipped modules remain listed as unmounted; skip applies only to this boot. The snapshot describes the startup plan, not a per-file mount success audit.
 
 ## Configuration
 
